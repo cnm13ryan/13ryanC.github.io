@@ -1,7 +1,7 @@
-baseURL = "https://13ryanC.github.io/"   # ← critical
+baseURL = "https://13ryanC.github.io/"
 languageCode = "en-gb"
 title = "My Research Notes"
-publishDir = "public"                    # keep default
+publishDir = "public"
 theme = "hugo-PaperMod"
 
 # Number of posts per page
