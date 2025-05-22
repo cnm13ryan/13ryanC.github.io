@@ -1,84 +1,32 @@
 classDiagram
-    class JekyllSite {
+    class HugoSite {
         -title: string
-        -description: string
-        -url: string
-        -baseurl: string
-        -collections: array
-        -pages: array
-        -posts: array
-        -categories: object
-        -pagination: object
-        +site.title: string
-        +site.posts: array
-        +site.categories: object
-        +site.pages: array
+        -baseURL: string
+        -params: map
+        -contentDir: string
+        -layoutsDir: string
+        +build(): void
     }
-    
-    class Post {
+
+    class ContentPage {
         -title: string
         -date: datetime
-        -summary: string
-        -layout: string
-        -category: string
-        -author: string
-        -hero: string
-        -image: string
+        -type: string
         -content: string
-        +post.title: string
-        +post.date: datetime
-        +post.url: string
-        +post.summary: string
-        +post.category: string
-        +post.author: string
-        +post.hero: string
-        +post.image: string
-        +post.content: string
+        +Permalink: string
     }
-    
-    class Page {
-        -title: string
-        -layout: string
-        -permalink: string
-        -content: string
-        +page.title: string
-        +page.url: string
-        +page.content: string
-    }
-    
+
     class Layout {
         -name: string
-        -content: string
         +render(page): string
     }
-    
-    class Include {
+
+    class Partial {
         -name: string
-        -content: string
-        +render(parameters): string
+        +render(context): string
     }
-    
-    class CategoryFilter {
-        -categories: array
-        +filterPosts(category): void
-        +resetFilter(): void
-    }
-    
-    class ShareButtons {
-        -platforms: array
-        -post: Post
-        +initialize(): void
-        +showOnScroll(): void
-        +generateShareUrls(): void
-    }
-    
-    JekyllSite "1" --* "*" Post: contains
-    JekyllSite "1" --* "*" Page: contains
-    JekyllSite "1" --* "*" Layout: contains
-    JekyllSite "1" --* "*" Include: contains
-    Layout "1" --* "*" Include: uses
-    Post "*" -- "1" Layout: uses
-    Page "*" -- "1" Layout: uses
-    Post "*" -- "1" Category: belongs to
-    CategoryFilter -- "*" Post: filters
-    ShareButtons -- "1" Post: shares
+
+    HugoSite "1" --* "*" ContentPage: generates
+    HugoSite "1" --* "*" Layout: uses
+    Layout "1" --* "*" Partial: includes
+    ContentPage "*" -- "1" Layout: renderedWith

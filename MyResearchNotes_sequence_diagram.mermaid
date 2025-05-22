@@ -1,55 +1,40 @@
 sequenceDiagram
-    participant U as User
+    participant Dev as Developer
+    participant H as Hugo
+    participant Files as Static Files
     participant B as Browser
-    participant J as Jekyll Server
-    participant L as Liquid Template
     participant JS as JavaScript
-    
-    %% Initial Page Load
-    U->>B: Visit blog URL
-    B->>J: Request homepage
-    J->>J: Load _config.yml
-    J->>J: Process posts in _posts/
-    J->>L: Render home.html layout
-    L->>L: Include head.html
-    L->>L: Include navbar.html
-    L->>L: Process post list
-    loop For each post
-        L->>L: Include post-card.html
-    end
-    L->>L: Include footer.html
-    J->>B: Return rendered HTML
+    participant U as User
+
+    %% Site Generation
+    Dev->>H: Run hugo
+    H->>H: Read config.toml
+    H->>H: Process content and templates
+    H->>Files: Output HTML/CSS/JS
+
+    %% User Browsing
+    U->>B: Visit site
+    B->>Files: Request page
+    Files->>B: Serve HTML
     B->>U: Display homepage
-    
+
     %% Category Filtering
     U->>B: Click category filter
-    B->>JS: Trigger filter.js
-    JS->>JS: Get selected category
-    JS->>B: Update post visibility
-    B->>U: Display filtered posts
-    
+    B->>JS: Trigger filter script
+    JS->>B: Update visible posts
+    B->>U: Show filtered posts
+
     %% View Single Post
     U->>B: Click post link
-    B->>J: Request post URL
-    J->>J: Find post by URL
-    J->>L: Render post.html layout
-    L->>L: Include head.html
-    L->>L: Include navbar.html
-    L->>L: Process post content
-    L->>L: Include share-buttons.html
-    L->>L: Get related posts by category
-    loop For each related post
-        L->>L: Include post-card.html
-    end
-    L->>L: Include footer.html
-    J->>B: Return rendered HTML
-    B->>U: Display post page
-    
+    B->>Files: Request post HTML
+    Files->>B: Serve post page
+    B->>JS: Initialize share buttons
+    B->>U: Display post
+
     %% Share Functionality
     U->>B: Scroll down post
     B->>JS: Detect scroll position
     JS->>B: Show share buttons
     U->>B: Click share button
-    B->>JS: Generate share URL
     JS->>B: Open share dialog
     B->>U: Display share options
