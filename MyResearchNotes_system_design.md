@@ -11,10 +11,7 @@
 
 ### Frameworks and Libraries
 - **Google Fonts (Inter)**: For typography as specified in the style guide
-- **Hugo Plugins**: 
-  - jekyll-feed: For generating RSS feed
-  - jekyll-seo-tag: For better SEO optimization
-  - jekyll-paginate: For pagination functionality
+- **Hugo Modules**: Built-in features handle RSS, SEO and pagination
 
 ### Implementation Strategy
 1. **Setup Hugo Structure**: Implement the basic Hugo folder structure with _layouts, _includes, assets, etc.
@@ -75,7 +72,7 @@ The interfaces will be primarily through Hugo's Hugo templates templating langua
 
 2. **Image Handling**: The requirements specify image paths but don't detail how images should be handled or optimized. We'll assume standard image optimization practices.
 
-3. **SEO Requirements**: Beyond using jekyll-seo-tag, specific SEO requirements aren't detailed. We'll implement standard SEO best practices.
+3. **SEO Requirements**: Specific SEO requirements aren't detailed. We'll implement standard SEO best practices.
 
 4. **Analytics**: No analytics requirements are specified. If needed, Google Analytics or similar could be added later.
 
