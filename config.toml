@@ -1,8 +1,7 @@
-# Update this value to your GitHub Pages URL, e.g.
-# "https://<USERNAME>.github.io/<REPOSITORY>/" if hosting as a project page.
-baseURL = "https://example.github.io/"
-title = "MyResearchNotes"
-languageCode = "en-us"
+baseURL = "https://13ryanC.github.io/"   # ← critical
+languageCode = "en-gb"
+title = "My Research Notes"
+publishDir = "public"                    # keep default
 theme = "hugo-PaperMod"
 
 # Number of posts per page
