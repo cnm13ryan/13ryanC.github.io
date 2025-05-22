@@ -1,13 +1,15 @@
-name: Deploy to GitHub Pages
+# .github/workflows/gh-pages.yml
+name: Deploy Hugo site to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]        # trigger only from the default branch
+  workflow_dispatch:          # allow manual re-runs
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: read              # checkout
+  pages: write                # upload & deploy
+  id-token: write             # OIDC for deploy-pages
 
 concurrency:
   group: 'pages'
@@ -16,17 +18,27 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-hugo@v1
-        with:
-          hugo-version: '0.121.1'
-      - name: Build
-        run: hugo --minify
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: ./public
+    # 1 – get the code *and* the PaperMod submodule
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    # 2 – install Hugo (extended) fast
+    - uses: peaceiris/actions-hugo@v3        # maintained action :contentReference[oaicite:0]{index=0}
+      with:
+        hugo-version: '0.121.1'              # pin or set 'latest'
+        extended: true
+
+    # 3 – build the site
+    - name: Build
+      run: hugo --minify
+
+    # 4 – package the ./public folder for Pages
+    - uses: actions/upload-pages-artifact@v3  # current artifact format :contentReference[oaicite:1]{index=1}
+      with:
+        path: ./public
 
   deploy:
     needs: build
@@ -34,8 +46,8 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
 
+    steps:
+    # 5 – deploy the artifact produced above
+    - id: deployment
+      uses: actions/deploy-pages@v4          # must match v3 artifact :contentReference[oaicite:2]{index=2}
