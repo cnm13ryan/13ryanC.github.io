@@ -26,9 +26,9 @@ jobs:
         submodules: recursive
 
     # 2 – install Hugo (extended) fast
-    - uses: peaceiris/actions-hugo@v3        # maintained action :contentReference[oaicite:0]{index=0}
+    - uses: peaceiris/actions-hugo@v3        # maintained action
       with:
-        hugo-version: '0.121.1'              # pin or set 'latest'
+        hugo-version: 'latest'              # or '0.146.0' 
         extended: true
 
     # 3 – build the site
@@ -36,7 +36,7 @@ jobs:
       run: hugo --minify
 
     # 4 – package the ./public folder for Pages
-    - uses: actions/upload-pages-artifact@v3  # current artifact format :contentReference[oaicite:1]{index=1}
+    - uses: actions/upload-pages-artifact@v3  # current artifact format 
       with:
         path: ./public
 
@@ -50,4 +50,4 @@ jobs:
     steps:
     # 5 – deploy the artifact produced above
     - id: deployment
-      uses: actions/deploy-pages@v4          # must match v3 artifact :contentReference[oaicite:2]{index=2}
+      uses: actions/deploy-pages@v4          # must match v3 artifact 
