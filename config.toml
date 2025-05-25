@@ -1,29 +1,59 @@
-baseURL = "https://13ryanC.github.io/"
+baseURL     = "https://13ryanC.github.io/"
 languageCode = "en-gb"
-title = "My Research Notes"
-publishDir = "public"
-theme = "hugo-PaperMod"
+title       = "My Research Notes"
+publishDir  = "public"
+theme       = "hugo-PaperMod"
 
 # Number of posts per page
 [pagination]
   pagerSize = 9
 
-
+############################
+# 1. Site-wide PaperMod flags
+############################
 [params]
-  description = "Exploring the frontiers of AI research and applications"
-  defaultTheme = "auto"
-  ShowReadingTime = true
-  ShowShareButtons = true
+  math               = true      # KaTeX on pages that set math: true (or site-wide here)
+  ShowCodeCopyButtons = true     # clipboard icon on every ``` fence
+  description        = "Exploring the frontiers of AI research and applications"
+  defaultTheme       = "auto"
+  ShowReadingTime    = true
+  ShowShareButtons   = true
+
   homeInfoParams = { Title = "Welcome", Content = "Exploring the frontiers of AI research and applications" }
 
   [[params.socialIcons]]
     name = "twitter"
-    url = "https://twitter.com/myresearchnotes"
+    url  = "https://twitter.com/myresearchnotes"
 
   [[params.socialIcons]]
     name = "github"
-    url = "https://github.com/myresearchnotes"
+    url  = "https://github.com/myresearchnotes"
 
   [[params.socialIcons]]
     name = "linkedin"
-    url = "https://www.linkedin.com/in/myresearchnotes"
+    url  = "https://www.linkedin.com/in/myresearchnotes"
+
+[params.assets]
+  customCSS = ["css/katex-tweak.css"]
+  customJS = ["js/katex-delims.js"]
+
+########################################
+# 2. Goldmark & syntax-highlight tweaks
+########################################
+[markup]
+  defaultMarkdownHandler = 'goldmark'
+
+  [markup.goldmark.renderer]
+    unsafe = true         # ←  allow raw HTML
+
+  [markup.goldmark.parser]
+    attribute = true
+
+  [markup.highlight]
+    codeFences = true            # colourise ``` fences
+    noClasses  = false           # keep CSS classes so PaperMod’s palette applies
+    guessSyntax = false          # speed boost; flip to true if you omit languages
+
+  [markup.goldmark.extensions]
+    footnote = true            # optional, useful for citations/notes
+    # passthrough = true
