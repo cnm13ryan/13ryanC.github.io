@@ -28,7 +28,7 @@ a {
   text-decoration: none;
   color: inherit;
   transition: color 0.2s ease;
-  
+
   &:hover {
     color: $accent-teal;
   }
@@ -86,7 +86,7 @@ p {
 .logo-container {
   display: flex;
   align-items: center;
-  
+
   .site-logo {
     height: 40px;
   }
@@ -96,16 +96,16 @@ p {
   .nav-list {
     display: flex;
     list-style: none;
-    
+
     .nav-item {
       margin: 0 1rem;
-      
+
       .nav-link {
         color: $white;
         font-weight: 500;
         position: relative;
         padding-bottom: 5px;
-        
+
         &::after {
           content: '';
           display: block;
@@ -117,7 +117,7 @@ p {
           left: 0;
           transition: width 0.3s ease;
         }
-        
+
         &:hover::after,
         &.active::after {
           width: 100%;
@@ -132,7 +132,7 @@ p {
   background: none;
   border: none;
   cursor: pointer;
-  
+
   .bar {
     display: block;
     width: 25px;
@@ -147,14 +147,14 @@ p {
   display: none;
   background-color: $dark-header;
   padding: 1rem;
-  
+
   .mobile-nav-list {
     list-style: none;
-    
+
     .mobile-nav-item {
       padding: 0.75rem 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      
+
       .mobile-nav-link {
         color: $white;
         font-weight: 500;
@@ -177,7 +177,7 @@ p {
   justify-content: center;
   color: $white;
   text-align: center;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -195,17 +195,17 @@ p {
   z-index: 2;
   max-width: 800px;
   padding: 2rem;
-  
+
   .site-title {
     font-size: 4rem;
     margin-bottom: 1rem;
   }
-  
+
   .site-tagline {
     font-size: 1.5rem;
     margin-bottom: 2rem;
   }
-  
+
   .cta-button {
     display: inline-block;
     background-color: $accent-teal;
@@ -215,7 +215,7 @@ p {
     font-size: 1.1rem;
     border-radius: 4px;
     transition: all 0.2s ease;
-    
+
     &:hover {
       transform: translateY(-3px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -230,11 +230,11 @@ p {
   overflow: hidden;
   box-shadow: $card-shadow;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-    
+
     .post-card-image img {
       transform: scale(1.05);
     }
@@ -263,7 +263,7 @@ p {
   overflow: hidden;
   height: 0;
   padding-bottom: 56.25%; // 16:9 aspect ratio
-  
+
   img {
     width: 100%;
     height: 100%;
@@ -296,7 +296,7 @@ p {
   display: flex;
   color: #777;
   font-size: 0.85rem;
-  
+
   .post-card-date {
     margin-right: 1rem;
   }
@@ -310,7 +310,7 @@ p {
   padding: 2rem 0;
   margin-top: 1rem;
   border-top: 1px solid $light-border;
-  
+
   a {
     display: inline-block;
     color: $body-text;
@@ -319,7 +319,7 @@ p {
     border-radius: 4px;
     background-color: $white;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background-color: $accent-teal;
       color: $dark-header;
@@ -354,7 +354,7 @@ p {
   width: 100%;
   padding: 3rem 5rem;
   color: $white;
-  
+
   @media (max-width: 768px) {
     padding: 2rem;
   }
@@ -374,7 +374,7 @@ p {
 .post-title {
   font-size: 2.75rem;
   margin-bottom: 1rem;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
@@ -390,12 +390,12 @@ p {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  
+
   > span {
     margin-right: 1.5rem;
     position: relative;
     display: inline-flex;
-    
+
     &:not(:last-child):after {
       content: '•';
       position: absolute;
@@ -416,34 +416,34 @@ p {
   width: 100%;
   max-width: 720px;
   padding: 0 2rem;
-  
+
   h2 {
     margin-top: 2rem;
   }
-  
+
   h3 {
     margin-top: 1.5rem;
   }
-  
+
   p {
     font-size: 18px;
     line-height: 1.6;
   }
-  
+
   img {
     margin: 2rem 0;
     border-radius: 4px;
   }
-  
+
   ul, ol {
     margin-bottom: 1.5rem;
     padding-left: 1.5rem;
-    
+
     li {
       margin-bottom: 0.5rem;
     }
   }
-  
+
   blockquote {
     border-left: 4px solid $accent-teal;
     padding-left: 1.5rem;
@@ -451,7 +451,7 @@ p {
     font-style: italic;
     color: #555;
   }
-  
+
   code {
     font-family: 'Menlo', monospace;
     background-color: #f0f0f0;
@@ -459,14 +459,14 @@ p {
     border-radius: 3px;
     font-size: 0.85em;
   }
-  
+
   pre {
     background-color: #f0f0f0;
     padding: 1rem;
     border-radius: 4px;
     overflow: auto;
     margin: 1.5rem 0;
-    
+
     code {
       background: none;
       padding: 0;
@@ -482,15 +482,15 @@ p {
   transform: translateY(-50%);
   opacity: 0;
   transition: opacity 0.3s ease;
-  
+
   &.visible {
     opacity: 1;
   }
-  
+
   @media (max-width: 1400px) {
     left: 2%;
   }
-  
+
   @media (max-width: 992px) {
     position: static;
     transform: none;
@@ -504,7 +504,7 @@ p {
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+
   @media (max-width: 992px) {
     flex-direction: row;
     justify-content: center;
@@ -517,7 +517,7 @@ p {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   text-align: center;
-  
+
   @media (max-width: 992px) {
     writing-mode: horizontal-tb;
     transform: none;
@@ -537,11 +537,11 @@ p {
   background-color: $dark-header;
   color: $white;
   transition: all 0.2s ease;
-  
+
   &:hover {
     transform: translateY(-3px);
     color: $white;
-    
+
     &.twitter-share {
       background-color: #1DA1F2;
     }
@@ -559,7 +559,7 @@ p {
       color: $dark-header;
     }
   }
-  
+
   @media (max-width: 992px) {
     margin-bottom: 0;
     margin-right: 0.75rem;
@@ -570,12 +570,12 @@ p {
 .more-posts {
   background-color: $light-gray-bg;
   padding: 3rem 2rem;
-  
+
   h3 {
     text-align: center;
     margin-bottom: 2rem;
     position: relative;
-    
+
     &::after {
       content: '';
       display: block;
@@ -591,11 +591,11 @@ p {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
-  
+
   @media (max-width: 992px) {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   @media (max-width: 576px) {
     grid-template-columns: 1fr;
   }
@@ -613,11 +613,11 @@ p {
   grid-template-columns: 2fr 1fr 1fr 2fr;
   gap: 2rem;
   margin-bottom: 3rem;
-  
+
   @media (max-width: 992px) {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   @media (max-width: 576px) {
     grid-template-columns: 1fr;
   }
@@ -627,7 +627,7 @@ p {
   font-size: 1.25rem;
   margin-bottom: 1.5rem;
   position: relative;
-  
+
   &::after {
     content: '';
     display: block;
@@ -645,14 +645,14 @@ p {
 
 .footer-links {
   list-style: none;
-  
+
   li {
     margin-bottom: 0.75rem;
-    
+
     a {
       color: rgba(255, 255, 255, 0.8);
       transition: all 0.2s ease;
-      
+
       &:hover {
         color: $accent-teal;
       }
@@ -668,18 +668,18 @@ p {
 .subscribe-form {
   display: flex;
   margin-top: 1rem;
-  
+
   input[type="email"] {
     flex: 1;
     padding: 0.75rem;
     border: none;
     border-radius: 4px 0 0 4px;
-    
+
     &:focus {
       outline: none;
     }
   }
-  
+
   .btn-subscribe {
     background-color: $accent-teal;
     color: $dark-header;
@@ -689,7 +689,7 @@ p {
     border-radius: 0 4px 4px 0;
     cursor: pointer;
     transition: all 0.2s ease;
-    
+
     &:hover {
       opacity: 0.9;
     }
@@ -702,25 +702,25 @@ p {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  
+
   p {
     margin-bottom: 0;
     font-size: 0.9rem;
     opacity: 0.7;
   }
-  
+
   a {
     color: $accent-teal;
-    
+
     &:hover {
       text-decoration: underline;
     }
   }
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     text-align: center;
-    
+
     p {
       margin-bottom: 0.5rem;
     }
@@ -732,11 +732,11 @@ p {
   max-width: 800px;
   margin: 0 auto;
   padding: 4rem 2rem;
-  
+
   h1 {
     margin-bottom: 2rem;
     font-size: 2.5rem;
-    
+
     &::after {
       content: '';
       display: block;
@@ -746,10 +746,10 @@ p {
       margin-top: 1rem;
     }
   }
-  
+
   .team-section {
     margin-top: 3rem;
-    
+
     h2 {
       margin-bottom: 2rem;
     }
@@ -761,29 +761,29 @@ p {
   .main-nav {
     display: none;
   }
-  
+
   .mobile-menu-btn {
     display: block;
-    
+
     &.active {
       .bar:first-child {
         transform: rotate(45deg) translate(5px, 6px);
       }
-      
+
       .bar:nth-child(2) {
         opacity: 0;
       }
-      
+
       .bar:last-child {
         transform: rotate(-45deg) translate(5px, -6px);
       }
     }
   }
-  
+
   .mobile-menu.active {
     display: block;
   }
-  
+
   .post-header-content {
     padding: 2rem;
   }
@@ -793,12 +793,12 @@ p {
   html {
     font-size: 14px;
   }
-  
+
   .hero-content {
     .site-title {
       font-size: 3rem;
     }
-    
+
     .site-tagline {
       font-size: 1.25rem;
     }
