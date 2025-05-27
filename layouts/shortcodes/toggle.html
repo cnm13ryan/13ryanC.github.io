@@ -1,0 +1,12 @@
+{{/* usage:
+     {{< toggle title="Groceries" open=true >}}
+        - Milk
+        - Bread
+        - Eggs
+     {{< /toggle >}}
+*/}}
+
+<details {{ if (.Get "open") }}open{{ end }}>
+  <summary>{{ (.Get "title") | default "Details" | markdownify }}</summary>
+  {{ .Inner | markdownify }}
+</details>
