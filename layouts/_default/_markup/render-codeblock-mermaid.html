@@ -1,0 +1,9 @@
+{{- /*  Wrap the fenced code content in a <pre class="mermaid">.
+      The Page-wide Store flag lets us later decide
+      whether this page needs the Mermaid runtime.  */ -}}
+
+{{- .Page.Store.Set "hasMermaid" true -}}
+
+<pre class="mermaid">
+{{- .Inner | htmlEscape | safeHTML -}}
+</pre>
