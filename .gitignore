@@ -1,3 +1,129 @@
+# macOS
+.DS_Store
+
+# Project directories
 /public/
 resources/
-.DS_Store
+
+# Language & Runtime versions
+.python-version
+.ruby-version
+
+# Virtual environments & dependency managers
+.env
+.venv
+env/
+env.bak/
+venv/
+venv.bak/
+ENV/
+
+# Python byte‑code and C extensions
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+cython_debug/
+
+# Packaging & distribution artifacts
+.Python
+build/
+dist/
+downloads/
+share/python-wheels/
+wheels/
+sdist/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
+
+# Development tooling
+.installed.cfg
+develop-eggs/
+parts/
+var/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Logs
+logs/
+pip-log.txt
+pip-delete-this-directory.txt
+*.log
+
+# Test & coverage outputs
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Test runners & static analysis
+.tox/
+.nox/
+.hypothesis/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Documentation builds
+/docs/_build/
+/site
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Databases & local settings
+local_settings.py
+db.sqlite3*
+
+# Flask
+instance/
+.webassets-cache/
+
+# Scrapy
+.scrapy/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Poetry / PDM / Pipenv / PyBuilder
+poetry.lock
+.pdm.lock
+.pdm.toml
+.pdm-python
+.pdm-build/
+Pipfile.lock        # uncomment if you prefer to ignore it
+.pybuilder/
+target/
+
+# PEP 582
+__pypackages__/
+
+# SageMath
+*.sage.py
+
+# IDE & editor settings
+.idea/              # uncomment to ignore entire JetBrains project folder
+.ropeproject/
+.spyderproject/
+.spyproject/
+
+# Models & I/O directories
+models/
+input_images/
+input_pdfs/
+
+# Backup files created by editors
+*~
+.*.un~
