@@ -4,6 +4,43 @@ title       = "My Research Notes"
 publishDir  = "public"
 theme       = "hugo-PaperMod"
 
+[taxonomies]
+  tag      = "tags"
+  category = "categories"
+  series   = "series"
+
+[menu]
+
+  [[menu.main]]
+    identifier = "posts"
+    name       = "Posts"
+    url        = "/posts/"
+    weight     = 10
+
+  [[menu.main]]
+    identifier = "series"
+    name       = "Series"
+    url        = "/series/"
+    weight     = 20
+
+  [[menu.main]]
+    identifier = "search"
+    name       = "Search"
+    url        = "/search/"
+    weight     = 30
+
+  [[menu.main]]
+    identifier = "tags"
+    name       = "Tags"
+    url        = "/tags/"
+    weight     = 40
+
+  [[menu.main]]
+    identifier = "faq"
+    name       = "FAQ"
+    url        = "/faq/"
+    weight     = 50
+
 # Number of posts per page
 [pagination]
   pagerSize = 9
