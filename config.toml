@@ -70,10 +70,6 @@ theme       = "hugo-PaperMod"
     name = "linkedin"
     url  = "https://www.linkedin.com/in/myresearchnotes"
 
-[params.assets]
-  customCSS = ["css/katex-tweak.css"]
-  customJS = ["js/katex-delims.js"]
-
 ########################################
 # 2. Goldmark & syntax-highlight tweaks
 ########################################
