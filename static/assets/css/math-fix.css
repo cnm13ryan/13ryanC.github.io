@@ -1,0 +1,7 @@
+/* static/assets/css/math-fix.css */
+.MathJax_SVG, .katex {
+  display:inline-block;
+  vertical-align:-0.1em;
+  line-height:1.1;
+}
+li { line-height:1.5; }  /* optional: makes bullets even */

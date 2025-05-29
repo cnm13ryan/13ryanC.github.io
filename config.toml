@@ -49,7 +49,7 @@ theme       = "hugo-PaperMod"
 # 1. Site-wide PaperMod flags
 ############################
 [params]
-  math               = true      # KaTeX on pages that set math: true (or site-wide here)
+  math               = true      
   ShowCodeCopyButtons = true     # clipboard icon on every ``` fence
   description        = "Exploring the frontiers of AI research and applications"
   defaultTheme       = "auto"
@@ -69,6 +69,10 @@ theme       = "hugo-PaperMod"
   [[params.socialIcons]]
     name = "linkedin"
     url  = "https://www.linkedin.com/in/myresearchnotes"
+
+[params.assets]
+  customCSS = ["css/math-fix.css"] # baseline patch
+  customJS  = ["js/mathjax.js"]    # loader & config above
 
 ########################################
 # 2. Goldmark & syntax-highlight tweaks
