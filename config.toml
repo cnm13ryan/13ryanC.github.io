@@ -71,7 +71,10 @@ theme       = "hugo-PaperMod"
     url  = "https://www.linkedin.com/in/myresearchnotes"
 
 [params.assets]
-  customCSS = ["css/math-fix.css"] # baseline patch
+  customCSS = [
+    "css/math-table.css",    # (if you added this earlier)
+    "css/math-scroll.css"    #  ← NEW
+  ]
   customJS  = ["js/mathjax.js"]    # loader & config above
 
 ########################################

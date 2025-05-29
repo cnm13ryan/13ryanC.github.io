@@ -1,0 +1,24 @@
+/* ───────────────────────────────────────────────────────────────
+   math-scroll.css  ‣  global overflow handling for MathJax blocks
+   ─────────────────────────────────────────────────────────────── */
+
+/* 1 ▸ Only *display* math (MathJax wraps it in this class)      */
+mjx-container.MathJax_SVG_Display {
+  overflow-x: auto;          /* show a bar only when needed      */
+  overflow-y: hidden;        /* never vertical-scroll math       */
+  width: 100%;               /* stay inside the article column   */
+  -webkit-overflow-scrolling: touch; /* smooth drag on iOS       */
+  padding-bottom: 0.25em;    /* room so bar doesn’t overlay text */
+}
+
+/* 2 ▸ Keep wide tables a single logical line so width is known  */
+mjx-container.MathJax_SVG_Display table {
+  display: inline-block;     /* prevents wrapping inside column  */
+}
+
+/* 3 ▸ (Optional) keep inline math vertically centred everywhere */
+.MathJax_SVG {
+  display: inline-block;
+  vertical-align: -.05em;
+  line-height: 1.1;
+}

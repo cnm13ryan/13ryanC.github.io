@@ -1,0 +1,17 @@
+/* static/assets/css/math-table.css */
+mjx-container table {            /* affects all MathJax arrays */
+  border-collapse: collapse;
+}
+
+mjx-container td {
+  padding: .25em .5em;
+}
+
+/* keeps inline arrays from sitting too high/low */
+.MathJax_SVG {
+  display: inline-block;
+  vertical-align: -.05em;
+  line-height: 1.1;
+}
+
+li { line-height:1.5; }  /* optional: makes bullets even */
