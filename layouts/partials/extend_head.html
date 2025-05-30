@@ -208,6 +208,36 @@
           
           // Make SVG focusable for keyboard events
           svg.setAttribute('tabindex', '0');
+
+          /* ╭────────────────────────────────────────────────────────────╮
+           * │  Universal wheel handler (macOS track-pad & mouse wheel) │
+           * ╰────────────────────────────────────────────────────────────╯
+           *  – Two-finger scroll  ➜ pan the diagram
+           *  – Pinch-to-zoom      ➜ zoom the diagram
+           *  – Shift/Alt held     ➜ let the page scroll (escape hatch)
+           *    ↳ On macOS pinch appears as     ctrlKey===true 
+           */
+          const wheelHandler = (e) => {
+            if (e.shiftKey || e.altKey) return;      // user wants page scroll
+
+            const isPinch = e.ctrlKey || e.metaKey;  // macOS / iPadOS
+            e.preventDefault();                      // stop page scroll now
+
+            if (isPinch) {
+              /* Zoom around the pointer */
+              const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;  // ±15 %
+              const { left, top } = mermaidContainer.getBoundingClientRect();
+              panZoomInstance.zoom(
+                panZoomInstance.getZoom() * zoomFactor,
+                { x: e.clientX - left, y: e.clientY - top }
+              );
+            } else {
+              /* Smooth pan */
+              panZoomInstance.panBy({ x: -e.deltaX, y: -e.deltaY });
+            }
+          };
+
+          mermaidContainer.addEventListener('wheel', wheelHandler, { passive: false });
           
         } catch (error) {
           console.error(`Failed to add pan-zoom to diagram ${index + 1}:`, error);
@@ -303,6 +333,8 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       font-family: 'Trebuchet MS', Verdana, Arial, sans-serif !important;
+      overscroll-behavior: contain;  /* MDN: kills scroll-chaining  */
+      touch-action: none;           /* disables native pinch/scroll  */
     }
     
     /* Enhanced SVG styling for better text rendering */
@@ -417,6 +449,8 @@
       margin: 0 !important;
       z-index: 9999 !important;
       background: #fafbfc !important;
+      overscroll-behavior: contain;
+      touch-action: none;
       border-radius: 0 !important;
       border: none !important;
       padding: 30px !important;
