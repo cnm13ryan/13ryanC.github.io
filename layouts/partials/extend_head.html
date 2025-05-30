@@ -18,6 +18,25 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       console.log('Mermaid with pan-zoom initialization started...');
+
+      /* 0️⃣ Wait for fonts to load to prevent text cutoff */
+      const waitForFonts = () => {
+        return new Promise((resolve) => {
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => {
+              // Additional small delay to ensure fonts are fully applied
+              setTimeout(resolve, 100);
+            }).catch(() => {
+              // Fallback if font loading fails
+              setTimeout(resolve, 300);
+            });
+          } else {
+            // Fallback for browsers without Font Loading API
+            setTimeout(resolve, 500);
+          }
+        });
+      };
+
       
       /* 1️⃣ Convert code blocks to mermaid divs */
       document.querySelectorAll('pre > code.language-mermaid').forEach(code => {
@@ -29,17 +48,40 @@
         console.log('Converted code block to mermaid div');
       });
 
-      /* 2️⃣ Initialize and render Mermaid */
-      mermaid.initialize({ 
-        startOnLoad: false, 
-        securityLevel: 'loose',
-        theme: 'default'
-      });
-      
-      mermaid.init(undefined, '.mermaid');
-      console.log('Mermaid rendering initiated');
+      /* 2️⃣ Initialize and render Mermaid with proper sequencing */
+      const initializeMermaid = async () => {
+        // Wait for fonts first
+        await waitForFonts();
+        console.log('Fonts loaded, initializing Mermaid...');
+        
+        // Initialize Mermaid with font configuration
+        mermaid.initialize({ 
+          startOnLoad: false, 
+          securityLevel: 'loose',
+          theme: 'default',
+          // Explicit font configuration to prevent cutoff
+          fontFamily: 'trebuchet ms, verdana, arial, sans-serif',
+          // Enable responsive width for all diagram types
+          flowchart: { useMaxWidth: true, htmlLabels: true },
+          sequence: { useMaxWidth: true },
+          gantt: { useMaxWidth: true },
+          class: { useMaxWidth: true },
+          state: { useMaxWidth: true },
+          journey: { useMaxWidth: true }
+        });
+        
+        // Render all mermaid diagrams and wait for completion
+        await mermaid.run({ querySelector: '.mermaid' });
+        console.log('Mermaid rendering completed');
+        
+        // Now attach pan-zoom after rendering is complete
+        attachZoom();
+      };
 
-      /* 3️⃣ Add pan-zoom after a short delay to ensure SVGs are ready */
+      // Start the initialization process
+      initializeMermaid();
+
+      /* 3️⃣ Pan-zoom attachment function (no longer needs timeout) */
       setTimeout(() => {
         attachZoom();
       }, 500);
@@ -161,7 +203,14 @@
           if (mutation.addedNodes.length > 0) {
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === 1 && (node.classList.contains('mermaid') || node.querySelector('.mermaid'))) {
-                setTimeout(attachZoom, 100);
+                // For dynamically added content, also wait for fonts and proper rendering
+                waitForFonts().then(async () => {
+                  const targetNode = node.classList.contains('mermaid') ? node : node.querySelector('.mermaid');
+                  if (targetNode) {
+                    await mermaid.run({ nodes: [targetNode] });
+                    setTimeout(() => attachZoom(), 100);
+                  }
+                });
               }
             });
           }
@@ -171,6 +220,17 @@
       observer.observe(document.body, { childList: true, subtree: true });
     });
   </script>
+
+  <!-- Font preload to reduce text cutoff issues -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Trebuchet+MS:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Trebuchet+MS:wght@400;700&display=swap"></noscript>
+  
+  <!-- Fallback font CSS -->
+  <style>
+    .mermaid { 
+      font-family: 'Trebuchet MS', verdana, arial, sans-serif !important; 
+    }
+  </style>
 
   <!-- Enhanced CSS for better diagram interaction -->
   <style>
