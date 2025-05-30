@@ -55,8 +55,18 @@
         journey      : { useMaxWidth: true }
       });
 
-      await mermaid.run({ querySelector: '.mermaid' }).catch(console.error);
-      attachZoom();
+      /* run Mermaid only on yet-unprocessed diagrams */
+      const fresh = Array.from(document.querySelectorAll('.mermaid'))
+        .filter(el => !el.dataset.mermaidRendered);
+
+      if (fresh.length === 0) return;
+
+      await mermaid.run({ nodes: fresh }).catch(console.error);
+
+      /* mark as rendered so MutationObserver won’t re-do them */
+      fresh.forEach(el => (el.dataset.mermaidRendered = 'true'));
+
+      attachZoom(); /* pan-zoom once per diagram */
     };
 
     renderMermaid();
@@ -227,10 +237,15 @@
           const target = node.classList?.contains('mermaid')
             ? node
             : node.querySelector?.('.mermaid');
-          if (!target) return;
+          /* already rendered? → skip */
+          if (!target || target.dataset.mermaidRendered) return;
+
           waitForFonts()
             .then(() => mermaid.run({ nodes: [target] }))
-            .then(attachZoom)
+            .then(() => {
+              target.dataset.mermaidRendered = 'true';
+              attachZoom();
+            })
             .catch(console.error);
         });
       });
