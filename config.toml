@@ -49,7 +49,8 @@ theme       = "hugo-PaperMod"
 # 1. Site-wide PaperMod flags
 ############################
 [params]
-  math               = true      
+  math               = true
+  mermaid           = true
   ShowCodeCopyButtons = true     # clipboard icon on every ``` fence
   description        = "Exploring the frontiers of AI research and applications"
   defaultTheme       = "auto"
@@ -75,7 +76,12 @@ theme       = "hugo-PaperMod"
     "css/math-table.css",    # (if you added this earlier)
     "css/math-scroll.css"    #  ← NEW
   ]
-  customJS  = ["js/mathjax.js"]    # loader & config above
+  customJS = [
+    "js/mathjax.js",
+    "js/vendor/mermaid.min.js",
+    "js/vendor/svg-pan-zoom.min.js",
+    "js/mermaid-bootstrap.js"
+  ]
 
 ########################################
 # 2. Goldmark & syntax-highlight tweaks
