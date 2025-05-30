@@ -74,7 +74,8 @@ theme       = "hugo-PaperMod"
 [params.assets]
   customCSS = [
     "css/math-table.css",    # (if you added this earlier)
-    "css/math-scroll.css"    #  ← NEW
+    "css/math-scroll.css",    #  ← NEW
+    "css/pagination.css"      # styles for custom pagination
   ]
   customJS = [
     "js/mathjax.js",
