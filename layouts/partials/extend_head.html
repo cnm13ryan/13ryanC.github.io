@@ -103,84 +103,13 @@
           fontFamily: 'Trebuchet MS, Verdana, Arial, sans-serif',
           fontSize: 16,
           
-          // Global configuration for all diagram types
-          flowchart: { 
-            useMaxWidth: false, // Changed to false for better control
-            width: 1200, // Set larger base width
-            height: 800, // Set larger base height
-            scale: 1.5, // Scale up the entire diagram
-            htmlLabels: true,
-            curve: 'basis',
-            padding: 20,
-            nodeSpacing: 50,
-            rankSpacing: 50,
-            // Add extra padding for text
-            diagramPadding: 20
-          },
-          
-          sequence: { 
-            useMaxWidth: false,
-            width: 1200, // Set larger base width
-            height: 800, // Set larger base height
-            scale: 1.5, // Scale up sequence diagrams
-            diagramMarginX: 50,
-            diagramMarginY: 50,
-            actorMargin: 80,
-            width: 150,
-            height: 65,
-            boxMargin: 10,
-            boxTextMargin: 5,
-            noteMargin: 10,
-            messageMargin: 35
-          },
-          
-          gantt: { 
-            useMaxWidth: false,
-            width: 1200, // Set larger base width
-            height: 600, // Set larger base height for gantt
-            scale: 1.5, // Scale up gantt charts
-            leftPadding: 150,
-            rightPadding: 100,
-            topPadding: 50,
-            bottomPadding: 50,
-            gridLineStartPadding: 35,
-            fontSize: 14,
-            sectionFontSize: 16
-          },
-          
-          class: { 
-            useMaxWidth: false,
-            width: 1200, // Set larger base width
-            height: 800, // Set larger base height
-            scale: 1.5, // Scale up class diagrams
-            titleTopMargin: 25,
-            diagramPadding: 20
-          },
-          
-          state: { 
-            useMaxWidth: false,
-            width: 1200, // Set larger base width
-            height: 800, // Set larger base height
-            scale: 1.5, // Scale up state diagrams
-            titleTopMargin: 25,
-            diagramPadding: 20
-          },
-          
-          journey: { 
-            useMaxWidth: false,
-            width: 1200, // Set larger base width
-            height: 600, // Set larger base height for journey
-            scale: 1.5, // Scale up journey diagrams
-            diagramMarginX: 50,
-            diagramMarginY: 50,
-            leftMargin: 150,
-            width: 150,
-            height: 50,
-            boxMargin: 10,
-            boxTextMargin: 5,
-            noteMargin: 10,
-            messageMargin: 35
-          },
+          /*  ⬇  Just flip useMaxWidth:true for every diagram type           */
+          flowchart: { useMaxWidth: true },
+          sequence:  { useMaxWidth: true },
+          gantt:     { useMaxWidth: true },
+          class:     { useMaxWidth: true },
+          state:     { useMaxWidth: true },
+          journey:   { useMaxWidth: true },
           
           // Theme variables for better text rendering
           themeVariables: {
