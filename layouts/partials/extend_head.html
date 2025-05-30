@@ -43,7 +43,7 @@
       await waitForFonts();
       mermaid.initialize({
         startOnLoad  : false,
-        securityLevel: 'loose',
+        securityLevel: 'strict',
         theme        : 'default',
         fontFamily   : 'Trebuchet MS, Verdana, Arial, sans-serif',
         fontSize     : 16,
@@ -56,80 +56,12 @@
       });
 
       await mermaid.run({ querySelector: '.mermaid' }).catch(console.error);
-      setTimeout(() => {
-        adjustTextElements();
-        attachZoom();
-      }, 250);
+      attachZoom();
     };
 
     renderMermaid();
 
     /* ---------- post-render tweaks --------------------------- */
-    const adjustTextElements = () => {
-      document.querySelectorAll('.mermaid svg').forEach(svg => {
-        // Adjust text elements that might be cut off
-        svg.querySelectorAll('text').forEach(textEl => {
-          const bbox = textEl.getBBox();
-          const ctm = textEl.getCTM();
-          
-          // Check if text is near or outside SVG boundaries
-          if (ctm && (ctm.e < 10 || ctm.f < 10)) {
-            // Add padding to SVG if text is too close to edges
-            const currentViewBox = svg.getAttribute('viewBox') || svg.getAttribute('viewbox');
-            if (currentViewBox) {
-              const [x, y, width, height] = currentViewBox.split(' ').map(Number);
-              const newViewBox = `${Math.min(x, ctm.e - 20)} ${Math.min(y, ctm.f - 20)} ${width + 40} ${height + 40}`;
-              svg.setAttribute('viewBox', newViewBox);
-            }
-          }
-          
-          // Ensure text has proper font attributes
-          if (!textEl.style.fontFamily) {
-            textEl.style.fontFamily = 'Trebuchet MS, Verdana, Arial, sans-serif';
-          }
-          if (!textEl.style.fontSize) {
-            textEl.style.fontSize = '14px';
-          }
-        });
-        
-        // Expand SVG viewBox if needed
-        const bbox = svg.getBBox();
-        
-        // Force larger SVG dimensions first
-        const minWidth = 1200;
-        const minHeight = 800;
-        if (svg.getAttribute('width') && parseInt(svg.getAttribute('width')) < minWidth) {
-          svg.setAttribute('width', minWidth);
-        }
-        if (svg.getAttribute('height') && parseInt(svg.getAttribute('height')) < minHeight) {
-          svg.setAttribute('height', minHeight);
-        }
-        
-        const currentViewBox = svg.getAttribute('viewBox') || svg.getAttribute('viewbox');
-        if (currentViewBox) {
-          const [vx, vy, vw, vh] = currentViewBox.split(' ').map(Number);
-          const padding = 30;
-          
-          // Calculate new viewBox with padding
-          const newX = Math.min(vx, bbox.x - padding);
-          const newY = Math.min(vy, bbox.y - padding);
-          const newWidth = Math.max(vw, bbox.width + 2 * padding);
-          const newHeight = Math.max(vh, bbox.height + 2 * padding);
-          
-          if (newX !== vx || newY !== vy || newWidth !== vw || newHeight !== vh) {
-            // Ensure minimum viewBox dimensions
-            const finalWidth = Math.max(newWidth, minWidth);
-            const finalHeight = Math.max(newHeight, minHeight);
-            svg.setAttribute('viewBox', `${newX} ${newY} ${finalWidth} ${finalHeight}`);
-            console.log('Adjusted SVG viewBox for better text visibility');
-          }
-        } else {
-          // Create a larger default viewBox
-          svg.setAttribute('viewBox', `0 0 ${minWidth} ${minHeight}`);
-        }
-      });
-    };
-
     const attachZoom = () => {
       const svgs = document.querySelectorAll('.mermaid svg');
       if (!svgs.length) return;
@@ -298,7 +230,6 @@
           if (!target) return;
           waitForFonts()
             .then(() => mermaid.run({ nodes: [target] }))
-            .then(adjustTextElements)
             .then(attachZoom)
             .catch(console.error);
         });
@@ -309,17 +240,15 @@
   </script>
 
   <!-- Enhanced font preloading -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Trebuchet+MS:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Trebuchet+MS:wght@400;700&display=swap"></noscript>
+  <!-- Trebuchet MS is a system font on all major OSs – external preload not needed -->
   
   <!-- Enhanced CSS with better text rendering -->
   <style>
     /* Enhanced Mermaid container styling */
     .mermaid {
       text-align: center;
-      margin: 2em 0;
+      margin: 0 auto;
+      max-width: 100%
       border: 1px solid #e1e4e8;
       border-radius: 8px;
       padding: 40px;
