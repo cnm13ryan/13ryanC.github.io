@@ -299,16 +299,10 @@
       transform-origin: center center;
     }
     
-    /* Ensure all text elements have proper styling */
+    /* keep Mermaid’s measured font & size to avoid width/height drift */
     .mermaid svg text,
     .mermaid svg tspan {
-      font-family: 'Trebuchet MS', Verdana, Arial, sans-serif !important;
-      font-size: 14px;
-      dominant-baseline: middle;
-      text-anchor: middle;
-      /* Better text rendering */
-      shape-rendering: optimizeLegibility;
-      text-rendering: optimizeLegibility;
+      font-size: inherit;
     }
     
     /* Specific styling for different text elements */
