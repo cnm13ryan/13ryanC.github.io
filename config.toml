@@ -43,7 +43,7 @@ theme       = "hugo-PaperMod"
 
 # Number of posts per page
 [pagination]
-  pagerSize = 9
+  pagerSize = 20 
 
 ############################
 # 1. Site-wide PaperMod flags
