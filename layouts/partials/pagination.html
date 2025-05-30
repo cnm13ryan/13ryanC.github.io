@@ -1,5 +1,5 @@
 {{ $p := .Paginator }}
-{{ if gt $p.TotalPages 1 }}
+{{ if gt $p.TotalPages 3 }}
 <nav class="pagination-nav" role="navigation" aria-label="Pagination">
   <ul class="page-list">
     {{ with $p.Prev }}
@@ -9,9 +9,9 @@
     <!-- First page -->
     <li>
       {{ if eq $p.PageNumber 1 }}
-        <span class="page-num current">1</span>
+        <span class="page-num current" aria-label="Page 1" aria-current="page">1</span>
       {{ else }}
-        <a class="page-num" href="{{ (index $p.Pagers 0).URL }}">1</a>
+        <a class="page-num" href="{{ (index $p.Pagers 0).URL }}" aria-label="Page 1">1</a>
       {{ end }}
     </li>
 
@@ -19,25 +19,25 @@
     {{ if ge $p.TotalPages 2 }}
     <li>
       {{ if eq $p.PageNumber 2 }}
-        <span class="page-num current">2</span>
+        <span class="page-num current" aria-label="Page 2" aria-current="page">2</span>
       {{ else }}
-        <a class="page-num" href="{{ (index $p.Pagers 1).URL }}">2</a>
+        <a class="page-num" href="{{ (index $p.Pagers 1).URL }}" aria-label="Page 2">2</a>
       {{ end }}
     </li>
     {{ end }}
 
     <!-- Ellipsis if 3 or more pages -->
     {{ if ge $p.TotalPages 3 }}
-    <li class="ellipsis">&hellip;</li>
+    <li class="ellipsis" aria-hidden="true">&hellip;</li>
     {{ end }}
 
     <!-- Current page if between second and last -->
     {{ if and (gt $p.PageNumber 2) (lt $p.PageNumber $p.TotalPages) }}
     <li>
-      <span class="page-num current">{{ $p.PageNumber }}</span>
+      <span class="page-num current" aria-label="Page {{ $p.PageNumber }}" aria-current="page">{{ $p.PageNumber }}</span>
     </li>
     {{ if lt (add $p.PageNumber 1) $p.TotalPages }}
-    <li class="ellipsis">&hellip;</li>
+      <li class="ellipsis" aria-hidden="true">&hellip;</li>
     {{ end }}
     {{ end }}
 
@@ -45,9 +45,9 @@
     {{ if gt $p.TotalPages 2 }}
     <li>
       {{ if eq $p.PageNumber $p.TotalPages }}
-        <span class="page-num current">{{ $p.TotalPages }}</span>
+          <span class="page-num current" aria-label="Page {{ $p.TotalPages }}" aria-current="page">{{ $p.TotalPages }}</span>
       {{ else }}
-        <a class="page-num" href="{{ (index $p.Pagers (sub $p.TotalPages 1)).URL }}">{{ $p.TotalPages }}</a>
+          <a class="page-num" href="{{ (index $p.Pagers (sub $p.TotalPages 1)).URL }}" aria-label="Page {{ $p.TotalPages }}">{{ $p.TotalPages }}</a>
       {{ end }}
     </li>
     {{ end }}
