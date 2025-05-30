@@ -19,74 +19,287 @@
     document.addEventListener('DOMContentLoaded', () => {
       console.log('Mermaid with pan-zoom initialization started...');
 
-      /* 0️⃣ Wait for fonts to load to prevent text cutoff */
+      /* 0️⃣ Enhanced font loading with multiple fallbacks */
       const waitForFonts = () => {
         return new Promise((resolve) => {
+          let resolved = false;
+          
+          const resolveOnce = () => {
+            if (!resolved) {
+              resolved = true;
+              resolve();
+            }
+          };
+          
+          // Method 1: Modern Font Loading API
           if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(() => {
-              // Additional small delay to ensure fonts are fully applied
-              setTimeout(resolve, 100);
+              setTimeout(resolveOnce, 200); // Increased delay
             }).catch(() => {
-              // Fallback if font loading fails
-              setTimeout(resolve, 300);
+              setTimeout(resolveOnce, 500);
             });
-          } else {
-            // Fallback for browsers without Font Loading API
-            setTimeout(resolve, 500);
           }
+          
+          // Method 2: Check if fonts are actually loaded by measuring text
+          const testElement = document.createElement('span');
+          testElement.style.fontFamily = 'Trebuchet MS, verdana, arial, sans-serif';
+          testElement.style.fontSize = '16px';
+          testElement.style.position = 'absolute';
+          testElement.style.visibility = 'hidden';
+          testElement.textContent = 'Test Text Width';
+          document.body.appendChild(testElement);
+          
+          const checkFontLoad = () => {
+            const currentWidth = testElement.offsetWidth;
+            setTimeout(() => {
+              if (testElement.offsetWidth === currentWidth) {
+                document.body.removeChild(testElement);
+                resolveOnce();
+              } else {
+                setTimeout(checkFontLoad, 50);
+              }
+            }, 100);
+          };
+          
+          setTimeout(checkFontLoad, 100);
+          
+          // Method 3: Fallback timeout
+          setTimeout(resolveOnce, 1000);
         });
       };
 
       
-      /* 1️⃣ Convert code blocks to mermaid divs */
+      /* 1️⃣ Convert code blocks to mermaid divs with better text handling */
       document.querySelectorAll('pre > code.language-mermaid').forEach(code => {
         const pre = code.parentElement;
         const div = document.createElement('div');
         div.className = 'mermaid';
-        div.textContent = code.textContent;
+        
+        // Clean up the mermaid code to prevent parsing issues
+        let mermaidCode = code.textContent.trim();
+        
+        // Add extra spacing for better text rendering
+        mermaidCode = mermaidCode.replace(/(\w)(\[|\()/g, '$1 $2');
+        mermaidCode = mermaidCode.replace(/(\]|\))(\w)/g, '$1 $2');
+        
+        div.textContent = mermaidCode;
         pre.replaceWith(div);
-        console.log('Converted code block to mermaid div');
+        console.log('Converted code block to mermaid div with text spacing');
       });
 
-      /* 2️⃣ Initialize and render Mermaid with proper sequencing */
+      /* 2️⃣ Initialize and render Mermaid with enhanced configuration */
       const initializeMermaid = async () => {
-        // Wait for fonts first
+        // Wait for fonts with extended timeout
         await waitForFonts();
         console.log('Fonts loaded, initializing Mermaid...');
         
-        // Initialize Mermaid with font configuration
+        // Initialize Mermaid with comprehensive font and layout configuration
         mermaid.initialize({ 
           startOnLoad: false, 
           securityLevel: 'loose',
           theme: 'default',
-          // Explicit font configuration to prevent cutoff
-          fontFamily: 'trebuchet ms, verdana, arial, sans-serif',
-          // Enable responsive width for all diagram types
-          flowchart: { useMaxWidth: true, htmlLabels: true },
-          sequence: { useMaxWidth: true },
-          gantt: { useMaxWidth: true },
-          class: { useMaxWidth: true },
-          state: { useMaxWidth: true },
-          journey: { useMaxWidth: true }
+          
+          // Enhanced font configuration
+          fontFamily: 'Trebuchet MS, Verdana, Arial, sans-serif',
+          fontSize: 16,
+          
+          // Global configuration for all diagram types
+          flowchart: { 
+            useMaxWidth: false, // Changed to false for better control
+            width: 1200, // Set larger base width
+            height: 800, // Set larger base height
+            scale: 1.5, // Scale up the entire diagram
+            htmlLabels: true,
+            curve: 'basis',
+            padding: 20,
+            nodeSpacing: 50,
+            rankSpacing: 50,
+            // Add extra padding for text
+            diagramPadding: 20
+          },
+          
+          sequence: { 
+            useMaxWidth: false,
+            width: 1200, // Set larger base width
+            height: 800, // Set larger base height
+            scale: 1.5, // Scale up sequence diagrams
+            diagramMarginX: 50,
+            diagramMarginY: 50,
+            actorMargin: 80,
+            width: 150,
+            height: 65,
+            boxMargin: 10,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 35
+          },
+          
+          gantt: { 
+            useMaxWidth: false,
+            width: 1200, // Set larger base width
+            height: 600, // Set larger base height for gantt
+            scale: 1.5, // Scale up gantt charts
+            leftPadding: 150,
+            rightPadding: 100,
+            topPadding: 50,
+            bottomPadding: 50,
+            gridLineStartPadding: 35,
+            fontSize: 14,
+            sectionFontSize: 16
+          },
+          
+          class: { 
+            useMaxWidth: false,
+            width: 1200, // Set larger base width
+            height: 800, // Set larger base height
+            scale: 1.5, // Scale up class diagrams
+            titleTopMargin: 25,
+            diagramPadding: 20
+          },
+          
+          state: { 
+            useMaxWidth: false,
+            width: 1200, // Set larger base width
+            height: 800, // Set larger base height
+            scale: 1.5, // Scale up state diagrams
+            titleTopMargin: 25,
+            diagramPadding: 20
+          },
+          
+          journey: { 
+            useMaxWidth: false,
+            width: 1200, // Set larger base width
+            height: 600, // Set larger base height for journey
+            scale: 1.5, // Scale up journey diagrams
+            diagramMarginX: 50,
+            diagramMarginY: 50,
+            leftMargin: 150,
+            width: 150,
+            height: 50,
+            boxMargin: 10,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 35
+          },
+          
+          // Theme variables for better text rendering
+          themeVariables: {
+            fontFamily: 'Trebuchet MS, Verdana, Arial, sans-serif',
+            fontSize: '16px',
+            primaryColor: '#fff2cc',
+            primaryTextColor: '#333',
+            primaryBorderColor: '#d6b656',
+            lineColor: '#333333',
+            secondaryColor: '#eeeeee',
+            tertiaryColor: '#fff'
+          }
         });
         
-        // Render all mermaid diagrams and wait for completion
-        await mermaid.run({ querySelector: '.mermaid' });
-        console.log('Mermaid rendering completed');
+        // Pre-render check: ensure all mermaid divs have content
+        document.querySelectorAll('.mermaid').forEach(div => {
+          if (!div.textContent.trim()) {
+            console.warn('Empty mermaid diagram found');
+            div.innerHTML = '<p>Empty diagram content</p>';
+          }
+        });
         
-        // Now attach pan-zoom after rendering is complete
-        attachZoom();
+        // Render all mermaid diagrams with error handling
+        try {
+          await mermaid.run({ querySelector: '.mermaid' });
+          console.log('Mermaid rendering completed');
+        } catch (error) {
+          console.error('Mermaid rendering failed:', error);
+          // Try to render individual diagrams
+          document.querySelectorAll('.mermaid').forEach(async (div, index) => {
+            try {
+              await mermaid.run({ nodes: [div] });
+            } catch (err) {
+              console.error(`Failed to render diagram ${index}:`, err);
+              div.innerHTML = `<p style="color: red;">Failed to render diagram: ${err.message}</p>`;
+            }
+          });
+        }
+        
+        // Post-render text adjustments
+        setTimeout(() => {
+          adjustTextElements();
+          attachZoom();
+        }, 300);
       };
 
       // Start the initialization process
       initializeMermaid();
 
-      /* 3️⃣ Pan-zoom attachment function (no longer needs timeout) */
-      setTimeout(() => {
-        attachZoom();
-      }, 500);
+      /* 2.5️⃣ Post-render text adjustment function */
+      const adjustTextElements = () => {
+        document.querySelectorAll('.mermaid svg').forEach(svg => {
+          // Adjust text elements that might be cut off
+          svg.querySelectorAll('text').forEach(textEl => {
+            const bbox = textEl.getBBox();
+            const ctm = textEl.getCTM();
+            
+            // Check if text is near or outside SVG boundaries
+            if (ctm && (ctm.e < 10 || ctm.f < 10)) {
+              // Add padding to SVG if text is too close to edges
+              const currentViewBox = svg.getAttribute('viewBox') || svg.getAttribute('viewbox');
+              if (currentViewBox) {
+                const [x, y, width, height] = currentViewBox.split(' ').map(Number);
+                const newViewBox = `${Math.min(x, ctm.e - 20)} ${Math.min(y, ctm.f - 20)} ${width + 40} ${height + 40}`;
+                svg.setAttribute('viewBox', newViewBox);
+              }
+            }
+            
+            // Ensure text has proper font attributes
+            if (!textEl.style.fontFamily) {
+              textEl.style.fontFamily = 'Trebuchet MS, Verdana, Arial, sans-serif';
+            }
+            if (!textEl.style.fontSize) {
+              textEl.style.fontSize = '14px';
+            }
+          });
+          
+          // Expand SVG viewBox if needed
+          const bbox = svg.getBBox();
+          
+          // Force larger SVG dimensions first
+          const minWidth = 1200;
+          const minHeight = 800;
+          if (svg.getAttribute('width') && parseInt(svg.getAttribute('width')) < minWidth) {
+            svg.setAttribute('width', minWidth);
+          }
+          if (svg.getAttribute('height') && parseInt(svg.getAttribute('height')) < minHeight) {
+            svg.setAttribute('height', minHeight);
+          }
+          
+          const currentViewBox = svg.getAttribute('viewBox') || svg.getAttribute('viewbox');
+          if (currentViewBox) {
+            const [vx, vy, vw, vh] = currentViewBox.split(' ').map(Number);
+            const padding = 30;
+            
+            // Calculate new viewBox with padding
+            const newX = Math.min(vx, bbox.x - padding);
+            const newY = Math.min(vy, bbox.y - padding);
+            const newWidth = Math.max(vw, bbox.width + 2 * padding);
+            const newHeight = Math.max(vh, bbox.height + 2 * padding);
+            
+            if (newX !== vx || newY !== vy || newWidth !== vw || newHeight !== vh) {
+              // Ensure minimum viewBox dimensions
+              const finalWidth = Math.max(newWidth, minWidth);
+              const finalHeight = Math.max(newHeight, minHeight);
+              svg.setAttribute('viewBox', `${newX} ${newY} ${finalWidth} ${finalHeight}`);
+              console.log('Adjusted SVG viewBox for better text visibility');
+            }
+          } else {
+            // Create a larger default viewBox
+            svg.setAttribute('viewBox', `0 0 ${minWidth} ${minHeight}`);
+          }
+        });
+      };
 
-      /* 4️⃣ Pan-zoom attachment function */
+      /* 3️⃣ Remove duplicate timeout call */
+      // Removed the duplicate setTimeout call
+
+      /* 4️⃣ Enhanced pan-zoom attachment function */
       const attachZoom = () => {
         const svgs = document.querySelectorAll('.mermaid svg');
         console.log(`Found ${svgs.length} SVG diagrams to enhance`);
@@ -108,21 +321,28 @@
             fullscreenBtn.onclick = () => toggleFullscreen(mermaidContainer);
             mermaidContainer.appendChild(fullscreenBtn);
             
-            // Add pan-zoom functionality
+            // Add pan-zoom functionality with better initial fitting
             const panZoomInstance = svgPanZoom(svg, {
               zoomEnabled: true,
               panEnabled: true,
               controlIconsEnabled: true,
+              contain: false, // Allow panning outside initial bounds
+              preventPanOutsideViewport: false, // Allow panning beyond viewport
+              eventsListenerElement: mermaidContainer, // Use container for events
               fit: true,
               center: true,
-              minZoom: 0.1,
-              maxZoom: 20,
+              minZoom: 0.05, // Allow more zoom out
+              maxZoom: 50,   // Allow more zoom in
               zoomScaleSensitivity: 0.2,
               mouseWheelZoomEnabled: true,
               dblClickZoomEnabled: true,
+              preventMouseEventsDefault: false, // Better text selection
               beforePan: function(oldPan, newPan) {
-                // Allow panning
                 return {x: newPan.x, y: newPan.y};
+              },
+              onZoom: function(level) {
+                // Ensure text remains crisp at different zoom levels
+                svg.style.shapeRendering = level > 2 ? 'optimizeSpeed' : 'geometricPrecision';
               }
             });
             
@@ -132,15 +352,27 @@
             svg.dataset.panzoom = 'initialized';
             console.log(`Pan-zoom successfully added to diagram ${index + 1}`);
             
-            // Add keyboard shortcuts
+            // Enhanced keyboard shortcuts
             svg.addEventListener('keydown', (e) => {
-              if (e.key === 'r' || e.key === 'R') {
-                panZoomInstance.resetZoom();
-                panZoomInstance.resetPan();
-                console.log('Reset zoom and pan');
-              }
-              if (e.key === 'f' || e.key === 'F') {
-                toggleFullscreen(mermaidContainer);
+              switch(e.key.toLowerCase()) {
+                case 'r':
+                  panZoomInstance.resetZoom();
+                  panZoomInstance.resetPan();
+                  console.log('Reset zoom and pan');
+                  break;
+                case 'f':
+                  toggleFullscreen(mermaidContainer);
+                  break;
+                case '+':
+                case '=':
+                  panZoomInstance.zoomIn();
+                  break;
+                case '-':
+                  panZoomInstance.zoomOut();
+                  break;
+                case '0':
+                  panZoomInstance.resetZoom();
+                  break;
               }
             });
             
@@ -153,7 +385,7 @@
         });
       };
       
-      /* 5️⃣ Fullscreen toggle function */
+      /* 5️⃣ Enhanced fullscreen toggle function */
       const toggleFullscreen = (container) => {
         const svg = container.querySelector('svg');
         const panZoomInstance = svg ? svg.panZoomInstance : null;
@@ -180,8 +412,8 @@
           if (panZoomInstance) {
             setTimeout(() => {
               panZoomInstance.resize();
-              panZoomInstance.resetZoom();
-              panZoomInstance.resetPan();
+              panZoomInstance.fit();
+              panZoomInstance.center();
             }, 100);
           }
         }
@@ -197,18 +429,25 @@
         }
       });
       
-      // Also try to attach zoom when new content is loaded (for SPA-like behavior)
+      // Enhanced mutation observer for dynamic content
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.addedNodes.length > 0) {
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === 1 && (node.classList.contains('mermaid') || node.querySelector('.mermaid'))) {
-                // For dynamically added content, also wait for fonts and proper rendering
+                // For dynamically added content
                 waitForFonts().then(async () => {
                   const targetNode = node.classList.contains('mermaid') ? node : node.querySelector('.mermaid');
                   if (targetNode) {
-                    await mermaid.run({ nodes: [targetNode] });
-                    setTimeout(() => attachZoom(), 100);
+                    try {
+                      await mermaid.run({ nodes: [targetNode] });
+                      setTimeout(() => {
+                        adjustTextElements();
+                        attachZoom();
+                      }, 200);
+                    } catch (error) {
+                      console.error('Failed to render dynamic mermaid diagram:', error);
+                    }
                   }
                 });
               }
@@ -221,48 +460,90 @@
     });
   </script>
 
-  <!-- Font preload to reduce text cutoff issues -->
+  <!-- Enhanced font preloading -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Trebuchet+MS:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Trebuchet+MS:wght@400;700&display=swap"></noscript>
   
-  <!-- Fallback font CSS -->
+  <!-- Enhanced CSS with better text rendering -->
   <style>
-    .mermaid { 
-      font-family: 'Trebuchet MS', verdana, arial, sans-serif !important; 
-    }
-  </style>
-
-  <!-- Enhanced CSS for better diagram interaction -->
-  <style>
+    /* Enhanced Mermaid container styling */
     .mermaid {
       text-align: center;
       margin: 2em 0;
       border: 1px solid #e1e4e8;
       border-radius: 8px;
-      padding: 30px;
+      padding: 60px; /* Increased padding */
       background-color: #fafbfc;
       position: relative;
-      overflow: hidden;
-      /* Make diagrams larger */
+      overflow: visible; /* Changed from hidden to visible */
       min-height: 400px;
       max-width: 100%;
-      /* Break out of content width on larger screens */
+      /* Better text rendering */
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-family: 'Trebuchet MS', Verdana, Arial, sans-serif !important;
     }
     
-    /* Make diagrams even larger on bigger screens */
+    /* Enhanced SVG styling for better text rendering */
+    .mermaid svg {
+      max-width: 100%;
+      min-width: 600px; /* Ensure minimum SVG size */
+      min-height: 400px; /* Ensure minimum SVG height */
+      height: auto;
+      cursor: grab;
+      outline: none;
+      /* Improved text rendering */
+      shape-rendering: geometricPrecision;
+      text-rendering: optimizeLegibility;
+      /* Ensure SVG can use full container space */
+      width: 100% !important;
+      font-family: 'Trebuchet MS', Verdana, Arial, sans-serif !important;
+      /* Ensure proper scaling */
+      transform-origin: center center;
+    }
+    
+    /* Ensure all text elements have proper styling */
+    .mermaid svg text,
+    .mermaid svg tspan {
+      font-family: 'Trebuchet MS', Verdana, Arial, sans-serif !important;
+      font-size: 14px;
+      dominant-baseline: middle;
+      text-anchor: middle;
+      /* Better text rendering */
+      shape-rendering: optimizeLegibility;
+      text-rendering: optimizeLegibility;
+    }
+    
+    /* Specific styling for different text elements */
+    .mermaid svg .node text,
+    .mermaid svg .cluster text,
+    .mermaid svg .actor text,
+    .mermaid svg .messageText text,
+    .mermaid svg .labelText text {
+      font-weight: 400;
+      font-size: 14px !important;
+      fill: #333333;
+    }
+    
+    /* Title and header text */
+    .mermaid svg .titleText,
+    .mermaid svg .sectionTitle {
+      font-weight: 700;
+      font-size: 18px !important;
+      fill: #000000;
+    }
+    
+    /* Make diagrams larger on bigger screens */
     @media (min-width: 1200px) {
       .mermaid {
         margin-left: -5%;
         margin-right: -5%;
         width: 110%;
+        padding: 80px;
       }
-    }
-    
-    .mermaid svg {
-      max-width: 100%;
-      height: auto;
-      cursor: grab;
-      outline: none;
     }
     
     .mermaid svg:active {
@@ -273,11 +554,12 @@
       box-shadow: 0 0 0 2px #0366d6;
     }
     
-    /* Control icons styling */
+    /* Enhanced control icons styling */
     .svg-pan-zoom-control {
-      background: rgba(255, 255, 255, 0.9) !important;
+      background: rgba(255, 255, 255, 0.95) !important;
       border: 1px solid #d1d5da !important;
-      border-radius: 3px !important;
+      border-radius: 4px !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
     }
     
     .svg-pan-zoom-control:hover {
@@ -285,28 +567,31 @@
       border-color: #0366d6 !important;
     }
     
-    /* Fullscreen button */
+    /* Enhanced fullscreen button */
     .mermaid-fullscreen-btn {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(255, 255, 255, 0.9);
+      top: 15px;
+      left: 15px;
+      background: rgba(255, 255, 255, 0.95);
       border: 1px solid #d1d5da;
-      border-radius: 4px;
-      padding: 5px 8px;
+      border-radius: 6px;
+      padding: 8px 12px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 16px;
       z-index: 10;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-family: monospace;
     }
     
     .mermaid-fullscreen-btn:hover {
       background: rgba(255, 255, 255, 1);
       border-color: #0366d6;
-      transform: scale(1.1);
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
-    /* Fullscreen mode */
+    /* Enhanced fullscreen mode */
     .mermaid-fullscreen {
       position: fixed !important;
       top: 0 !important;
@@ -318,46 +603,60 @@
       background: #fafbfc !important;
       border-radius: 0 !important;
       border: none !important;
-      padding: 20px !important;
-      /* Remove flex centering to allow full space usage */
+      padding: 30px !important;
       display: block !important;
-      overflow: hidden !important;
+      overflow: visible !important; /* Changed from hidden */
     }
     
     .mermaid-fullscreen svg {
-      /* Allow SVG to use full available space */
       width: 100% !important;
-      height: calc(100vh - 40px) !important;
+      height: calc(100vh - 60px) !important;
       max-width: none !important;
       max-height: none !important;
-      object-fit: contain;
     }
     
-    /* Add a subtle hint for users */
+    /* Enhanced user hint */
     .mermaid::after {
-      content: "💡 Drag to pan, scroll to zoom, 'R' to reset, 'F' for fullscreen";
+      content: "💡 Drag to pan • Scroll to zoom • R to reset • F for fullscreen • +/- to zoom • 0 to fit";
       position: absolute;
-      top: 5px;
-      right: 10px;
+      top: 8px;
+      right: 15px;
       font-size: 11px;
       color: #6a737d;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 2px 6px;
-      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 4px 8px;
+      border-radius: 4px;
       opacity: 0;
       transition: opacity 0.3s ease;
       pointer-events: none;
+      max-width: 300px;
+      text-align: left;
+      line-height: 1.3;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .mermaid:hover::after {
       opacity: 1;
     }
     
-    /* Dark mode support */
+    /* Enhanced dark mode support */
     @media (prefers-color-scheme: dark) {
       .mermaid {
         background-color: #161b22;
         border-color: #30363d;
+      }
+      
+      .mermaid svg text,
+      .mermaid svg tspan {
+        fill: #f0f6fc !important;
+      }
+      
+      .mermaid svg .node text,
+      .mermaid svg .cluster text,
+      .mermaid svg .actor text,
+      .mermaid svg .messageText text,
+      .mermaid svg .labelText text {
+        fill: #e6edf3 !important;
       }
       
       .mermaid-fullscreen {
@@ -365,7 +664,7 @@
       }
       
       .mermaid-fullscreen-btn {
-        background: rgba(22, 27, 34, 0.9);
+        background: rgba(22, 27, 34, 0.95);
         border-color: #30363d;
         color: #f0f6fc;
       }
@@ -377,11 +676,11 @@
       
       .mermaid::after {
         color: #8b949e;
-        background: rgba(22, 27, 34, 0.8);
+        background: rgba(22, 27, 34, 0.9);
       }
       
       .svg-pan-zoom-control {
-        background: rgba(22, 27, 34, 0.9) !important;
+        background: rgba(22, 27, 34, 0.95) !important;
         border-color: #30363d !important;
         color: #f0f6fc !important;
       }
@@ -395,11 +694,33 @@
     /* Responsive behavior */
     @media (max-width: 768px) {
       .mermaid {
-        padding: 10px;
+        padding: 20px;
       }
       
       .mermaid::after {
         display: none;
+      }
+      
+      .mermaid-fullscreen-btn {
+        top: 10px;
+        left: 10px;
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+    }
+    
+    /* Print styles */
+    @media print {
+      .mermaid {
+        border: 1px solid #000;
+        background: white;
+        page-break-inside: avoid;
+      }
+      
+      .mermaid-fullscreen-btn,
+      .svg-pan-zoom-control,
+      .mermaid::after {
+        display: none !important;
       }
     }
   </style>
