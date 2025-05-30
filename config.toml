@@ -65,7 +65,7 @@ theme       = "hugo-PaperMod"
 
   [[params.socialIcons]]
     name = "github"
-    url  = "https://github.com/myresearchnotes"
+    url  = "https://github.com/13ryanC"
 
   [[params.socialIcons]]
     name = "linkedin"
