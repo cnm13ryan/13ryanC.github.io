@@ -1,0 +1,9 @@
+{{- $srcPath := path.Join $.Page.File.Dir (.Get 0) -}}
+{{- $lang    := .Get 1 | default "python" -}}
+{{- $opts    := dict "linenos" "table" -}}
+
+{{- with readFile $srcPath }}
+  {{ highlight . $lang $opts }}
+{{- else }}
+  {{ errorf "importcode: could not read %q relative to %q" (.Get 0) $.Page.File.Dir }}
+{{- end }}
