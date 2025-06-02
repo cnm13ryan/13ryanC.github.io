@@ -1,0 +1,24 @@
+/* Styles for details toggles */
+details {
+  margin-bottom: 1rem;
+}
+
+details summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary .toggle-heading::before {
+  content: '\25B6'; /* right-pointing triangle */
+  display: inline-block;
+  margin-right: 0.25rem;
+  transition: transform 0.2s ease;
+}
+
+details[open] summary .toggle-heading::before {
+  transform: rotate(90deg);
+}
