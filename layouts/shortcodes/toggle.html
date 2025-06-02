@@ -1,12 +1,22 @@
-{{/* usage:
-     {{< toggle title="Groceries" open=true >}}
-        - Milk
-        - Bread
-        - Eggs
-     {{< /toggle >}}
-*/}}
+{{/* layouts/shortcodes/toggle.html */}}
+
+{{ $level  := .Get "level" | default "3" }}      {{/* fallback rank */}}
+{{ $title  := .Get "title" | default "Details" }}
+
+{{/* Map heading levels → Tailwind text sizes                         */}}
+{{ $sizes := dict "1" "text-4xl" "2" "text-3xl" "3" "text-2xl"
+                   "4" "text-xl"  "5" "text-lg"  "6" "text-base" }}
+{{ $size  := index $sizes $level | default "text-2xl" }}
 
 <details {{ if (.Get "open") }}open{{ end }}>
-  <summary>{{ (.Get "title") | default "Details" | markdownify }}</summary>
+  <summary>
+    <span
+      role="heading"
+      aria-level="{{ $level }}"
+      class="toggle-heading inline font-semibold leading-tight {{ $size }}">
+      {{ $title | markdownify | replaceRE "^<p>(.*)</p>$" "$1" | safeHTML }}
+    </span>
+  </summary>
+
   {{ .Inner | markdownify }}
 </details>

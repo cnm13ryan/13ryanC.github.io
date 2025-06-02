@@ -12,3 +12,8 @@
 @import 'layout';
 @import 'print';
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "toggle";
