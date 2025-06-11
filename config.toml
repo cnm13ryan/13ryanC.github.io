@@ -93,14 +93,17 @@ theme       = "hugo-PaperMod"
     unsafe = true         # ←  allow raw HTML
 
   [markup.goldmark.parser]
-    attribute = true
+    # convert the old boolean to an inline-table
+    # (block = fenced-block attributes like ```mermaid {…} )
+    # (title = allow title="…"  as alias)
+    attribute = { block = true, title = true }
 
   [markup.highlight]
-    style = "monokai"
+    style = "github"
     codeFences = true            # colourise ``` fences
     noClasses  = false           # keep CSS classes so PaperMod’s palette applies
-    guessSyntax = false          # speed boost; flip to true if you omit languages
-    lineNos    = true
+    guessSyntax = true          # speed boost; flip to true if you omit languages
+    lineNos    = false 
     lineNumbersInTable = true
     defaultMarkdownHandler = 'goldmark'
 

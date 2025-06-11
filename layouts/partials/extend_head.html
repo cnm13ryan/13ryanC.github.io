@@ -17,6 +17,8 @@
    *  Mermaid initialiser (runs after both scripts are loaded)    *
    * ------------------------------------------------------------ */
   window.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Mermaid script started');
+    
     /* ---------- helpers ------------------------------------- */
     const waitForFonts = () =>
       new Promise(res => {
@@ -27,46 +29,207 @@
         }
       });
 
+    /* ---------- enhanced caption detection helper ----------- */
+    const detectCaption = (codeElement) => {
+      let caption = null;
+      
+      // Method 1: Direct attributes on code element
+      caption = codeElement.getAttribute('data-caption') ||
+                codeElement.getAttribute('caption') ||
+                codeElement.getAttribute('title') ||
+                codeElement.getAttribute('alt');
+      
+      if (caption) {
+        console.log('  📝 Caption found on code element:', caption);
+        return caption.trim();
+      }
+      
+      // Method 2: Check parent pre element
+      const pre = codeElement.parentElement;
+      if (pre && pre.tagName === 'PRE') {
+        caption = pre.getAttribute('data-caption') ||
+                  pre.getAttribute('caption') ||
+                  pre.getAttribute('title') ||
+                  pre.getAttribute('alt');
+        
+        if (caption) {
+          console.log('  📝 Caption found on pre element:', caption);
+          return caption.trim();
+        }
+      }
+      
+      // Method 3: Hugo highlight shortcode - check wrapper elements
+      const wrappers = [
+        codeElement.closest('.highlight'),
+        codeElement.closest('.highlighter-rouge'),
+        codeElement.closest('.chroma'),
+        codeElement.closest('div[class*="highlight"]')
+      ].filter(Boolean);
+      
+      for (const wrapper of wrappers) {
+        caption = wrapper.getAttribute('data-caption') ||
+                  wrapper.getAttribute('caption') ||
+                  wrapper.getAttribute('title') ||
+                  wrapper.getAttribute('alt');
+        
+        if (caption) {
+          console.log('  📝 Caption found on wrapper element:', caption);
+          return caption.trim();
+        }
+      }
+      
+      // Method 4: Hugo's class-based attributes (e.g., from shortcodes)
+      const classList = codeElement.className || '';
+      const classMatch = classList.match(/(?:caption|title)[=:]"?([^"\s]+)"?/i);
+      if (classMatch) {
+        caption = classMatch[1].replace(/['"]/g, '');
+        console.log('  📝 Caption found in class attributes:', caption);
+        return caption.trim();
+      }
+      
+      // Method 5: Check for Hugo-generated data attributes in HTML comments or scripts
+      let element = pre || codeElement;
+      let sibling = element.previousElementSibling;
+      let attempts = 0;
+      
+      while (sibling && attempts < 3) {
+        const text = sibling.textContent || sibling.innerHTML || '';
+        const commentMatch = text.match(/(?:data-)?caption[=:]"([^"]+)"/i) ||
+                            text.match(/caption[=:]'([^']+)'/i);
+        
+        if (commentMatch) {
+          caption = commentMatch[1];
+          console.log('  📝 Caption found in sibling element:', caption);
+          return caption.trim();
+        }
+        
+        sibling = sibling.previousElementSibling;
+        attempts++;
+      }
+      
+      // Method 6: Look for preceding figcaption or caption elements
+      sibling = element.previousElementSibling;
+      attempts = 0;
+      
+      while (sibling && attempts < 2) {
+        if (sibling.tagName === 'FIGCAPTION' || 
+            sibling.classList?.contains('caption') ||
+            sibling.classList?.contains('figure-caption')) {
+          caption = sibling.textContent;
+          console.log('  📝 Caption found in preceding figcaption:', caption);
+          // Remove the caption element since we'll create our own
+          sibling.remove();
+          return caption.trim();
+        }
+        sibling = sibling.previousElementSibling;
+        attempts++;
+      }
+      
+      return null;
+    };
+
     /* ---------- transform ```mermaid``` fenced blocks -------- */
-    document
-      .querySelectorAll('pre>code.language-mermaid')
-      .forEach(code => {
-        const host    = code.parentElement;
-        const diagram = document.createElement('div');
-        diagram.className  = 'mermaid';
-        diagram.textContent = code.textContent.trim();
-        host.replaceWith(diagram);
-      });
+    const codeBlocks = document.querySelectorAll('pre > code.language-mermaid, code.language-mermaid');
+    console.log(`📊 Found ${codeBlocks.length} mermaid code blocks`);
+    
+    codeBlocks.forEach((code, index) => {
+      console.log(`🔍 Processing code block ${index + 1}:`);
+      console.log('  Element:', code);
+      console.log('  Parent:', code.parentElement);
+      
+      const caption = detectCaption(code);
+      console.log(`  📝 Final caption result: "${caption || 'NONE'}"`);
+      
+      const host = code.parentElement?.tagName === 'PRE' ? code.parentElement : code;
+      console.log('  🏠 Host element:', host.tagName, host.className);
+
+      /* build the diagram proper */
+      const diagram = document.createElement('div');
+      diagram.className = 'mermaid';
+      diagram.textContent = code.textContent.trim();
+      diagram.setAttribute('data-processed', 'false');
+      
+      console.log('  📄 Diagram content length:', diagram.textContent.length);
+
+      /* semantic wrapper */
+      const fig = document.createElement('figure');
+      fig.className = 'mermaid-figure';
+      fig.appendChild(diagram);
+      
+      console.log('  🎨 Created figure element');
+
+      if (caption && caption.trim()) {
+        const figcap = document.createElement('figcaption');
+        figcap.textContent = caption.trim();
+        figcap.className = 'mermaid-caption';
+        fig.appendChild(figcap);
+        console.log(`  ✅ Caption added: "${figcap.textContent}"`);
+      } else {
+        console.log('  ❌ No caption found for this diagram');
+      }
+
+      // Replace the host element with our figure
+      host.parentNode.replaceChild(fig, host);
+      console.log('  🔄 Replaced host element with figure');
+    });
 
     /* ---------- render --------------------------------------- */
     const renderMermaid = async () => {
+      console.log('🎨 Starting Mermaid rendering...');
+      
       await waitForFonts();
+      
       mermaid.initialize({
         startOnLoad  : false,
         securityLevel: 'strict',
-        theme        : 'default',
+        theme        : document.documentElement.classList.contains('dark') ? 'dark' : 'default',
         fontFamily   : 'Trebuchet MS, Verdana, Arial, sans-serif',
         fontSize     : 14,
-        flowchart    : { useMaxWidth: true },
-        sequence     : { useMaxWidth: true },
+        flowchart    : { useMaxWidth: true, htmlLabels: true },
+        sequence     : { useMaxWidth: true, wrap: true },
         gantt        : { useMaxWidth: true },
         class        : { useMaxWidth: true },
         state        : { useMaxWidth: true },
-        journey      : { useMaxWidth: true }
+        journey      : { useMaxWidth: true },
+        gitgraph     : { useMaxWidth: true },
+        pie          : { useMaxWidth: true }
       });
 
       /* run Mermaid only on yet-unprocessed diagrams */
       const fresh = Array.from(document.querySelectorAll('.mermaid'))
         .filter(el => !el.dataset.mermaidRendered);
 
+      console.log(`🔄 Found ${fresh.length} fresh diagrams to render`);
+
       if (fresh.length === 0) return;
 
-      await mermaid.run({ nodes: fresh }).catch(console.error);
+      try {
+        await mermaid.run({ nodes: fresh });
+        console.log('✅ Mermaid rendering completed successfully');
+        
+        /* mark as rendered so MutationObserver won't re-do them */
+        fresh.forEach(el => {
+          el.dataset.mermaidRendered = 'true';
+          el.setAttribute('data-processed', 'true');
+        });
 
-      /* mark as rendered so MutationObserver won’t re-do them */
-      fresh.forEach(el => (el.dataset.mermaidRendered = 'true'));
-
-      attachZoom(); /* pan-zoom once per diagram */
+        attachZoom(); /* pan-zoom once per diagram */
+        
+        // Final verification
+        console.log('🔍 Final DOM verification:');
+        document.querySelectorAll('.mermaid-figure').forEach((fig, idx) => {
+          const caption = fig.querySelector('figcaption');
+          console.log(`  Figure ${idx + 1}:`, {
+            element: fig,
+            hasCaption: !!caption,
+            captionText: caption ? caption.textContent : 'NONE',
+            captionVisible: caption ? getComputedStyle(caption).display !== 'none' : false
+          });
+        });
+        
+      } catch (error) {
+        console.error('❌ Mermaid rendering failed:', error);
+      }
     };
 
     renderMermaid();
@@ -98,29 +261,26 @@
             zoomEnabled: true,
             panEnabled: true,
             controlIconsEnabled: true,
-            contain: false, // Allow panning outside initial bounds
-            preventPanOutsideViewport: false, // Allow panning beyond viewport
-            eventsListenerElement: mermaidContainer, // Use container for events
+            contain: false,
+            preventPanOutsideViewport: false,
+            eventsListenerElement: mermaidContainer,
             fit: true,
             center: true,
-            minZoom: 0.05, // Allow more zoom out
-            maxZoom: 50,   // Allow more zoom in
+            minZoom: 0.05,
+            maxZoom: 50,
             zoomScaleSensitivity: 0.2,
             mouseWheelZoomEnabled: true,
             dblClickZoomEnabled: true,
-            preventMouseEventsDefault: false, // Better text selection
+            preventMouseEventsDefault: false,
             beforePan: function(oldPan, newPan) {
               return {x: newPan.x, y: newPan.y};
             },
             onZoom: function(level) {
-              // Ensure text remains crisp at different zoom levels
               svg.style.shapeRendering = level > 2 ? 'optimizeSpeed' : 'geometricPrecision';
             }
           });
           
-          // Store reference for fullscreen toggling
           svg.panZoomInstance = panZoomInstance;
-          
           svg.dataset.panzoom = 'initialized';
           console.log(`Pan-zoom successfully added to diagram ${index + 1}`);
           
@@ -148,33 +308,22 @@
             }
           });
           
-          // Make SVG focusable for keyboard events
           svg.setAttribute('tabindex', '0');
 
-          /* ╭────────────────────────────────────────────────────────────╮
-           * │  Universal wheel handler (macOS track-pad & mouse wheel) │
-           * ╰────────────────────────────────────────────────────────────╯
-           *  – Two-finger scroll  ➜ pan the diagram
-           *  – Pinch-to-zoom      ➜ zoom the diagram
-           *  – Shift/Alt held     ➜ let the page scroll (escape hatch)
-           *    ↳ On macOS pinch appears as     ctrlKey===true 
-           */
           const wheelHandler = (e) => {
-            if (e.shiftKey || e.altKey) return;      // user wants page scroll
+            if (e.shiftKey || e.altKey) return;
 
-            const isPinch = e.ctrlKey || e.metaKey;  // macOS / iPadOS
-            e.preventDefault();                      // stop page scroll now
+            const isPinch = e.ctrlKey || e.metaKey;
+            e.preventDefault();
 
             if (isPinch) {
-              /* Zoom around the pointer */
-              const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;  // ±15 %
+              const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
               const { left, top } = mermaidContainer.getBoundingClientRect();
               panZoomInstance.zoom(
                 panZoomInstance.getZoom() * zoomFactor,
                 { x: e.clientX - left, y: e.clientY - top }
               );
             } else {
-              /* Smooth pan */
               panZoomInstance.panBy({ x: -e.deltaX, y: -e.deltaY });
             }
           };
@@ -192,11 +341,9 @@
       const panZoomInstance = svg ? svg.panZoomInstance : null;
       
       if (container.classList.contains('mermaid-fullscreen')) {
-        // Exit fullscreen
         container.classList.remove('mermaid-fullscreen');
         document.body.style.overflow = '';
         
-        // Reset and reconfigure pan-zoom for normal size
         if (panZoomInstance) {
           setTimeout(() => {
             panZoomInstance.resize();
@@ -205,11 +352,9 @@
           }, 100);
         }
       } else {
-        // Enter fullscreen
         container.classList.add('mermaid-fullscreen');
         document.body.style.overflow = 'hidden';
         
-        // Reconfigure pan-zoom for fullscreen
         if (panZoomInstance) {
           setTimeout(() => {
             panZoomInstance.resize();
@@ -234,10 +379,11 @@
     const observer = new MutationObserver(mutations => {
       mutations.forEach(({ addedNodes }) => {
         addedNodes.forEach(node => {
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
+          
           const target = node.classList?.contains('mermaid')
             ? node
             : node.querySelector?.('.mermaid');
-          /* already rendered? → skip */
           if (!target || target.dataset.mermaidRendered) return;
 
           waitForFonts()
@@ -254,31 +400,26 @@
   });
   </script>
 
-  <!-- Enhanced font preloading -->
-  <!-- Trebuchet MS is a system font on all major OSs – external preload not needed -->
-  
-  <!-- Enhanced CSS with better text rendering -->
+  <!-- Enhanced CSS with better caption styling -->
   <style>
     /* Enhanced Mermaid container styling */
     .mermaid {
       text-align: center;
       margin: 0 auto;
-      max-width: 100%
+      max-width: 100%;
       border: 1px solid #e1e4e8;
       border-radius: 8px;
       padding: 40px;
       background-color: #fafbfc;
       position: relative;
-      overflow: visible !important; /* Changed from hidden to visible */
+      overflow: visible !important;
       min-height: 400px;
-      max-width: 100%;
-      /* Better text rendering */
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       font-family: 'Trebuchet MS', Verdana, Arial, sans-serif !important;
-      overscroll-behavior: contain;  /* MDN: kills scroll-chaining  */
-      touch-action: none;           /* disables native pinch/scroll  */
+      overscroll-behavior: contain;
+      touch-action: none;
     }
     
     /* Enhanced SVG styling for better text rendering */
@@ -289,21 +430,17 @@
       height: auto;
       cursor: grab;
       outline: none;
-      /* Improved text rendering */
       shape-rendering: geometricPrecision;
       text-rendering: optimizeLegibility;
       font-family: 'Trebuchet MS', Verdana, Arial, sans-serif !important;
-      /* Ensure proper scaling */
       transform-origin: center center;
     }
     
-    /* keep Mermaid’s measured font & size to avoid width/height drift */
     .mermaid svg text,
     .mermaid svg tspan {
       font-size: inherit;
     }
     
-    /* Specific styling for different text elements */
     .mermaid svg .node text,
     .mermaid svg .cluster text,
     .mermaid svg .actor text,
@@ -314,7 +451,6 @@
       fill: #333333;
     }
     
-    /* Title and header text */
     .mermaid svg .titleText,
     .mermaid svg .sectionTitle {
       font-weight: 700;
@@ -322,7 +458,6 @@
       fill: #000000;
     }
     
-    /* Make diagrams larger on bigger screens */
     @media (min-width: 1200px) {
       .mermaid {
         margin-left: -5%;
@@ -391,7 +526,7 @@
       border: none !important;
       padding: 30px !important;
       display: block !important;
-      overflow: visible !important; /* Changed from hidden */
+      overflow: visible !important;
     }
     
     .mermaid-fullscreen svg {
@@ -425,7 +560,48 @@
       opacity: 1;
     }
     
-    /* Enhanced dark mode support */
+    /* CRITICAL: Enhanced figure and caption styling */
+    .mermaid-figure {
+      text-align: center;
+      margin: 2em auto;
+      display: block;
+      clear: both;
+      max-width: 100%;
+    }
+
+    .mermaid-figure figcaption,
+    .mermaid-caption { 
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      margin: 0.8em auto 0 auto !important;
+      padding: 12px 20px !important;
+      font-size: 0.9em !important;
+      color: #586069 !important;
+      font-style: italic !important;
+      text-align: center !important;
+      font-weight: normal !important;
+      line-height: 1.5 !important;
+      background: rgba(0,0,0,0.02) !important;
+      border: 1px solid #e1e4e8 !important;
+      border-radius: 6px !important;
+      max-width: 90% !important;
+      box-sizing: border-box !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+    }
+
+    /* Ensure captions are always visible */
+    .mermaid-figure figcaption:empty {
+      display: none !important;
+    }
+
+    /* Hide captions when diagram goes fullscreen */
+    .mermaid-fullscreen ~ figcaption,
+    .mermaid-figure .mermaid-fullscreen ~ figcaption {
+      display: none !important;
+    }
+
+    /* Dark mode support */
     @media (prefers-color-scheme: dark) {
       .mermaid {
         background-color: #161b22;
@@ -475,12 +651,35 @@
         background: rgba(22, 27, 34, 1) !important;
         border-color: #58a6ff !important;
       }
+      
+      .mermaid-figure figcaption,
+      .mermaid-caption { 
+        color: #8b949e !important;
+        background: rgba(255,255,255,0.03) !important;
+        border-color: #30363d !important;
+      }
+    }
+    
+    /* Theme-specific support for explicit dark class */
+    .dark .mermaid {
+      background-color: #161b22;
+      border-color: #30363d;
+    }
+    
+    .dark .mermaid-figure figcaption,
+    .dark .mermaid-caption { 
+      color: #8b949e !important;
+      background: rgba(255,255,255,0.03) !important;
+      border-color: #30363d !important;
     }
     
     /* Responsive behavior */
     @media (max-width: 768px) {
       .mermaid {
         padding: 20px;
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
       }
       
       .mermaid::after {
@@ -492,6 +691,13 @@
         left: 10px;
         padding: 6px 10px;
         font-size: 14px;
+      }
+      
+      .mermaid-figure figcaption,
+      .mermaid-caption {
+        font-size: 0.85em !important;
+        padding: 10px 15px !important;
+        max-width: 95% !important;
       }
     }
     
@@ -507,6 +713,14 @@
       .svg-pan-zoom-control,
       .mermaid::after {
         display: none !important;
+      }
+      
+      .mermaid-figure figcaption,
+      .mermaid-caption {
+        color: #000 !important;
+        background: none !important;
+        border: 1px solid #ccc !important;
+        font-style: normal !important;
       }
     }
   </style>
