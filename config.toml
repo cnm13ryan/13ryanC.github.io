@@ -49,13 +49,16 @@ theme       = "hugo-PaperMod"
 # 1. Site-wide PaperMod flags
 ############################
 [params]
-  math               = true
-  mermaid           = true
+  math                = true
+  mermaid             = true
   ShowCodeCopyButtons = true     # clipboard icon on every ``` fence
   description        = "Exploring the frontiers of AI research and applications"
   defaultTheme       = "auto"
   ShowReadingTime    = true
   ShowShareButtons   = true
+  showtoc            = true
+  UseHugoToc         = false
+  tocopen            = true 
 
   homeInfoParams = { Title = "Welcome", Content = "Exploring the frontiers of AI research and applications" }
 
