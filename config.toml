@@ -8,6 +8,7 @@ theme       = "hugo-PaperMod"
   tag      = "tags"
   category = "categories"
   series   = "series"
+  legacy   = "legacy"
 
 [menu]
 
@@ -24,22 +25,28 @@ theme       = "hugo-PaperMod"
     weight     = 20
 
   [[menu.main]]
+    identifier = "legacy"
+    name       = "Legacy"
+    url        = "/legacy/"
+    weight     = 30
+
+  [[menu.main]]
     identifier = "search"
     name       = "Search"
     url        = "/search/"
-    weight     = 30
+    weight     = 40
 
   [[menu.main]]
     identifier = "tags"
     name       = "Tags"
     url        = "/tags/"
-    weight     = 40
+    weight     = 50
 
   [[menu.main]]
     identifier = "faq"
     name       = "FAQ"
     url        = "/faq/"
-    weight     = 50
+    weight     = 60
 
 # Number of posts per page
 [pagination]

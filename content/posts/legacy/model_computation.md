@@ -5,6 +5,7 @@ summary: "errata"
 category: Tutorial 
 series: ["Definitions"]
 tags: ["Definitions"]
+legacy: ["legacy"]
 weight: 1
 author: "Author: Bryan Chan with ChatGPT" 
 hero: /assets/images/hero3.png
