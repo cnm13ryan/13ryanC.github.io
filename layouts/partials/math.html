@@ -12,4 +12,9 @@
 
 <!-- Component loader — MUST be second, use defer (not async) -->
 <script id="MathJax-script" defer
-        src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<script>
+document.addEventListener('page:loaded', () =>
+  window.MathJax?.typesetPromise && MathJax.typesetPromise());
+</script>
