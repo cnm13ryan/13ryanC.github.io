@@ -59,6 +59,7 @@ theme       = "hugo-PaperMod"
   math                = true
   mermaid             = true
   ShowCodeCopyButtons = true     # clipboard icon on every ``` fence
+  ShowPageNums       = true      # so the nav bar is visible
   description        = "Exploring the frontiers of AI research and applications"
   defaultTheme       = "auto"
   ShowReadingTime    = true
@@ -88,7 +89,6 @@ theme       = "hugo-PaperMod"
     "css/pagination.css"      # styles for custom pagination
   ]
   customJS = [
-    "js/mathjax.js",
     "js/vendor/mermaid.min.js",
     "js/vendor/svg-pan-zoom.min.js",
     "js/mermaid-bootstrap.js"
