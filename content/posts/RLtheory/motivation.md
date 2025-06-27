@@ -30,11 +30,11 @@ It’s important to understand that while deep learning has brought surprises, R
 
 The success of this era of experience rests unequivocally on reinforcement learning and its adjoint fields like universal artificial intelligence, information theory, and Bayesian learning. 
 
-We may reach this future sooner than we think. And regardless of the risks of superintelligence introduced in Nick Bostrom's (2014) book [*Superintelligence*](#ref-bostrom "Bostrom, N. (2014). Superintelligence: Paths, Dangers, Strategies. Oxford University Press."), it is critical for us to revisit the fundamentals of RL. 
+We may reach this future sooner than we think. Regardless of the risks of superintelligence introduced in Nick Bostrom’s (2014) book [*Superintelligence*](#ref-bostrom "Bostrom, N. (2014). *Superintelligence: Paths, Dangers, Strategies*. Oxford University Press.") as well as [other risks](#ref-bengio "Bengio, Y. et al. (2025). *Superintelligent Agents Pose Catastrophic Risks: Can Scientist AI Offer a Safer Path?* arXiv:2502.15657.") it is critical for us to revisit the fundamentals of RL.&#x20;
 
 Practitioners often struggle with experimentation, a pain point highlighted by recent work showing just how difficult it can be to reproduce published results in the field ([Gazeau et al., 2023](#ref-gazeau "Gazeau, M., Darvish, K., Romero, D., Sigaud, O., & Geist, M. (2023). On the Reproducibility of Reinforcement Learning Research. arXiv preprint arXiv:2304.01315.")).
 
-For more rapid progress in this field, there must be a more unified and holistic view. Right now, information is scattered, and the bridge between experimentation and theory is weak. (I’m not sure about frontier physics; that seems to be its own kind of mess).
+For more rapid progress in this field, there must be a more unified and holistic view. Right now, information is scattered, and the bridge between experimentation and theory is weak.
 
 I hope that through this blog, I can help the community lean more in that direction. Frankly, I’m just sick of retrieving materials and sticking them together in ways that don't lead to real learning or absorption.
 
@@ -48,7 +48,7 @@ My hope is that by tackling RL from both angles, we can see how theory and exper
 
 With the emerging maturity of formalizing mathematical proofs in languages like Lean, maybe one day the process can be seamless. A researcher could poke at a crazy idea, get help from an AI to flesh out the mathematics, and immediately implement it. Conversely, a discovery in implementation could be quickly formalized to verify its correctness, helping the theory side.
 
-This sounds very idealistic, but I hope it gets here sooner than I think. It would help out beginners, practitioners, and researchers alike.
+This sounds very idealistic, but I hope it gets there sooner than I think. It would help out beginners, practitioners, and researchers alike.
 
 ---
 
