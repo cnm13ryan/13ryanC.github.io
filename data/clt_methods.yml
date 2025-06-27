@@ -1,0 +1,62 @@
+- part: "**Problem space & goal**"
+  bullet: >-
+    Deep-learning models spread computation across many polysemantic neurons, making
+    it hard to explain their behaviour. Mechanistic interpretability therefore tries
+    to find **human-understandable features** and the **circuits** that link them.
+- part: "**Why raw neurons fall short**"
+  bullet: >-
+    Neurons mix unrelated concepts (polysemanticity) due to **superposition**—models
+    hold more concepts than there are neurons—so circuits built directly from neurons
+    are opaque, especially in language models.
+- part: "**Sparse-coding family as remedy**"
+  bullet: >-
+    Recent **SAEs, transcoders, and cross-coders** decompose activations into *sparse*
+    “features” that often map to interpretable concepts, providing building blocks
+    for clearer circuits.
+- part: "**Methodological pillars of this paper**"
+  bullet: |-
+    1. **Transcoders** – replace MLPs with an interpretable proxy so feature–feature
+       interactions can be examined directly.
+    2. **Cross-Layer Transcoder (CLT)** – each feature reads once and writes to all
+       later MLPs, simplifying circuits; \~50 % output fidelity when swapped in.
+    3. **Attribution graphs** – directed graphs whose nodes are active
+       features/embeddings and whose edges are linear contributions; focus of
+       analysis.
+    4. **Linear feature–feature attribution** – achieved by freezing attention
+       patterns & norms and using the transcoder, so direct effects are well defined.
+    5. **Pruning** – keep only nodes/edges that drive the chosen output token,
+       yielding sparse, readable graphs.
+    6. **Interactive interface** – lets researchers explore graphs and inspect
+       features quickly.
+    7. **Validation via perturbations** – test whether moving along a feature
+       direction changes other activations/outputs as the graph predicts.
+    8. **Global-weight analysis** – study replacement-model weights for cross-prompt
+       mechanisms; useful but harder due to weight interference.
+- part: "**Paper roadmap**"
+  bullet: >-
+    *§ 2* Build replacement model (CLT). → *§ 3* Construct attribution graphs; two
+    case studies (factual recall, small-number addition). → *§ 4* Explore global
+    weights. → *§ 5* Quantitatively evaluate CLTs vs. neurons & per-layer
+    transcoders. → *§ 6* Preview companion paper on Claude 3.5 Haiku behaviours. →
+    *§ 7* Limitations (role of attention, reconstruction error, suppression motifs,
+    global-circuit challenges). → *§ 8* Broader design-space discussion. → *§ 9*
+    Related work.
+- part: "**Companion work**"
+  bullet: >-
+    Separate paper applies the same methods to **Claude 3.5 Haiku**, probing
+    behaviours such as multi-hop reasoning, planning, and hallucination.
+- part: "**Cost & alternatives**"
+  bullet: >-
+    Training a CLT is compute-heavy but yields more parsimonious, interpretable
+    circuits; nonetheless, cheaper per-layer transcoders or even raw neurons can still
+    be slotted into steps 3–8 if resources are limited.
+- part: "**Replication aids**"
+  bullet: >-
+    Authors share guidance on CLT implementation, graph-pruning details, and front-end
+    code for the interactive interface, to facilitate external reproduction and
+    extension.
+- part: "**Future outlook**"
+  bullet: >-
+    Expect better feature-finding methods than CLTs; refining attention treatment,
+    error handling, and global-circuit understanding are promising next steps.
+

@@ -1,0 +1,31 @@
+{{/* layouts/shortcodes/bibliography.html */}}
+{{ $bibData := .Site.Data.pubs }}
+
+<div class="bibliography">
+<h2>Bibliography</h2>
+{{ range $bibData }}
+  <div class="bib-entry" id="ref-{{ .id }}">
+    <p>
+      {{ range $i, $author := .authors }}
+        {{- if $i }}, {{ end }}{{ $author -}}
+      {{ end }}
+      {{ if .year }} ({{ .year }}){{ end }}.
+      {{ if eq .type "book" }}
+        <em>{{ .title }}</em>.
+      {{ else }}
+        {{ .title }}.
+      {{ end }}
+      {{ if .venue }}
+        {{ if eq .type "book" }}
+          {{ .venue }}.
+        {{ else }}
+          <em>{{ .venue }}</em>.
+        {{ end }}
+      {{ end }}
+      {{ if .url }}
+        <a href="{{ .url }}" target="_blank">{{ .url }}</a>
+      {{ end }}
+    </p>
+  </div>
+{{ end }}
+</div>

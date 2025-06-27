@@ -1,0 +1,9 @@
+{{- $caption := .Get "caption" | default (.Get 0) -}}
+<figure class="mermaid-figure">
+  <div class="mermaid" data-processed="false">
+{{- .Inner | safeHTML -}}
+  </div>
+  {{- if $caption -}}
+  <figcaption>{{ $caption | markdownify }}</figcaption>
+  {{- end -}}
+</figure>
