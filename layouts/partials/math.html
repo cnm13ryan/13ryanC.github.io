@@ -1,20 +1,15 @@
-<!-- MathJax global config — MUST come first -->
+<!-- 1.  Configuration (before the loader) -->
 <script>
-  window.MathJax = {
+  MathJax = {
     tex: {
       inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
       processEscapes: true
     },
-    svg: { fontCache: 'global' }
+    svg: { fontCache: 'global' }      /* or chtml if you prefer */
   };
 </script>
 
-<!-- Component loader — MUST be second, use defer (not async) -->
-<script id="MathJax-script" defer
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-<script>
-document.addEventListener('page:loaded', () =>
-  window.MathJax?.typesetPromise && MathJax.typesetPromise());
-</script>
+<!-- 2.  Only ONE loader script, with the canonical ID -->
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>

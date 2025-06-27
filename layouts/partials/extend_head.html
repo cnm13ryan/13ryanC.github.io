@@ -1,7 +1,7 @@
 {{- /* mathjax ------------------------------------------------------------ */ -}}
-{{- with or .Params.math .Site.Params.math -}}
-  {{ partial "math.html" $ }}
-{{- end }}
+{{ if or .Params.math .Site.Params.math }}
+  {{ partial "math.html" . }}
+{{ end }}
 
 {{- /* enable-mermaid ----------------------------------------------------- */ -}}
 {{- $hasMermaid := or .Params.mermaid .Site.Params.mermaid -}}

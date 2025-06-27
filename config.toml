@@ -2,13 +2,18 @@ baseURL     = "https://13ryanC.github.io/"
 languageCode = "en-gb"
 title       = "My Research Notes"
 publishDir  = "public"
-theme       = "hugo-PaperMod"
+theme       = ["hugo-PaperMod", "hugo-cite"]
+# theme       = "hugo-PaperMod"
 
 [taxonomies]
   tag      = "tags"
   category = "categories"
   series   = "series"
   legacy   = "legacy"
+
+[cite]
+
+  bib = "data/pubs.json"
 
 [menu]
 
