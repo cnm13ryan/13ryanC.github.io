@@ -20,16 +20,22 @@ sources:
 Reinforcement Learning: agents learn optimal decisions in uncertain environments through trial and error, formalized using **Markov Decision Processes (MDPs)**.
 
 ### Mathematical Foundation
-**MDP**: States, Actions, Transition probabilities, Rewards, discount factor. Agent follows a **policy** to maximize expected future rewards. Key insight: current state contains all info needed for optimal decisions.
+**MDP**: States, Actions, Transition probabilities, Rewards, discount factor. 
+
+Agent follows a **policy** to maximize expected future rewards. 
+
+Key insight: current state contains all info needed for optimal decisions.
 
 ### Three Domains of RL
-
 **1. Planning**: Environment is known → find optimal actions via dynamic programming/search
+
 **2. Offline RL**: Learn from fixed dataset → avoid trying actions not in data  
+
 **3. Online RL**: Learn while interacting → balance exploration vs exploitation
 
 ### The Central Challenge
 **Problem**: Learn optimal behavior without knowing how the environment works
+
 **Solution**: Must explore (try new actions) even if it hurts short-term performance
 
 ### Bottom Line
@@ -48,7 +54,7 @@ The unifying mathematical foundation for reinforcement learning is the Markov De
 $$\mathcal{M} = \langle S, A, P, R, \gamma \rangle$$
 
 where:
-- **States ($S$):** The set of all possible environment configurations (equipped with $\sigma$-algebra $\Sigma_S$ for measurability)
+- **States ($S$):** The set of all possible environment configurations (equipped with $\sigma$-algebra $\Sigma_S$)
 - **Actions ($A$):** The set of all possible agent actions (equipped with $\sigma$-algebra $\Sigma_A$)
 - **Transition Kernel ($P(\cdot \mid s,a)$):** Probability distribution over next states given current state-action pair
 - **Reward Function ($R: S \times A \to \mathbb{R}$):** Expected immediate reward for taking action $a$ in state $s$
@@ -118,13 +124,13 @@ $$
 1. **Finitude:** State and action spaces are finite
 2. **Full observability:** Agent has direct access to current state
 
-## The Three Domains of Reinforcement Learning
+# The Three Domains of Reinforcement Learning
 
 The field can be conceptualized as three overlapping domains addressing different aspects of sequential decision-making:
 
 ![Venn Diagram](../images/venn_diagram.png)
 
-### 1. Planning (Model-Based Control)
+## 1. Planning (Model-Based Control)
 
 **Setting:** Known transition kernel $P(s' \mid s,a)$ and reward function $R(s,a)$
 
@@ -139,7 +145,7 @@ The field can be conceptualized as three overlapping domains addressing differen
 
 **Model-based RL connection:** When models are learned and reused (e.g., Dyna, MuZero, PETS), planning becomes model-based reinforcement learning.
 
-### 2. Batch (Offline) RL
+## 2. Batch (Offline) RL
 
 **Setting:** Static dataset $\mathcal{D} = \{(s_i, a_i, r_i, s'_i)\}$ from unknown behavior policy $\mu$, with no further interaction allowed
 
@@ -150,7 +156,7 @@ The field can be conceptualized as three overlapping domains addressing differen
 - **Pessimistic value estimation:** Learning conservative value functions with uncertainty penalties (Conservative Q-Learning)
 - **Importance sampling:** Density-ratio estimation for off-policy correction
 
-### 3. Online RL (Interactive Learning)
+## 3. Online RL (Interactive Learning)
 
 **Protocol:** At each time-step $t = 0, 1, \ldots$:
 1. Agent observes state $x_t$
@@ -171,7 +177,7 @@ The field can be conceptualized as three overlapping domains addressing differen
 
 **Distinguishing feature:** Online RL uniquely unifies data collection and learning in a single feedback loop, contrasting with planning (model known) and offline RL (data fixed).
 
-## The Central Challenge: Learning Under Uncertainty
+# The Central Challenge: Learning Under Uncertainty
 
 The fundamental RL problem: *How can an agent learn an optimal policy when transition dynamics $P$ and rewards $R$ are unknown?*
 
@@ -197,7 +203,7 @@ Success is measured by how efficiently agents balance exploration and exploitati
 
 Each framework preserves the core state → action → reward structure while addressing specific real-world complexities.
 
-## References
+# References
 
 * RL Theory. (2021, January 19). *Lecture 1 (2021-01-12)* [Video]. YouTube. [http://www.youtube.com/watch?v=0oJmSULoj3I](http://www.youtube.com/watch?v=0oJmSULoj3I)
 * RL Theory. (2022, January 9). *Lecture 1 (2022-01-05)* [Video]. YouTube. [http://www.youtube.com/watch?v=rjwxqcVrVws](http://www.youtube.com/watch?v=rjwxqcVrVws)
