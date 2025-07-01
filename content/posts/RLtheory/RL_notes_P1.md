@@ -14,15 +14,28 @@ sources:
     url: "http://www.youtube.com/watch?v=0oJmSULoj3I"
 ---
 
-## TL;DR
+## TL;DR: 
 
-- Reinforcement Learning unifies **Planning** (known model), **Batch/Offline RL** (fixed data), and **Online RL** (live interaction) via the **Markov Decision Process**, a tuple $(\mathcal S,\mathcal A,P,r,\gamma)$ capturing states, actions, unknown transition dynamics, rewards, and a discount factor that regularises infinite horizons.
+### The Core Idea
+Reinforcement Learning: agents learn optimal decisions in uncertain environments through trial and error, formalized using **Markov Decision Processes (MDPs)**.
 
-- Because $P$ and $r$ are unknown, the agent must **learn**: from its history it chooses a *policy* that maximises the **expected discounted return**—even though each policy induces a *distribution* of returns. 
- 
-- In finite, fully observable MDPs the current state suffices; an optimal policy can be deterministic.
+### Mathematical Foundation
+**MDP**: States, Actions, Transition probabilities, Rewards, discount factor. Agent follows a **policy** to maximize expected future rewards. Key insight: current state contains all info needed for optimal decisions.
 
-- To avoid deep measure‑theoretic complications (infinite trajectories, continuous spaces), this first instalment restricts attention to finite, observable settings—clearing theoretical underbrush before tackling larger, risk‑sensitive or partially observable problems later in the series.
+### Three Domains of RL
+
+**1. Planning**: Environment is known → find optimal actions via dynamic programming/search
+**2. Offline RL**: Learn from fixed dataset → avoid trying actions not in data  
+**3. Online RL**: Learn while interacting → balance exploration vs exploitation
+
+### The Central Challenge
+**Problem**: Learn optimal behavior without knowing how the environment works
+**Solution**: Must explore (try new actions) even if it hurts short-term performance
+
+### Bottom Line
+RL provides a unified framework for sequential decision-making under uncertainty. The core challenge is balancing exploration (learning) with exploitation (performing well) across three different practical scenarios.
+
+---
 
 # Landscape of Reinforcement Learning
 
