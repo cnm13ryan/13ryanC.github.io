@@ -64,7 +64,7 @@ The discount factor serves multiple purposes: it ensures finite returns in infin
 
 ### Policies and the Agent-Environment Loop
 
-A **policy** $\pi$ defines the agent's strategy for action selection. In its most general form, a policy is a sequence of conditional probability distributions $\{\pi_t\}_{t \geq 0}$:
+A **policy** $\pi$ defines the agent's strategy for action selection. In its most general form, a policy is a sequence of conditional probability distributions $\lbrace \pi_t \rbrace_{t \geq 0}$:
 
 $$\pi_t : \mathcal{H}_t \to M_1(A)$$
 
@@ -124,13 +124,13 @@ $$
 1. **Finitude:** State and action spaces are finite
 2. **Full observability:** Agent has direct access to current state
 
-# The Three Domains of Reinforcement Learning
+## The Three Domains of Reinforcement Learning
 
 The field can be conceptualized as three overlapping domains addressing different aspects of sequential decision-making:
 
 ![Venn Diagram](../images/venn_diagram.png)
 
-## 1. Planning (Model-Based Control)
+### 1. Planning (Model-Based Control)
 
 **Setting:** Known transition kernel $P(s' \mid s,a)$ and reward function $R(s,a)$
 
@@ -145,7 +145,7 @@ The field can be conceptualized as three overlapping domains addressing differen
 
 **Model-based RL connection:** When models are learned and reused (e.g., Dyna, MuZero, PETS), planning becomes model-based reinforcement learning.
 
-## 2. Batch (Offline) RL
+### 2. Batch (Offline) RL
 
 **Setting:** Static dataset $\mathcal{D} = \{(s_i, a_i, r_i, s'_i)\}$ from unknown behavior policy $\mu$, with no further interaction allowed
 
@@ -156,7 +156,7 @@ The field can be conceptualized as three overlapping domains addressing differen
 - **Pessimistic value estimation:** Learning conservative value functions with uncertainty penalties (Conservative Q-Learning)
 - **Importance sampling:** Density-ratio estimation for off-policy correction
 
-## 3. Online RL (Interactive Learning)
+### 3. Online RL (Interactive Learning)
 
 **Protocol:** At each time-step $t = 0, 1, \ldots$:
 1. Agent observes state $x_t$
@@ -177,7 +177,7 @@ The field can be conceptualized as three overlapping domains addressing differen
 
 **Distinguishing feature:** Online RL uniquely unifies data collection and learning in a single feedback loop, contrasting with planning (model known) and offline RL (data fixed).
 
-# The Central Challenge: Learning Under Uncertainty
+## The Central Challenge: Learning Under Uncertainty
 
 The fundamental RL problem: *How can an agent learn an optimal policy when transition dynamics $P$ and rewards $R$ are unknown?*
 
@@ -189,7 +189,7 @@ This necessitates **exploration**—sometimes sacrificing immediate reward to ga
 
 Success is measured by how efficiently agents balance exploration and exploitation across diverse environments, guided only by self-generated trajectory data.
 
-## Extensions and Alternative Frameworks
+### Extensions and Alternative Frameworks
 
 **Common MDP extensions:**
 
