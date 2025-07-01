@@ -14,7 +14,7 @@ sources:
     url: "http://www.youtube.com/watch?v=0oJmSULoj3I"
 ---
 
-### TL;DR
+## TL;DR
 
 - Reinforcement Learning unifies **Planning** (known model), **Batch/Offline RL** (fixed data), and **Online RL** (live interaction) via the **Markov Decision Process**, a tuple $(\mathcal S,\mathcal A,P,r,\gamma)$ capturing states, actions, unknown transition dynamics, rewards, and a discount factor that regularises infinite horizons.
 
@@ -24,41 +24,121 @@ sources:
 
 - To avoid deep measure‑theoretic complications (infinite trajectories, continuous spaces), this first instalment restricts attention to finite, observable settings—clearing theoretical underbrush before tackling larger, risk‑sensitive or partially observable problems later in the series.
 
-
-### **The Landscape of Reinforcement Learning**
+## The Landscape of Reinforcement Learning
 
 The field can be conceptualized as a Venn diagram of three distinct, yet overlapping, domains:
 
 ![Venn Diagram](../images/venn_diagram.png)
 
-1.  **Planning:** Given a perfect model of the environment, the challenge is purely computational: how does one efficiently compute an optimal sequence of actions?
-2.  **Batch RL:** In this paradigm, learning occurs from a fixed, static dataset of past interactions. This is critical in risk-averse fields like medicine, where live experimentation is infeasible. It functions as a proof-of-concept, using historical data as a proxy for environmental interaction, much like supervised learning.
-3.  **Online RL:** This is the classical paradigm where an agent learns through continuous, live interaction with its environment, adapting its strategy based on the feedback it receives.
+### 1. Planning (Model-Based Control)
 
-The crucial intersection of these three domains—the unifying mathematical framework for modeling sequential decision-making under uncertainty—is the **Markov Decision Process (MDP)**.
+Given a known transition kernel $P(s' \mid s,a)$ and reward function $R(s,a)$, planning decides how to act **without further environment interaction**. Three main approaches exist:
 
-### **The General Problem and the Rationale for Learning**
+* **Closed-loop optimal policy** $(\pi^* : S \rightarrow A)$ via dynamic programming solving the Bellman optimality equation:
 
-At its most abstract, the RL problem involves an agent using observations to take actions within a stochastic environment to maximize a cumulative reward. 
+  $$
+  V^{\ast}(s) = \max_{a} \lbrace R(s,a) + \gamma\sum_{s'}P(s'|s,a)V^{\ast}(s') \rbrace
+  $$
 
-This simple definition immediately provokes foundational inquiries:
+* **Open-loop trajectory optimization** of action sequences $(a_{0:H-1})$ ignoring feedback during execution
 
-* *Why this specific formulation? What are the consequences of tweaking it?*
-* *What alternative formulations could be devised and measured?*
+* **Online look-ahead search** (e.g. MCTS, AlphaZero) that replans at each step under limited compute
 
-The answer lies in the necessity of **learning**. 
+Even with perfect models, exact planning is computationally hard (P-complete for finite MDPs; PSPACE-hard for POMDPs). When models are *learned* and reused (e.g. Dyna, MuZero, PETS), this becomes **model-based reinforcement learning**.
 
-The agent is not provided with the environment's dynamics. Its success is therefore measured by its ability to adapt and perform well across a multitude of potential environments, guided only by its stream of observations.
+### 2. Batch (Offline) RL
 
-This frames the central question of the field: *How can an agent learn a good policy when the transition probabilities $P$ and reward function $r$ are unknown?*
+**Setting:** A static dataset $\mathcal{D} = \{(s_i, a_i, r_i, s'_i)\}$ from an unknown behavior policy $\mu$, with no further interaction allowed.
+
+**Challenge:** The learned policy $\pi$ may query state-action pairs outside $\mu$'s support, causing *extrapolation error*. Solutions include:
+- Constraining $\pi$ near $\mu$ (behavior cloning, KL penalties)
+- Learning **pessimistic value functions** that subtract uncertainty bonuses (Conservative Q-Learning)
+- Importance sampling with density-ratio estimation
+
+### 3. Online RL (Interactive Learning)
+
+**Protocol:** At each discrete time-step $t = 0, 1, \ldots$:
+1. Agent observes state $x_t$ from the environment
+2. Chooses action $a_t \sim \pi_t(\cdot \mid H_t)$ where policy $\pi_t$ may depend on history $H_t = (x_0, a_0, r_0, \ldots, x_t)$
+3. Environment yields reward $r_t$ and next state $x_{t+1}$
+4. Agent **updates** its parameters, producing $\pi_{t+1}$
+
+**Objective:** Maximize expected discounted return $J(\pi) = \mathbb{E}[\sum_{t=0}^{\infty}\gamma^{t}r_t]$ or minimize **cumulative regret**:
+$\text{Regret}(T) = \sum_{t=0}^{T-1}(V^*(x_t) - r_t)$
+
+**Exploration-exploitation trade-off:** Actions must gather informative data while accruing reward via:
+- ε-greedy and Boltzmann exploration
+- **Optimism under uncertainty** (UCB, RLSVI) 
+- **Posterior sampling** (Thompson sampling, PSRL)
+
+**Learning paradigms:**
+- *On-policy*: Updates use current policy $\pi_t$ data (e.g., PPO)
+- *Off-policy*: Reuses past policy trajectories with importance sampling corrections (e.g., Q-learning, DDPG)
+
+Online RL unifies *data collection* and *learning* in a single feedback loop—contrasting with planning (model known) and offline RL (data fixed).
+
+---
+
+### The Markov Decision Process Foundation
+
+The unifying formalism is the MDP 5-tuple:
+$$\mathcal{M} = \langle S, A, P, R, \gamma \rangle$$
+
+where $S$ is the state space, $A$ the action space, $P(\cdot \mid s,a)$ the transition kernel, $R(s,a)$ expected immediate reward, and $\gamma \in [0,1]$ the discount factor.
+
+A policy $\pi$ induces value functions:
+$$V^\pi(s) = \mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^{t}r_t \mid s_0=s, \pi\right], \quad V^*(s) = \sup_{\pi}V^\pi(s)$$
+
+**Common Extensions:**
+* **POMDP** – partial observability via observation kernel $O(o \mid s)$
+* **Semi-MDP** – actions with variable duration
+* **Multi-agent MDP** – multiple decision-makers with coupled rewards
+
+### Performance Criteria
+
+Beyond the discounted return objective detailed in online RL, alternative formulations include:
+
+* **Finite-horizon reward:** $G^{(H)}_t = \sum_{k=0}^{H-1}R_{t+k+1}$
+* **Average reward:** $\lim_{T\to\infty}\frac{1}{T}\sum_{t=1}^{T}R_t$
+
+Each criterion leads to different algorithmic designs and theoretical guarantees.
+
+## The Central Challenge: Learning Under Uncertainty
+
+The fundamental RL problem: *How can an agent learn an optimal policy when transition dynamics $P$ and rewards $r$ are unknown?*
+
+This necessitates **exploration**—sometimes sacrificing immediate reward to gather information for future exploitation. The challenge is captured by the **identifiability barrier**:
+
+> **Identifiability Barrier**
+> 
+> If two MDPs differ only in $P(\cdot \mid s,a)$ for some state-action pair $(s,a)$, any algorithm avoiding $(s,a)$ with probability 1 produces identical trajectories in both environments and cannot be simultaneously optimal.
+
+Success is measured by how efficiently agents accomplish both exploration and exploitation across diverse environments, guided only by self-generated trajectory data.
+
+### Alternative Frameworks
+
+| Framework | Key Distinction | New Challenges |
+|-----------|-----------------|----------------|
+| **POMDP** | Noisy state observations | Belief-state explosion; intractable control |
+| **CMDP** | Constrained optimization | Feasible-set identification; dual learning |
+| **Multi-objective RL** | Vector-valued rewards | Preference elicitation; Pareto optimality |
+
+Each framework preserves the core state → action → reward structure while addressing specific real-world complexities.
+
+---
 
 ### **The Core Framework: Markov Decision Processes (MDPs)**
 
-An MDP formalizes the environment using a set of mathematical primitives:
+A MDP is the tuple
+$$
+\mathcal{M} = \langle S, A, P, R, \gamma \rangle
+$$
+with 
 * **States ($S$):** A set representing every possible configuration of the environment.
 * **Actions ($A$):** A set of all possible actions the agent can take.
 * **Transition Function ($P(\cdot|s, a)$):** A probability kernel that maps a state-action pair $(s,a)$ to a probability distribution over the next state $S$.
 * **Reward Function ($r(s,a)$):** A scalar reward received for taking action $a$ in state $s$.
+* **Objective function related:** discounting $\gamma$, or otherwise.
 
 Rigorously, an MDP is a tuple $(\mathcal{S}, \mathcal{A}, P, r, \gamma)$, where $\mathcal{S}$ and $\mathcal{A}$ are measurable spaces (equipped with respective $\sigma$-algebras, $\Sigma_S$ and $\Sigma_A$). 
 
