@@ -1,7 +1,7 @@
 ---
 date: "2025-06-27"
-title: "(Part 1) Personal Notes on the Foundations of Reinforcement Learning"
-summary: "Aim to provide more insight on RL foundations for beginners"
+title: "(Part 1) MDP Fundamentals and fixed-point theory" 
+summary: "Aim to provide more insight on RL foundations for beginners. Includes MDP definitions, bellman eq, funda thm, value functions, contrction mappings. Ensure rigorous definitions of MDP, value functions, contraction mappings."
 category: "Tutorial"
 series: ["RL Theory"]
 author: "Bryan Chan"
@@ -47,6 +47,16 @@ RL provides a unified framework for sequential decision-making under uncertainty
 
 ## Mathematical Foundations
 
+### Measure-Theoretic Preliminaries
+
+The exposition that follows relies on measurable-space machinery, which we state up-front for self-containment.
+
+* **Measurable spaces.** $(S,\Sigma_S)$ and $(A,\Sigma_A)$ are measurable spaces (typically Borel spaces when $S$ or $A$ are Polish).
+
+* **Probability kernel.** A map $K:(X,\Sigma_X)\times\Sigma_Y \to [0,1]$ is a kernel if $K(x,\cdot)$ is a probability measure and $K(\cdot,B)$ is $\Sigma_X$-measurable. The transition kernel $P(\cdot \mid s,a)$ and the policy distributions $\pi_t(\cdot \mid h_t)$ are both kernels.
+
+* **Trajectory measure.** Given an initial distribution $\mu$ on state space $S$, a sequence of policy kernels $(\pi_t)_{t \geq 0}$ and a transition kernel $P$, the Ionescu-Tulcea theorem guarantees a unique probability measure $\mathbb{P}$ on the trajectory space $\mathcal{T} = (S \times A)^{\mathbb{N}}$.
+
 ### The Markov Decision Process Framework
 
 The unifying mathematical foundation for reinforcement learning is the Markov Decision Process (MDP), formally defined as the 5-tuple:
@@ -56,19 +66,19 @@ $$\mathcal{M} = \langle S, A, P, R, \gamma \rangle$$
 where:
 - **States ($S$):** The set of all possible environment configurations (equipped with $\sigma$-algebra $\Sigma_S$)
 - **Actions ($A$):** The set of all possible agent actions (equipped with $\sigma$-algebra $\Sigma_A$)
-- **Transition Kernel ($P(\cdot \mid s,a)$):** Probability distribution over next states given current state-action pair
-- **Reward Function ($R: S \times A \to \mathbb{R}$):** Expected immediate reward for taking action $a$ in state $s$
-- **Discount Factor ($\gamma \in [0,1)$):** Controls the trade-off between immediate and future rewards
+- **Transition kernel ($P(\cdot \mid s,a)$):** Probability distribution over next states given current state-action pair
+- **Reward function ($R: S \times A \to \mathbb{R}$):** Expected immediate reward for taking action $a$ in state $s$
+- **Discount factor ($\gamma \in [0,1)$):** Controls the trade-off between immediate and future rewards
 
-The discount factor serves multiple purposes: it ensures finite returns in infinite-horizon problems, creates an effective horizon of approximately $\frac{1}{\varepsilon(1-\gamma)}$ steps, and can be interpreted as implicit regularization favoring earlier rewards or as a constant termination probability $(1-\gamma)$.
+The discount factor serves multiple purposes: it ensures finite returns in infinite-horizon problems, creates an effective horizon of approximately $\frac{1}{\varepsilon(1-\gamma)}$ steps, and provides implicit regularization favoring earlier rewards.
 
 ### Policies and the Agent-Environment Loop
 
-A **policy** $\pi$ defines the agent's strategy for action selection. In its most general form, a policy is a sequence of conditional probability distributions $\lbrace \pi_t \rbrace_{t \geq 0}$:
+A **policy** $\pi$ defines the agent's strategy for action selection. In its most general form, a policy is a sequence of conditional probability distributions $\{\pi_t\}_{t \geq 0}$:
 
 $$\pi_t : \mathcal{H}_t \to M_1(A)$$
 
-where $\mathcal{H}_t = (S \times A)^{t-1} \times S$ represents the history space, and $M_1(A)$ denotes probability measures over actions.
+where $\mathcal{H}_t = (S \times A)^{t-1} \times S$ represents the history space at time $t$, and $M_1(A)$ denotes probability measures over actions.
 
 The **history** at time $t$ is: $H_t = (S_0, A_0, S_1, \ldots, S_{t-1}, A_{t-1}, S_t)$
 
@@ -78,34 +88,72 @@ The agent-environment interaction forms a closed feedback loop:
 3. State transition $S_{t+1} \sim P(\cdot \mid S_t, A_t)$
 4. Reward observation $R_t = R(S_t, A_t)$
 
-This interconnection of $(\mu, \pi, P)$ induces a probability measure $\mathbb{P}_{\mu}^{\pi}$ over the trajectory space $\mathcal{T} = (S \times A)^{\mathbb{N}}$.
+A **stationary Markov policy** is a single kernel $\pi : S \times \Sigma_A \to [0,1]$ that depends only on the current state.
 
-### Objectives and Value Functions
+### Value Functions and Bellman Equations
 
 The agent's goal is to maximize expected **discounted return**:
 
 $$
-J(\pi) = \mathbb{E}_{\mu}^{\pi} \left[ \sum_t \gamma^t R(S_t,A_t) \right]
+J(\pi) = \mathbb E_{\mu}^{\pi} \left[ \sum_{t=0}^{\infty} \gamma^t R(S_t,A_t) \right]
 $$
 
 This leads to the definition of **value functions**:
-- **State value function:** $V^\pi(s) = \mathbb{E}^\pi\left[\sum_{t=0}^{\infty}\gamma^{t}R_t \mid S_0=s\right]$
 
-- **Optimal value function:** $V^*(s) = \sup_{\pi}V^\pi(s)$
+$$V^\pi(s) := \mathbb{E}^\pi \left[\sum_{t=0}^{\infty}\gamma^{t}R_t \mid S_0=s\right]$$
 
-- **Action-value function:** $Q^\pi(s,a) = \mathbb{E}^\pi\left[\sum_{t=0}^{\infty}\gamma^{t}R_t \mid S_0=s, A_0=a\right]$
+$$Q^\pi(s,a) := \mathbb{E}^\pi \left[\sum_{t=0}^{\infty}\gamma^{t}R_t \mid S_0=s, A_0=a\right]$$
 
-The **Bellman optimality equation** characterizes the optimal value function:
+The **optimal value functions** are:
 
 $$
-V^{\ast}(s) = \max_{a} \lbrace R(s,a) + \gamma\sum_{s'}P(s'|s,a)V^{\ast}(s') \rbrace
+V^\ast (s) = \sup_{\pi} V^\pi(s), \quad Q^\ast (s,a) = \sup_{\pi}Q^\pi(s,a)
 $$
 
-**Alternative performance criteria** include:
+Define the policy-induced reward and transition functions:
+$$R_\pi(s):=\int_A\pi(\mathrm{d}a\mid s)\,R(s,a), \quad P_\pi(\mathrm{d}s'\mid s):=\int_A\pi(\mathrm{d}a\mid s) P(\mathrm{d}s'\mid s,a)$$
+
+The **Bellman equations** for policy evaluation are:
+
+$$
+V^\pi(s) = R_\pi(s) +\gamma\int_S P_\pi(\mathrm{d}s'\mid s)\,V^\pi(s')
+$$
+
+$$
+Q^\pi(s,a) = R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a) \int_A \pi(\mathrm{d}a'\mid s')\,Q^\pi(s',a')
+$$
+
+The **Bellman optimality equations** are:
+
+$$
+V^\ast (s)=\max_{a} \lbrace R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a)\,V^*(s') \rbrace
+$$
+
+$$
+Q^\ast (s,a)=R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a)\, \max_{a'}Q^*(s',a')
+$$
+
+Any deterministic policy greedy with respect to $Q^*$ is optimal.
+
+### State Occupancy Measures
+
+The **state occupancy measures** characterize the distribution of states visited under policy $\pi$:
+
+$$d_{\mu,T}^\pi(s):=\frac{1}{T}\sum_{t=0}^{T-1} \mathbb{P}_\mu^\pi(S_t=s) \quad \text{(finite-horizon)}$$
+
+$$d_\mu^\pi(s):=(1-\gamma)\sum_{t=0}^{\infty}\gamma^{t} \mathbb{P}_\mu^\pi(S_t=s) \quad \text{(discounted)}$$
+
+The performance objective can be rewritten as:
+
+$$
+J(\pi)=\frac{1}{1-\gamma} \mathbb E_{s\sim d_\mu^\pi}[R_\pi(s)]
+$$
+
+### Alternative Performance Criteria
+
+Beyond discounted return, other objectives include:
 - **Finite-horizon return:** $G^H_t = \sum_{k=0}^{H-1} R_{t+k+1}$
-
 - **Average reward:** $\lim_{T\to\infty}\frac{1}{T}\sum_{t=1}^{T}R_t$
-
 - **Cumulative regret:** $\text{Regret}(T) = \sum_{t=0}^{T-1}(V^*(S_t) - R_t)$
 
 ### Theoretical Considerations
@@ -115,11 +163,6 @@ $$
 - **Deterministic optimality:** While policies can be stochastic, a deterministic optimal policy always exists
 - **Existence of optimal policies:** Under regularity conditions (continuous bounded rewards, continuous transitions, compact action spaces), measurable optimal policies are guaranteed to exist
 
-**Measure-theoretic foundations:** For rigorous treatment of infinite trajectories and continuous spaces, one must ensure:
-- Measurability of policy functions for well-defined expectations
-- Application of Ionescu-Tulcea extension theorem for trajectory measures
-- Topological conditions for optimal policy existence
-
 **Simplifying assumptions** commonly made to avoid measure-theoretic complexity:
 1. **Finitude:** State and action spaces are finite
 2. **Full observability:** Agent has direct access to current state
@@ -128,7 +171,7 @@ $$
 
 The field can be conceptualized as three overlapping domains addressing different aspects of sequential decision-making:
 
-![Venn Diagram](../images/venn_diagram.png)
+![Venn diagram](https://raw.githubusercontent.com/13ryanC/13ryanC.github.io/main/content/posts/RLtheory/images/venn_diagram.png)
 
 ### 1. Planning (Model-Based Control)
 
@@ -137,13 +180,11 @@ The field can be conceptualized as three overlapping domains addressing differen
 **Objective:** Determine optimal actions without further environment interaction
 
 **Key approaches:**
-- **Closed-loop optimal policy** via dynamic programming solving Bellman optimality equation
-- **Open-loop trajectory optimization** of action sequences $(a_{0:H-1})$ ignoring feedback during execution  
-- **Online look-ahead search** (e.g., MCTS, AlphaZero) that replans at each step under computational constraints
+- **Dynamic programming:** Solving Bellman optimality equation for closed-loop optimal policy
+- **Trajectory optimization:** Open-loop optimization of action sequences $(a_{0:H-1})$ ignoring feedback during execution  
+- **Online search:** Look-ahead methods (e.g., MCTS, AlphaZero) that replan at each step under computational constraints
 
 **Computational complexity:** Even with perfect models, exact planning is computationally hard (P-complete for finite MDPs; PSPACE-hard for POMDPs).
-
-**Model-based RL connection:** When models are learned and reused (e.g., Dyna, MuZero, PETS), planning becomes model-based reinforcement learning.
 
 ### 2. Batch (Offline) RL
 
@@ -159,9 +200,9 @@ The field can be conceptualized as three overlapping domains addressing differen
 ### 3. Online RL (Interactive Learning)
 
 **Protocol:** At each time-step $t = 0, 1, \ldots$:
-1. Agent observes state $x_t$
+1. Agent observes state $s_t$
 2. Chooses action $a_t \sim \pi_t(\cdot \mid H_t)$ 
-3. Environment yields reward $r_t$ and next state $x_{t+1}$
+3. Environment yields reward $r_t$ and next state $s_{t+1}$
 4. Agent updates parameters, producing $\pi_{t+1}$
 
 **Central challenge:** **Exploration-exploitation trade-off** - gathering informative data while maximizing reward
@@ -174,8 +215,6 @@ The field can be conceptualized as three overlapping domains addressing differen
 **Learning paradigms:**
 - **On-policy:** Updates use current policy data (e.g., PPO)
 - **Off-policy:** Reuses past trajectories with importance sampling corrections (e.g., Q-learning, DDPG)
-
-**Distinguishing feature:** Online RL uniquely unifies data collection and learning in a single feedback loop, contrasting with planning (model known) and offline RL (data fixed).
 
 ## The Central Challenge: Learning Under Uncertainty
 
@@ -203,7 +242,10 @@ Success is measured by how efficiently agents balance exploration and exploitati
 
 Each framework preserves the core state → action → reward structure while addressing specific real-world complexities.
 
-# References
+## References
 
 * RL Theory. (2021, January 19). *Lecture 1 (2021-01-12)* [Video]. YouTube. [http://www.youtube.com/watch?v=0oJmSULoj3I](http://www.youtube.com/watch?v=0oJmSULoj3I)
 * RL Theory. (2022, January 9). *Lecture 1 (2022-01-05)* [Video]. YouTube. [http://www.youtube.com/watch?v=rjwxqcVrVws](http://www.youtube.com/watch?v=rjwxqcVrVws)
+* RL Theory. (2025, February 5). *The fundamental theorem* [Lecture notes]. [https://rltheory.github.io/w2021-lecture-notes/planning-in-mdps/lec2/](https://rltheory.github.io/w2021-lecture-notes/planning-in-mdps/lec2/)
+* RL Theory. (2025, February 5). *Introductions* [Lecture notes]. [https://rltheory.github.io/lecture-notes/planning-in-mdps/lec1/](https://rltheory.github.io/lecture-notes/planning-in-mdps/lec1/)
+* Jiang, N. (2024, September 27). *MDP preliminaries* [Lecture notes]. [https://nanjiang.cs.illinois.edu/files/cs542f22/note1.pdf](https://nanjiang.cs.illinois.edu/files/cs542f22/note1.pdf)
