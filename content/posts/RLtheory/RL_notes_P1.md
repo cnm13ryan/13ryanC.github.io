@@ -1,236 +1,1015 @@
 ---
-date: "2025-06-27"
-title: "(Part 1) MDP Fundamentals and fixed-point theory" 
-summary: "Aim to provide more insight on RL foundations for beginners. Includes MDP definitions, bellman eq, funda thm, value functions, contrction mappings. Ensure rigorous definitions of MDP, value functions, contraction mappings."
-category: "Tutorial"
+date: "2025-07-06"
+title: "(Part 1) MDP Foundations nad Optimality"
+summary: "MDP Foundations and Optimality"
+lastmod: "2025-07-06"
+category: "Notes"
 series: ["RL Theory"]
 author: "Bryan Chan"
 hero: /assets/images/hero3.png
 image: /assets/images/card3.png
-sources:
-  - title: "Lecture 1 (2022-01-05)"
-    url: "http://www.youtube.com/watch?v=rjwxqcVrVws"
-  - title: "Lecture 1 (2021-01-12)"
-    url: "http://www.youtube.com/watch?v=0oJmSULoj3I"
 ---
 
-## TL;DR: 
+# Abstract
 
-### The Core Idea
-Reinforcement Learning: agents learn optimal decisions in uncertain environments through trial and error, formalized using **Markov Decision Processes (MDPs)**.
+This document lays out the mathematical foundations of modern reinforcement learning, with a focus on systems involving continuous or hybrid state-action spaces. We begin by establishing the measure-theoretic framework necessary for a rigorous treatment of probability, including measurable spaces, σ-fields, and probability kernels. Using these tools, we formally construct the canonical trajectory space and define the controlled stochastic process induced by a policy via the Ionescu-Tulcea Extension Theorem. We then define the Markov Decision Process (MDP) and derive the Bellman equations, which form the basis for dynamic programming and reinforcement learning algorithms. The analysis culminates in establishing the existence of optimal policies under standard regularity conditions, justified by measurable selection theorems. The text aims to provide a clear, logical, and rigorous progression from foundational mathematics to the core principles of sequential decision-making under uncertainty.
 
-### Mathematical Foundation
-**MDP**: States, Actions, Transition probabilities, Rewards, discount factor. 
+# 1. Introduction: The Sequential Decision-Making Problem
 
-Agent follows a **policy** to maximize expected future rewards. 
+Reinforcement Learning addresses the fundamental question: *How can an agent learn to make optimal decisions in an unknown environment through interaction?* This challenge requires balancing immediate rewards with long-term consequences, all while gathering information about the environment's dynamics.
 
-Key insight: current state contains all info needed for optimal decisions.
+The mathematical foundation rests on probability theory, measure theory, and stochastic processes, providing the rigorous tools needed to analyze learning algorithms and their convergence properties.
 
-### Three Domains of RL
-**1. Planning**: Environment is known → find optimal actions via dynamic programming/search
+# 2. Mathematical Foundations
 
-**2. Offline RL**: Learn from fixed dataset → avoid trying actions not in data  
+This section establishes the measure-theoretic framework required for a rigorous analysis of stochastic systems, including those with continuous or hybrid state-action spaces.
 
-**3. Online RL**: Learn while interacting → balance exploration vs exploitation
+## 2.1. Measurable Spaces and Key Structures
 
-### The Central Challenge
-**Problem**: Learn optimal behavior without knowing how the environment works
+We begin with the fundamental structure for defining probability measures.
 
-**Solution**: Must explore (try new actions) even if it hurts short-term performance
+**Definition 2.1 (Measurable Space and $\sigma$-Field)**
 
-### Bottom Line
-RL provides a unified framework for sequential decision-making under uncertainty. The core challenge is balancing exploration (learning) with exploitation (performing well) across three different practical scenarios.
+A **measurable space** is a pair $(E, \Sigma_E)$, where $E$ is a non-empty set and $\Sigma_E$ is a **σ-field** (or **σ-algebra**) on $E$. 
 
----
+A collection of subsets $\Sigma_E \subseteq 2^E$ is a $\sigma$-field if it satisfies three axioms:
 
-# Landscape of Reinforcement Learning
+1.  **Contains the space:** $E \in \Sigma_E$.
+2.  **Closed under complements:** If $A \in \Sigma_E$, then its complement $A^c = E \setminus A$ is also in $\Sigma_E$.
+3.  **Closed under countable unions:** If $(A_n)_{n \in \mathbb N}$ is any sequence of sets in $\Sigma_E$, then their union $U$ is in $\Sigma_E$,
 
-## Mathematical Foundations
+where $U := \bigcup_{n=1}^{\infty} A_n$
 
-### Measure-Theoretic Preliminaries
+It follows directly that a $\sigma$-field also contains the empty set ($\emptyset$) and is closed under countable intersections. The sets in $\Sigma_E$ are called **measurable sets**.
 
-The exposition that follows relies on measurable-space machinery, which we state up-front for self-containment.
+> **Remark (Purpose of a $\sigma$-Field).** A $\sigma$-field acts as a formal rulebook for which events (subsets) can be assigned a probability. This is crucial in continuous spaces, where attempting to assign a probability to every conceivable subset can lead to mathematical paradoxes. The $\sigma$-field restricts us to a collection of "well-behaved" sets, ensuring the theory is consistent.
 
-* **Measurable spaces.** $(S,\Sigma_S)$ and $(A,\Sigma_A)$ are measurable spaces (typically Borel spaces when $S$ or $A$ are Polish).
+Often, the most practical way to define a $\sigma$-field is by starting with a simpler collection of subsets.
 
-* **Probability kernel.** A map $K:(X,\Sigma_X)\times\Sigma_Y \to [0,1]$ is a kernel if $K(x,\cdot)$ is a probability measure and $K(\cdot,B)$ is $\Sigma_X$-measurable. The transition kernel $P(\cdot \mid s,a)$ and the policy distributions $\pi_t(\cdot \mid h_t)$ are both kernels.
+**Definition 2.2 (Generated $\sigma$-Field)**
 
-* **Trajectory measure.** Given an initial distribution $\mu$ on state space $S$, a sequence of policy kernels $(\pi_t)_{t \geq 0}$ and a transition kernel $P$, the Ionescu-Tulcea theorem guarantees a unique probability measure $\mathbb{P}$ on the trajectory space $\mathcal{T} = (S \times A)^{\mathbb{N}}$.
+Let $\mathcal{C} \subseteq 2^E$ be any collection of subsets of $E$. 
 
-### The Markov Decision Process Framework
+The $\sigma$-field generated by $\mathcal{C}$, denoted $\sigma(\mathcal{C})$, is the smallest $\sigma$-field on $E$ that contains every set in $\mathcal{C}$. 
 
-The unifying mathematical foundation for reinforcement learning is the Markov Decision Process (MDP), formally defined as the 5-tuple:
-
-$$\mathcal{M} = \langle S, A, P, R, \gamma \rangle$$
-
-where:
-- **States ($S$):** The set of all possible environment configurations (equipped with $\sigma$-algebra $\Sigma_S$)
-- **Actions ($A$):** The set of all possible agent actions (equipped with $\sigma$-algebra $\Sigma_A$)
-- **Transition kernel ($P(\cdot \mid s,a)$):** Probability distribution over next states given current state-action pair
-- **Reward function ($R: S \times A \to \mathbb{R}$):** Expected immediate reward for taking action $a$ in state $s$
-- **Discount factor ($\gamma \in [0,1)$):** Controls the trade-off between immediate and future rewards
-
-The discount factor serves multiple purposes: it ensures finite returns in infinite-horizon problems, creates an effective horizon of approximately $\frac{1}{\varepsilon(1-\gamma)}$ steps, and provides implicit regularization favoring earlier rewards.
-
-### Policies and the Agent-Environment Loop
-
-A **policy** $\pi$ defines the agent's strategy for action selection. In its most general form, a policy is a sequence of conditional probability distributions $\{\pi_t\}_{t \geq 0}$:
-
-$$\pi_t : \mathcal{H}_t \to M_1(A)$$
-
-where $\mathcal{H}_t = (S \times A)^{t-1} \times S$ represents the history space at time $t$, and $M_1(A)$ denotes probability measures over actions.
-
-The **history** at time $t$ is: $H_t = (S_0, A_0, S_1, \ldots, S_{t-1}, A_{t-1}, S_t)$
-
-The agent-environment interaction forms a closed feedback loop:
-1. Initial state $S_0 \sim \mu$ (initial state distribution)
-2. Action selection $A_t \sim \pi_t(H_t)$
-3. State transition $S_{t+1} \sim P(\cdot \mid S_t, A_t)$
-4. Reward observation $R_t = R(S_t, A_t)$
-
-A **stationary Markov policy** is a single kernel $\pi : S \times \Sigma_A \to [0,1]$ that depends only on the current state.
-
-### Value Functions and Bellman Equations
-
-The agent's goal is to maximize expected **discounted return**:
+It is formally defined as the intersection of all σ-fields containing $\mathcal{C}$:
 
 $$
-J(\pi) = \mathbb E_{\mu}^{\pi} \left[ \sum_{t=0}^{\infty} \gamma^t R(S_t,A_t) \right]
+\sigma(\mathcal{C}) := \bigcap \lbrace \Sigma \mid \mathcal{C} \subseteq \Sigma \text{ and } \Sigma \text{ is a σ-field on } E \rbrace
 $$
 
-This leads to the definition of **value functions**:
+This is well-defined because the power set, $2^E$, is always a valid $\sigma$-field containing $\mathcal{C}$, ensuring the collection of $\sigma$-fields to be intersected is non-empty.
 
+> **Theorem 2.0 (Monotone‑Class).**  
+> Let $\mathcal A\subseteq 2^E$ be an algebra (closed under finite unions and complements).  
+> Denote by $\operatorname{m}(\mathcal A)$ the smallest *monotone class* containing $\mathcal A$.  
+> Then $\sigma(\mathcal A)=\operatorname{m}(\mathcal A)$.  
+> *Proof sketch.* Every σ‑field is a monotone class containing $\mathcal A$, and $\operatorname{m}(\mathcal A)$ itself is a σ‑field. ∎
+
+
+> **Remark (A Constructive Tool).** The generated $\sigma$-field is highly practical. Instead of describing an often-uncountable σ-field by listing all its elements, we can define it by specifying a much simpler collection of "generators." For example, the hugely important Borel σ-field on $\mathbb{R}$ is simply generated by all open intervals.
+
+
+### 2.1.1. Standard Borel Spaces
+
+While the theory applies to any measurable space, most results in advanced probability and dynamic programming require additional regularity. This motivates the use of a specific, yet highly general, class of spaces.
+
+**Definition 2.3 (Polish and Standard Borel Spaces)**
+
+A topological space is **Polish** if it is separable and completely metrizable. 
+
+The σ-field generated by the open sets of a Polish space $(E, \tau)$ is the **Borel $\sigma$-field**, denoted $\mathcal{B}(E) = \sigma(\tau)$. 
+
+A measurable space $(E, \Sigma_E)$ is a **standard Borel space** if it is Borel-isomorphic to a Polish space; that is, there exists a bijective map $f: E \to E'$ for some Polish space $E'$ such that both $f$ and $f^{-1}$ are measurable.
+
+This class is broad enough to include:
+1.  **Finite or countable sets** $E$, equipped with the discrete σ-field $2^E$ (power set of $E$)
+2.  **Euclidean spaces** $\mathbb{R}^d$ with their standard Borel σ-field $\mathcal{B}(\mathbb{R}^d)$.
+3.  Many function spaces and manifolds encountered in control theory.
+
+The structural properties of standard Borel spaces are crucial. Therefore, we adopt the following convention:
+
+**Assumption 2.1 (Standard Borel Spaces)**
+
+Unless explicitly stated otherwise, all state spaces $(S, \Sigma_S)$ and action spaces $(A, \Sigma_A)$ are assumed to be standard Borel spaces.
+
+This assumption is not merely for technical convenience; it is foundational for guaranteeing the existence of key objects, including:
+* **Regular conditional probabilities** for well-defined belief states (Rokhlin Disintegration Theorem).
+* **Optimal measurable policies** (Jankov-von Neumann Measurable Selection Theorem).
+* **Consistent laws of stochastic processes** (Kolmogorov Extension Theorem).
+
+> **Remark (The Power of Assumption 2.1).** This assumption is the key that unlocks the powerful theorems of modern probability. It ensures our state and action spaces are "regular" enough to avoid pathologies, guaranteeing that essential objects like optimal policies (via measurable selection) and well-defined conditional distributions (i.e., belief states in POMDPs) are guaranteed to exist.
+
+> **Prohorov’s Theorem (Tightness ⇔ Relative Compactness).**  
+> For a Polish space $E$, a set $\mathcal M\subseteq\mathcal P(E)$ is relatively compact under weak convergence **iff** it is tight.  
+> We shall rely on this criterion to extract convergent subsequences in approximate dynamic‑programming proofs.
+ 
+
+### 2.1.2. Uniqueness and Existence of Measures
+
+Two cornerstone theorems allow us to define and verify measures uniquely from simpler collections of sets.
+
+**Definition 2.4 ($\pi$-system and $\lambda$-system)**
+
+Let $\mathcal{C} \subseteq 2^E$ be a collection of subsets.
+* $\mathcal{C}$ is a **$\pi$-system** if it is closed under finite intersections.
+* $\mathcal{C}$ is a **$\lambda$-system** if it contains $E$ and is closed under complements and countable *disjoint* unions.
+
+**Definition 2.4 bis (Product $σ$‑Field).**  
+
+For measurable spaces $(E_i,\Sigma_{E_i})_{i\in I}$ the *product σ‑field*  
+
+$$
+\bigotimes_{i\in I}\Sigma_{E_i}
+$$  
+
+is generated by all rectangles $\prod_{i\in I}A_i$ with $A_i\in\Sigma_{E_i}$ and $A_i=E_i$ for all but finitely many $i$.
+
+
+**Theorem 2.1 (Dynkin's $\pi-\lambda$ Theorem)**
+
+If $\mathcal{P}$ is a $\pi$-system and $\mathcal{L}$ is a $\lambda$-system such that $\mathcal{P} \subseteq \mathcal{L}$, then the generated $\sigma$-field $\sigma(\mathcal{P})$ is also contained in $\mathcal{L}$. 
+
+> **Remark (A Labor-Saving Theorem).** Dynkin's theorem is a primary tool for proving that two measures are identical. For example, it provides the formal justification for why a probability distribution on $\mathbb{R}$ is uniquely determined by its Cumulative Distribution Function (CDF), as the collection of intervals $(-\infty, x]$ forms a generating $\pi$-system.
+
+As a consequence, if two probability measures agree on a $\pi$-system, they must agree on the entire generated $\sigma$-field. This makes $\pi$-systems powerful tools for proving the uniqueness of measures.
+
+**Theorem 2.2 (Carathéodory-Fréchet Extension)**
+
+Let $\mathcal{A}$ be an algebra of subsets of $E$ (closed under complements and finite unions). 
+
+If $\mu_0$ is a $\sigma$-finite pre-measure on $\mathcal{A}$, it has a **unique** extension to a complete measure $\mu$ on the full generated $\sigma$-field $\sigma(\mathcal{A})$. 
+
+This theorem guarantees the existence of measures, such as product measures and the laws of stochastic processes.
+
+> **Remark (Guaranteeing Existence).** This theorem is the theoretical backbone for constructing measures on complex spaces. It allows us to define the law of an entire stochastic process (a measure on an infinite-dimensional path space) by first specifying consistent probabilities on finite-horizon events and then uniquely extending them.
+
+### 2.1.3 Classical Integration Results
+
+We collect four limit/interchange theorems used throughout Sections 3–6.
+
+* **Monotone Convergence (MCT).** If $0\le f_n\uparrow f$ then $\int f_n\to\int f$.
+* **Fatou’s Lemma.** $\displaystyle\int\liminf_{n}f_n\le\liminf_{n}\int f_n$.
+* **Dominated Convergence (DCT).** If $|f_n|\le g\in L^1$ and $f_n\to f$ a.e., then $\int f_n\to\int f$.
+* **Fubini–Tonelli.** For $\sigma$‑finite $(E,\Sigma,\mu)$, $(F,\mathcal F,\nu)$ and $f\ge0$ measurable,  
+  $$
+    \int_{E\times F} fd(\mu\otimes\nu)
+      =\int_E\Bigl[\int_F f(x,y)d\nu(y)\Bigr]d\mu(x).
+  $$
+
+These classical results justify exchanging limits, expectations and integrals in later convergence proofs.
+
+
+
+## 2.2. Probability Kernels
+
+Probability kernels are the mathematical representation of stochastic mappings, such as policies or transition dynamics.
+
+**Definition 2.5 (Probability Kernel)**
+
+A **probability kernel** (or stochastic kernel) from a measurable space $(X, \Sigma_X)$ to another $(Y, \Sigma_Y)$ is a mapping $K: X \times \Sigma_Y \to [0, 1]$ satisfying:
+1.  For each fixed $x \in X$, the map $B \mapsto K(x, B)$ is a probability measure on $(Y, \Sigma_Y)$.
+2.  For each fixed measurable set $B \in \Sigma_Y$, the map $x \mapsto K(x, B)$ is a $\Sigma_X$-measurable function.
+
+We can define an operator action of a kernel $K$ on a bounded measurable function $f: Y \to \mathbb{R}$ by:
+
+$$
+(Kf)(x) := \int_Y f(y)  K(x, \mathrm{d}y)
+$$
+
+> **Remark (Role of Measurability).** The second condition—that $x \mapsto K(x, B)$ is measurable—is crucial. It ensures that the output distribution changes "smoothly" with respect to the input. This property is essential for the integral in the operator $(Kf)(x)$ to be well-defined and is fundamental to the analysis of operators used in dynamic programming, such as the Bellman operator.
+
+
+**Lemma 2.3 (Kernel Composition)**
+
+Let $K_1$ be a kernel from $(X, \Sigma_X)$ to $(Y, \Sigma_Y)$ and $K_2$ be a kernel from $(X \times Y, \Sigma_X \otimes \Sigma_Y)$ to $(Z, \Sigma_Z)$. 
+
+The composition $K = K_2 \circ K_1$, defined by
+$$
+K(x, C) := \int_Y K_2((x, y), C)  K_1(x, \mathrm{d}y) \quad \text{for } C \in \Sigma_Z
+$$
+
+is a probability kernel from $(X, \Sigma_X)$ to $(Z, \Sigma_Z)$. This composition is associative, allowing for the construction of multi-step transition operators.
+
+> **Remark (The Engine of Dynamic Programming).** Kernel composition is the mathematical engine for analyzing multi-step dynamics. Applying a policy kernel to a transition kernel yields the system's evolution under that policy. Repeatedly composing this resulting kernel with itself allows for the evaluation of the system over an extended horizon, forming the basis of value iteration.
+
+> **Definition 2.6 (Markov Operator).**  
+> Any kernel $K:X\times\Sigma_Y\to[0,1]$ induces the linear map  
+> $$
+>    (\mathcal Kf)(x):=\int_Y f(y)K(x,dy),\qquad f\in\mathcal B_b(Y).
+> $$  
+> $\mathcal K$ is positive and $\Vert \mathcal Kf \Vert_\infty \le \Vert f \Vert_\infty$.  
+> Successive kernels satisfy the **Chapman–Kolmogorov identity** $\mathcal K_2\mathcal K_1=\mathcal K_2\circ\mathcal K_1$.
+
+
+### 2.2.1. Regular Conditional Probabilities
+
+A profound result connecting kernels to conditioning is that, on standard Borel spaces, conditional probabilities can always be represented by a kernel.
+
+**Theorem 2.4 (Rokhlin's Regular Conditional Probability Theorem)**
+
+Let $(\Omega, \mathcal{F}, \mathbb{P})$ be a probability space, $X$ be a random variable taking values in a standard Borel space $(E, \Sigma_E)$, and $\mathcal{G} \subseteq \mathcal{F}$ be a sub-σ-field. 
+
+Then there exists a probability kernel $K: \Omega \times \Sigma_E \to [0, 1]$ such that for any $B \in \Sigma_E$:
+$$
+K(\omega, B) = \mathbb{P}(X \in B \mid \mathcal{G})(\omega) \quad \text{for } \mathbb{P}\text{-almost every } \omega \in \Omega
+$$
+
+This kernel is called the **regular conditional distribution** of $X$ given $\mathcal{G}$. Its existence is fundamental for defining belief states in partially observable models and for disintegrating measures.
+
+> **Remark (Rigorous Belief States).** This theorem provides the rigorous foundation for the concept of a **belief state** in POMDPs. It guarantees that an agent's belief—the conditional probability distribution over a hidden state, given a history of actions and observations—exists as a well-defined probability kernel. This allows the belief itself to be treated as the state in a new, fully-observable decision process.
+
+## 2.3. Summary of Core Notation
+
+| Symbol | Interpretation | Structure | Remarks |
+| :--- | :--- | :--- | :--- |
+| $(S, \Sigma_S)$ | State space | Standard Borel | e.g., $\mathbb{R}^d$, a countable set, etc. |
+| $(A, \Sigma_A)$ | Action space | Standard Borel | Compactness is not generally assumed. |
+| $(\Omega, \mathcal{F}, \mathbb{P})$| Underlying probability space | Measurable space with a probability measure | Supports all defined random variables. |
+| $\sigma(\mathcal{C})$ | Generated σ-field | σ-field | The smallest σ-field containing the collection $\mathcal{C}$. |
+| $\mathcal{B}(E)$ | Borel σ-field | σ-field | Generated by the open sets of a topological space $E$. |
+| $\mathcal{P}(E)$ | Space of probability measures | Polish space under weak convergence | The target space for many kernels. |
+| $K(x, \mathrm{d}y)$ | Probability kernel | Map from $X \times \Sigma_Y \to [0,1]$ | Represents policies, transitions, conditional laws. |
+| $\mu \otimes K$ | Mixed measure | Measure on product space | Defined by $(\mu \otimes K)(C) = \int_X K(x, C_x) \mu(\mathrm{d}x)$. |
+
+# 3 Markov Decision Process Framework
+
+## 3.1 Controlled Markov System
+
+Let $(S,\Sigma_S)$ and $(A,\Sigma_A)$ be state and action spaces satisfying **Assumption 2.1** (standard Borel spaces), meaning they are topologically isomorphic to Borel subsets of complete separable metric spaces.
+
+> **Insight.**  *Standard Borel* means “measurable enough” to guarantee the regular conditional probabilities and measurable‑selection tools we will need later; most existence proofs break down if this assumption is dropped.
+
+**Definition 3.1 (Transition kernel)** 
+
+A **transition kernel** is a **probability kernel** $P$ from the product space $(S \times A, \Sigma_S \otimes \Sigma_A)$ to the state space $(S, \Sigma_S)$, as defined in **Definition 2.5**. It maps a state-action pair $(s,a)$ to a probability distribution over subsequent states, denoted $P(\cdot \mid s,a)$.
+
+> **Remark.**  Think of $P$ as the *physics* of the system: it turns a state‑action pair into a full distribution over next states while remaining measurable in $(s,a)$, which is crucial for later integrals.
+
+**Definition 3.2 (Reward kernel)** 
+
+A **reward kernel** is a probability kernel 
+$$R:(S\times A,\Sigma_S \otimes \Sigma_A)\to\mathcal P(\mathbb R,\mathcal B(\mathbb R))$$
+where $\mathcal B(\mathbb R)$ is the Borel $\sigma$-algebra on $\mathbb R$. This kernel governs the distribution of immediate rewards obtained from state-action pairs.
+
+We require the uniform integrability condition:
+$$R_{\max}:=\sup_{s,a}\int_{\mathbb R}|r| R(\mathrm dr\mid s,a)<\infty$$
+This ensures that all reward distributions have uniformly bounded first moments. The expected reward function is defined as:
+$$\bar R(s,a)=\int_{\mathbb R} rR(\mathrm dr\mid s,a)$$
+
+> **Insight.**  Treating rewards as a kernel lets us handle deterministic, discrete, or continuous pay‑offs uniformly; the uniform $L^1$ bound $R_{\max}$ guarantees the discounted return is finite.
+
+**Definition 3.3 (MDP)** 
+
+An **MDP** is the tuple $\mathcal M=\langle S,A,P,R,\gamma\rangle$ where $\gamma\in[0,1)$ is the discount factor that ensures convergence of infinite-horizon value functions.
+
+> **Remark.**  Packing the ingredients into one tuple fixes the environment so that optimisation statements (“there exists an optimal policy”) are always with respect to this $\mathcal M$
+
+## 3.2 Policies and Induced Stochastic Process
+
+**Definition 3.4 (Policy)** 
+
+A **policy** is a **probability kernel** $\pi$ from the state space $(S, \Sigma_S)$ to the action space $(A, \Sigma_A)$, per **Definition 2.5**. It prescribes a probability distribution over actions for each state, denoted $\pi(\cdot \mid s)$. The policy is:
+- **Stationary** if it does not depend on time
+- **Deterministic** if it has the form $\pi=\delta_f$ for a measurable selector $f:S\to A$, where $\delta_f(C \mid s) = \mathbf{1}_C(f(s))$ for all $C \in \Sigma_A$
+
+> **Insight.**  A policy is *just another kernel*—this symmetry with $P$ and $R$ simplifies proofs and lets us chain kernels to form the full trajectory law.
+
+Given an initial distribution $\mu\in\mathcal P(S,\Sigma_S)$ over states, the **Ionescu–Tulcea theorem** guarantees the existence of a unique probability measure $\mathbb P_{\mu}^{\pi}$ on the product space $(S\times A)^{\mathbb N}$ equipped with the product $\sigma$-algebra $(\Sigma_S \otimes \Sigma_A)^{\otimes \mathbb N}$.
+
+This measure governs the canonical stochastic process $(S_t,A_t)_{t\geq 0}$ with transition structure:
+- $\mathbb P_{\mu}^{\pi}(S_0 \in B) = \mu(B)$ for all $B \in \Sigma_S$
+- $\mathbb P_{\mu}^{\pi}(A_t\in C\mid \mathcal F_t^S)=\pi(C\mid S_t)$ for all $C \in \Sigma_A$
+- $\mathbb P_{\mu}^{\pi}(S_{t+1}\in B\mid \mathcal F_t^{S,A})=P(B\mid S_t,A_t)$ for all $B \in \Sigma_S$
+
+where $\mathcal F_t^S = \sigma(S_0,\ldots,S_t)$ and $\mathcal F_t^{S,A} = \sigma(S_0,A_0,\ldots,S_t,A_t)$ are the natural filtrations.
+
+> **Remark.**  Ionescu–Tulcea is the glue: once one‑step kernels are measurable, it *automatically* constructs a probability space for infinite trajectories.
+
+## 3.3 Value and Q-Functions
+
+Define the discounted return as the random variable:
+$$G_t=\sum_{k=0}^{\infty}\gamma^{k}R_{t+k+1}$$
+
+Under the bounded reward assumption, we have the uniform bound:
+$$|G_t|\leq \frac{R_{\max}}{1-\gamma} \quad \mathbb P_{\mu}^{\pi}\text{-almost surely}$$
+
+This ensures $G_t \in L^1(\mathbb P_{\mu}^{\pi})$, making the following definitions well-posed:
+
+**State-value function**: The expected return starting from state $s$:
+$$
+V^{\pi}(s)=\mathbb E_{\mathbb P_{\delta_s}^{\pi}}[G_0] = \int_{(S \times A)^{\mathbb N}} G_0 \mathrm d\mathbb P_{\delta_s}^{\pi}
+$$
+
+**Action-value function**: The expected return starting from state $s$ and taking action $a$:
+$$
+Q^{\pi}(s,a)=\bar R(s,a)+\gamma\int_S V^{\pi}(s') P(\mathrm ds'\mid s,a)
+$$
+
+Both functions belong to the Banach spaces $\mathcal B_b(S,\Sigma_S)$ and $\mathcal B_b(S\times A,\Sigma_S \otimes \Sigma_A)$ respectively, where $\mathcal B_b$ denotes the space of bounded measurable functions equipped with the supremum norm.
+
+> **Insight.**  Boundedness places $V^\pi$ and $Q^\pi$ inside a Banach space, so contraction‑mapping arguments apply cleanly.
+
+## 3.4 Bellman Operators
+
+**Policy evaluation operator**: For a fixed policy $\pi$, define the linear operator $T^{\pi}:\mathcal B_b(S) \to \mathcal B_b(S)$ by:
+$$
+(T^{\pi}V)(s)=\int_A\left[\bar R(s,a)+\gamma\int_S V(s') P(\mathrm ds'\mid s,a)\right] \pi(\mathrm da\mid s)
+$$
+
+This operator represents the expected one-step look-ahead under policy $\pi$.
+
+**Bellman optimality operator**: Define $T:\mathcal B_b(S) \to \mathcal B_b(S)$ by:
+$$
+(TV)(s)=\sup_{a\in A}\left[\bar R(s,a)+\gamma\int_S V(s') P(\mathrm ds'\mid s,a)\right]
+$$
+
+**Lemma 3.5 (Contraction property)** 
+
+The operator $T$ is a $\gamma$-contraction on the Banach space $(\mathcal B_b(S),\Vert\cdot\Vert_\infty)$:
+
+$$
+\Vert TV_1 - TV_2 \Vert_\infty \leq \gamma \Vert V_1 - V_2 \Vert_\infty
+$$
+
+By the Banach fixed-point theorem, $T$ has a unique fixed point $V^\star \in \mathcal B_b(S)$, which is the optimal value function.
+
+> **Remark.**  Contraction means “one pass of $T$ shrinks errors by $\gamma$”; iterating $T$ or its empirical analogue (e.g. value iteration) therefore converges geometrically.
+
+## 3.5 Existence of Optimal Policies
+
+**Theorem 3.6 (Existence of optimal deterministic policies)** 
+
+Under the standard Borel assumption and bounded rewards, there exists a $(\Sigma_S,\Sigma_A)$-measurable selector $f^\star:S\to A$ such that:
+$$
+f^\star(s)\in\arg\max_{a\in A}\left[\bar R(s,a)+\gamma\int_S V^\star(s') P(\mathrm ds'\mid s,a)\right]
+$$
+for all $s \in S$, where the argmax is taken over the action space.
+
+The deterministic policy $\pi^\star=\delta_{f^\star}$ satisfies $V^{\pi^\star}=V^\star$ and is therefore optimal.
+
+**Proof sketch**: The existence of the measurable selector $f^\star$ follows from measurable selection theorems (e.g., Jankov-von Neumann theorem for analytic sets, or Kuratowski-Ryll-Nardzewski theorem when the action space is compact). The measurability of the value function $V^\star$ as a fixed point of the measurable operator $T$ ensures that the optimization problem has a measurable solution.
+
+> **Insight.**  Measurable‑selection theorems turn the abstract $\sup$ in $T$ into an *actual function* $f^\star$—crucial when coding a greedy policy.
+
+## 3.6 Blackwell Optimality
+
+**Definition 3.7 (Blackwell optimality)**
+
+A deterministic policy $\pi$ is **Blackwell-optimal** if there exists $\bar\gamma \in [0,1)$ such that $\pi$ is optimal for every discount factor $\gamma \in (\bar\gamma,1)$.
+
+For finite state spaces with bounded rewards, the optimal policy $\pi^\star$ is also Blackwell-optimal, providing robustness across different discount factors.
+
+> **Remark.**  Blackwell optimality yields robustness: one policy simultaneously solves all *sufficiently long‑horizon* versions of the same control problem.
+
+
+## 3.7 Notation Recap
+
+| Symbol | Meaning | Measure-theoretic interpretation |
+|:---|:---|:---|
+| $(S,\Sigma_S), (A,\Sigma_A)$ | State and action spaces | Standard Borel spaces |
+| $P(\cdot\mid s,a)$ | Transition kernel | Probability measure on $(S,\Sigma_S)$ |
+| $R(\cdot\mid s,a)$ | Reward kernel | Probability measure on $(\mathbb R,\mathcal B(\mathbb R))$ |
+| $\bar R(s,a)$ | Expected reward | $\int rR(\mathrm dr\mid s,a)$ |
+| $\pi$ | Policy kernel | Probability kernel $(S,\Sigma_S) \to \mathcal P(A,\Sigma_A)$ |
+| $f^\star$ | Optimal selector | Measurable function $S \to A$ |
+| $T^{\pi}, T$ | Bellman operators | Contractions on $\mathcal B_b(S)$ |
+| $V^\pi, V^\star$ | Value functions | Elements of $\mathcal B_b(S,\Sigma_S)$ |
+| $Q^\pi$ | Action-value function | Element of $\mathcal B_b(S \times A,\Sigma_S \otimes \Sigma_A)$ |
+| $\mathbb P_{\mu}^{\pi}$ | Trajectory measure | Probability measure on $(S \times A)^{\mathbb N}$ |
+| $G_t$ | Discounted return | Random variable in $L^1(\mathbb P_{\mu}^{\pi})$ |
+
+
+# 4. Trajectory Spaces, Filtrations, and Extension Theorems
+
+Building upon the measure-theoretic tools from Section 2, we now construct the formal space of system trajectories. This framework is essential for defining and analyzing the law of a stochastic process governed by a sequence of decisions.
+
+## 4.1 The Canonical Trajectory Space
+
+We begin by defining the space of all possible infinite histories of states and actions.
+
+Following **Assumption 2.1**, the state space $(S, \Sigma_S)$ and action space $(A, \Sigma_A)$ are taken to be standard Borel spaces. The space for a single state-action pair is their product.
+
+**Definition 4.1.1 (Single-Step Space).** 
+
+The single-step outcome space is the product measurable space $(\Omega_0, \Sigma_0)$, where:
+$$
+\Omega_0 := S \times A, \qquad \Sigma_0 := \Sigma_S \otimes \Sigma_A
+$$
+
+Here, $\Sigma_0$ is the product σ-field generated by all measurable rectangles $\{B_S \times B_A : B_S \in \Sigma_S, B_A \in \Sigma_A\}$.
+
+**Definition 4.1.2 (Trajectory Space).** 
+
+The **trajectory space** $(T, \mathcal{T})$ is the countably infinite product of the single-step spaces:
+$$
+T := \Omega_0^{\mathbb{N}} = (S \times A)^{\mathbb{N}}, \qquad \mathcal{T} := \bigotimes_{t=0}^{\infty} \Sigma_0
+$$
+
+A point $\tau = (s_0, a_0, s_1, a_1, \dots) \in T$ represents one complete trajectory of the system. 
+
+Since the product of standard Borel spaces is also standard Borel, $(T, \mathcal{T})$ is a standard Borel space, inheriting the desirable regularity properties discussed in Section 2.1.1.
+
+**Definition 4.1.3 (Coordinate Processes).** 
+
+For each time $t \ge 0$, the **coordinate maps** are the projections onto the components of a trajectory $\tau$:
+-   $S_t: T \to S$ where $S_t(\tau) = s_t$
+-   $A_t: T \to A$ where $A_t(\tau) = a_t$
+
+These maps are our fundamental random variables. The trajectory space σ-field $\mathcal{T}$ is, by definition, the **generated $\sigma$-field** $\sigma(\{S_t, A_t\}_{t \ge 0})$, in the sense of **Definition 2.2**. It is the smallest σ-field that makes all coordinate maps measurable.
+
+> **Remark 4.1 (Structure of the Trajectory Space).** Since $S$ and $A$ are standard Borel, their infinite product $T$ inherits this strong regularity, ensuring the entire process is well-behaved (cf. Sec 2.1.1). The fact that $\mathcal{T} = \sigma(\{S_t, A_t\})$ means that any measurable event concerning the full infinite trajectory can be constructed from questions about the states and actions at a finite number of time points.
+
+## 4.2 Cylinder Sets and Uniqueness of Measures
+
+To specify a probability measure on the complex space $(T, \mathcal{T})$, we use a simpler collection of generating sets, whose structure is key to proving uniqueness.
+
+**Definition 4.2.1 (Cylinder Set).** 
+
+A **cylinder set** is any set defined by constraining a finite portion of the trajectory. 
+
+For a finite history $h_{0:t} = (s_0, a_0, \dots, s_t)$, the corresponding cylinder set is:
+$$
+C(h_{0:t}) := \lbrace \tau \in T \mid (S_0(\tau), A_0(\tau), \dots, S_t(\tau)) = h_{0:t} \rbrace
+$$
+
+The collection of all cylinder sets is closed under finite intersections, which means it forms a **$\pi$-system** as defined in **Definition 2.4**. This $\pi$-system generates the full trajectory $\sigma$-field, $\mathcal{T}$.
+
+This structure allows us to invoke one of the foundational theorems from Section 2.1.2.
+
+**Theorem 4.2.1 (Uniqueness of the Trajectory Measure).**
+
+Let $\mathbb{P}_1$ and $\mathbb{P}_2$ be two probability measures on $(T, \mathcal{T})$. 
+
+If $\mathbb{P}_1$ and $\mathbb{P}_2$ agree on the probability of all cylinder sets, then they are identical, i.e., $\mathbb{P}_1(B) = \mathbb{P}_2(B)$ for all $B \in \mathcal{T}$.
+
+*Justification.* This is a direct application of **Theorem 2.1 (Dynkin's $\pi-\lambda$ Theorem)**. As established in **Definition 4.2.1**, the collection of cylinder sets is a $\pi$-system that generates $\mathcal{T}$. The theorem states that if two probability measures agree on a generating $\pi$-system, they must be identical on the generated $\sigma$-field.
+
+> **Remark 4.2 (The Power of Uniqueness).** This theorem is a direct application of the $\pi$-λ theorem (Thm 2.1) and is a cornerstone of the theory. It provides a massive simplification: to prove that two complex stochastic processes are identical in law, one only needs to verify that their finite-dimensional distributions (i.e., their probabilities on the cylinder $\pi$-system) match.
+
+This result is fundamental: it guarantees that if we can construct a measure by consistently defining the probabilities of all finite-horizon events, that measure will be unique.
+
+## 4.3 Information Structure and Causality
+
+We now model the flow of information available to a decision-maker.
+
+**Definition 4.3.1 (History Filtration).** 
+
+The **history filtration** is the sequence of increasing $\sigma$-algebras $(\mathcal F_t)_{t \ge 0} $
+
+We know that each $\mathcal F_t$ is the σ-field **generated by** the history up to the observation of state $S_t$:
+
+$$
+\mathcal F_t := \sigma(S_0, A_0, S_1, A_1, \dots, S_{t-1}, A_{t-1}, S_t)
+$$
+
+$\mathcal F_t$ mathematically represents all information available when choosing action $A_t$. The fact that $\mathcal F_t \subseteq \mathcal F_{t+1}$ formalizes that information accumulates over time.
+
+**Causality Constraint.** A decision rule (or policy) at time $t$, denoted $\pi_t$, specifies how to choose action $A_t$. Causality demands that this choice depends only on the information available at that time. This is enforced by modeling the policy $\pi_t$ as a **probability kernel** (in the sense of **Definition 2.5**) from the space of available histories to the action space.
+
+Specifically, a policy $\pi_t$ is a kernel that maps a history $h_t = (s_0, a_0, \dots, s_t)$ to a probability measure on the action space $(A, \Sigma_A)$. The measurability requirement for kernels ensures that the function $h_t \mapsto \pi_t(B | h_t)$ is $\mathcal{F}_t$-measurable for any action set $B \in \Sigma_A$. This precisely captures the constraint that the probability of taking a certain action can only depend on the observed past and present, not the future.
+
+> **Remark 4.3 (Kernels as Causal Maps).** The abstract definition of a probability kernel (Def 2.5) provides the perfect mathematical language for causality. The requirement that the map $h_t \mapsto \pi_t(B | h_t)$ be $\mathcal{F}_t$-measurable is the rigorous statement that the likelihood of taking an action can only depend on past and present information, not on the future.
+
+
+## 4.4 Constructing the Trajectory Measure
+
+While **Theorem 2.2 (Carathéodory-Fréchet Extension)** guarantees the existence of a measure in principle, the Ionescu-Tulcea Extension Theorem provides a concrete, constructive method for building the unique trajectory measure from a sequence of kernels.
+
+**Theorem 4.4.1 (Ionescu-Tulcea Extension Theorem).**
+
+Let $(S, \Sigma_S)$ be a standard Borel space with an initial probability measure $\mu_0$. 
+
+For each $t \ge 0$, let:
+1.  $\pi_t$ be a probability kernel from $((S \times A)^t \times S, \Sigma_0^{\otimes t} \otimes \Sigma_S)$ to $(A, \Sigma_A)$. (The policy kernel).
+2.  $P_{t+1}$ be a probability kernel from $((S \times A)^{t+1}, \Sigma_0^{\otimes (t+1)})$ to $(S, \Sigma_S)$. (The transition dynamics kernel).
+
+Then there exists a **unique** probability measure $\mathbb{P}$ on the trajectory space $(T, \mathcal{T})$ such that for any finite history $(s_0, a_0, \dots, s_t)$, the probability of the corresponding cylinder set is given by the composition of these kernels:
+
+$$
+\mathbb P (C(s_0, a_0, \dots, s_t)) = \int K_0 \prod_{k=0}^{t-1} K_{1,k} K_{2,k}
+$$
+
+where 
+
+$K_0 = \mu_0(ds'_0)$; 
+
+$K_{1,k} = \pi_k(da'_k \mid s'_k)$; 
+
+$K_{2,k} = P_{k+1}(ds'_{k+1} \mid s'_k, a'_k)$
+
+
+(Here, integration over a point implies the density or mass at that point).
+
+> **Remark 4.4 (The Constructive Engine).** While Carathéodory's theorem (Thm 2.2) gives a general promise of existence, the Ionescu-Tulcea theorem provides the explicit recipe. It is the engine that takes the local, one-step-ahead rules of the system—the initial distribution and the policy/transition kernels—and integrates them over the infinite horizon to construct the single, unique probability measure $\mathbb{P}$ governing the entire process.
+
+*Significance.* This theorem is the engine that formally constructs the law of the stochastic process. It takes the primitive components of a dynamic system—an initial distribution, a sequence of policies, and transition dynamics (all modeled as kernels)—and combines them via **kernel composition (Lemma 2.3)** into a single, well-defined probability measure $\mathbb{P}$ over all possible futures. It provides the constructive counterpart to the more general existence guarantee of **Theorem 2.2 (Carathéodory-Fréchet Extension)**. The existence of $\mathbb{P}$ is what allows us to rigorously analyze expectations, long-run averages, and other properties of a system controlled by a policy $\pi$.
+
+# 5. Policies, Causality, and the Controlled Process
+
+With the measure‑theoretic scaffolding in place we now specify **how the agent acts**.  
+Crucially, policies are modelled as *probability kernels* so that **causality**—“no peeking into the future’’—is built‑in rather than imposed post‑hoc.
+
+## 5.1 Policy, Admissibility, Key Sub‑classes
+
+Let the **history space** at time $t$ be  
+$$
+H_t:=(S\times A)^{t}\times S,\qquad
+\Sigma_{H_t}:=(\Sigma_S\otimes\Sigma_A)^{\otimes t}\otimes\Sigma_S.
+$$
+
+> **Definition 5.1 (Admissible Policy).**  
+> A *policy* is a sequence of probability kernels  
+> $$ 
+> \pi_t:H_t\times\Sigma_A\longrightarrow[0,1],\qquad t\ge0,
+> $$ 
+> satisfying the usual kernel measurability.  
+
+We call $\pi=(\pi_t)_{t\ge0}$ **admissible** because $\Sigma_{H_t}$‑measurability forces *non‑anticipation*: each action distribution depends only on information up to time $t$.
+
+### 5.1.1 Canonical Sub‑classes
+
+| Class | Definition | Notation |
+|-------|------------|----------|
+| **Markov** | $\pi_t(\cdot\mid h)=\pi_t(\cdot\mid s_t)$ | $(\pi_t)_{t\ge0}$ on $S$ |
+| **Stationary** | Markov **and** time‑invariant | single kernel $\pi$ |
+| **Deterministic** | $\pi_t(\cdot\mid h)=\delta_{f_t(h)}$ | measurable $f_t:H_t \rightarrow A$ |
+
+> **Insight (Kernel = Causal Map).**  
+> Thinking of a policy as a kernel unifies randomised and deterministic controls: *Dirac kernels* encode pure functions, while general kernels admit internal randomisation *without* violating causality.
+
+### 5.1.2 Realisation via Skorohod Representation
+
+For standard Borel $A$, there exist measurable maps  
+$$
+f_t:H_t\times[0,1]\to A
+$$  
+such that if $(U_t)_{t\ge0}\overset{\text{i.i.d.}}{\sim}\mathrm{Unif}[0,1]$,
+$$
+A_t:=f_t(H_t,U_t)
+$$  
+satisfies  
+$$
+\mathbb P(A_t\in B\mid\mathcal F_t)=\pi_t(B\mid H_t)\quad\text{a.s.}
+$$  
+(Skorohod / inverse‑CDF construction).  Thus *any* admissible policy can be implemented by combining a measurable function with i.i.d. uniform coins.
+
+## 5.2 From Policy to Trajectory Law
+
+Given
+1. an initial distribution $\mu\in\mathcal P(S)$,  
+2. a transition kernel $P:S\times A\to\mathcal P(S)$,  
+3. an admissible policy $\pi$,
+
+the **Ionescu–Tulcea theorem** (§ 4.4) produces a **unique** measure  
+$$
+\boxed{\mathbb P_{\mu}^{\pi}\in\mathcal P(T)}
+$$
+
+on the trajectory space $T=(S\times A)^{\mathbb N}$ such that
+$$
+\mathbb P_{\mu}^{\pi}(C_t(s_0,a_0,\dots,s_t))
+  =\mu(s_0)\prod_{k=0}^{t-1}\pi_k(a_k\mid h_k)P(s_{k+1}\mid s_k,a_k),
+$$
+
+where $h_k=(s_0,a_0,\dots,s_k)$.
+
+All subsequent *performance criteria*—value functions, occupancy measures, regret—are **expectations under $\mathbb P_{\mu}^{\pi}$**.  
+The entire edifice of RL theory therefore rests on the existence and uniqueness of this controlled trajectory law.
+
+> **Remark (Complete Specification).**  
+> “Policy + Dynamics + Initial‑law’’ ⇒ *one and only one* stochastic process.  
+> This guarantees that optimisation problems such as  
+> $\max_{\pi}V^\pi(s)$ are well posed, and that algorithmic updates have an unambiguous probabilistic interpretation.
+
+# 6. Value Functions and Optimality
+
+## 6.1 Return and Value Functions
+
+**Discounted Return:** 
+$$G_t = \sum_{k=0}^{\infty} \gamma^k R_{t+k}$$
+
+**Value Functions:**
 $$V^\pi(s) := \mathbb{E}^\pi \left[\sum_{t=0}^{\infty}\gamma^{t}R_t \mid S_0=s\right]$$
 
 $$Q^\pi(s,a) := \mathbb{E}^\pi \left[\sum_{t=0}^{\infty}\gamma^{t}R_t \mid S_0=s, A_0=a\right]$$
 
-The **optimal value functions** are:
+**Optimal Value Functions:**
+$$V^\ast (s) = \sup_{\pi} V^\pi(s), \quad Q^\ast (s,a) = \sup_{\pi}Q^\pi(s,a)$$
 
-$$
-V^\ast (s) = \sup_{\pi} V^\pi(s), \quad Q^\ast (s,a) = \sup_{\pi}Q^\pi(s,a)
-$$
+## 6.2 Bellman Equations
 
-Define the policy-induced reward and transition functions:
-$$R_\pi(s):=\int_A\pi(\mathrm{d}a\mid s)\,R(s,a), \quad P_\pi(\mathrm{d}s'\mid s):=\int_A\pi(\mathrm{d}a\mid s) P(\mathrm{d}s'\mid s,a)$$
+**Policy-Induced Functions:**
+$$R_\pi(s) := \int_A\pi(\mathrm{d}a\mid s) R(s,a), \quad P_\pi(\mathrm{d}s'\mid s):=\int_A\pi(\mathrm{d}a\mid s) P(\mathrm{d}s'\mid s,a)$$
 
-The **Bellman equations** for policy evaluation are:
+**Bellman Equations for Policy Evaluation:**
+$$V^\pi(s) = R_\pi(s) +\gamma\int_S P_\pi(\mathrm{d}s'\mid s) V^\pi(s')$$
 
-$$
-V^\pi(s) = R_\pi(s) +\gamma\int_S P_\pi(\mathrm{d}s'\mid s)\,V^\pi(s')
-$$
+$$Q^\pi(s,a) = R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a) \int_A \pi(\mathrm{d}a'\mid s') Q^\pi(s',a')$$
 
-$$
-Q^\pi(s,a) = R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a) \int_A \pi(\mathrm{d}a'\mid s')\,Q^\pi(s',a')
-$$
+**Bellman Optimality Equations:**
+$$V^\ast (s)=\max_{a} \lbrace R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a) V^*(s') \rbrace$$
 
-The **Bellman optimality equations** are:
+$$Q^\ast (s,a)=R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a) \max_{a'}Q^*(s',a')$$
 
-$$
-V^\ast (s)=\max_{a} \lbrace R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a)\,V^*(s') \rbrace
-$$
+**Key Result:** Any deterministic policy greedy with respect to $Q^*$ is optimal.
 
+### 6.2.1 Banach Contraction & Error Bounds
+
+Define, for **fixed** policy $\pi$,
 $$
-Q^\ast (s,a)=R(s,a) +\gamma\int_S P(\mathrm{d}s'\mid s,a)\, \max_{a'}Q^*(s',a')
+T_\pi V(s):=R_\pi(s)+\gamma\int_S V(s')P_\pi(\mathrm ds'\mid s),
 $$
 
-Any deterministic policy greedy with respect to $Q^*$ is optimal.
+on the Banach space $(\mathcal B_b(S),\Vert\cdot\Vert_\infty)$.
 
-### State Occupancy Measures
+> **Lemma 6.2.1.**  $\Vert T_\pi V-T_\pi W \Vert_\infty \le \gamma \Vert V-W \Vert_\infty$.  
+> *Proof.*  Triangle inequality plus $\int P_\pi=1$. ∎
 
-The **state occupancy measures** characterize the distribution of states visited under policy $\pi$:
+By Banach’s fixed‑point theorem, $T_\pi$ admits a unique fixed point $V^\pi$ and
+$$
+\Vert V_k^\pi-V^\pi \Vert_\infty\le\gamma^k \Vert V_0-V^\pi \Vert_\infty.
+$$
+
+Setting $V_0\equiv0$ and using $R_{\max}$ (Ass. 3.0) gives the **value‑iteration error bound**
+$$
+\Vert V_k^\pi-V^\pi \Vert_\infty\le\frac{\gamma^kR_{\max}}{1-\gamma}.
+$$
+
+### 6.2.2 Monotone Convergence (Dynamic Programming)
+
+If $V_{k+1}^\pi:=T_\pi V_k^\pi$ with $V_0^\pi$ a **lower bound** (e.g. $-\frac{R_{\max}}{1-\gamma}$), then  
+$V_k^\pi\uparrow V^\pi$ pointwise.  
+Proof uses monotone convergence plus contractivity.
+
+### 6.2.3 Optimality Operator
+
+Define
+$$
+TV(s):=\sup_{a\in A}\{\bar R(s,a)+\gamma PV(s,a)\}.
+$$
+
+$T$ is still a $\gamma$‑contraction (sup preserves Lipschitz constant ≤1).  
+Therefore **value‑iteration** $V_{k+1}=TV_k$ converges to $V^\star$ with the same error rate.
+
+### 6.2.4 Policy Improvement & Iteration
+
+**Policy‑improvement step.**  
+Given $V_k$, pick measurable $f_{k+1}$ with
+$$
+(s,f_{k+1}(s))\in\arg\max_{a}\{\bar R(s,a)+\gamma PV_k(s,a)\}.
+$$
+Then $V^{f_{k+1}}\ge V_k$ pointwise (standard proof via Bellman inequalities).  
+
+**Policy‑iteration algorithm.**
+1. Evaluate $\pi_k$ (e.g. by linear solver or value‑iteration to ε‑accuracy).  
+2. Improve to $\pi_{k+1}$ via $f_{k+1}$ above.  
+With bounded rewards and finite $A$, the sequence $(V^{\pi_k})$ is monotonically increasing and converges to $V^\star$ in finitely many steps; for Borel $A$ convergence is still guaranteed though possibly infinite.
+
+### 6.2.5 Asynchronous Value Iteration (AVI)
+
+Let $(i_n)_{n\ge0}$ be a sequence of states with each $s\in S$ visited infinitely often.  
+
+Update only state $i_n$:
+
+$$
+V_{n+1}(i_n):=TV_n(i_n),\quad V_{n+1}(s)=V_n(s)\ \text{if }s\neq i_n.
+$$
+
+If $\sum_n\gamma^{n}<\infty$ (e.g. $\gamma<1$) then $V_n\to V^\star$ (Bertsekas & Tsitsiklis 1996, Prop 6.2).
+
+### 6.2.6 Notation Addendum
+
+| Symbol | Meaning |
+|--------|---------|
+| $T_\pi$ | policy evaluation operator |
+| $T$ | optimality operator |
+| $V_k^\pi,V_k$ | $k$‑th value‑iteration iterate |
+| $f_k$ | greedy selector at iteration $k$ |
+
+## 6.3 State Occupancy Measures
+
+**Definition 6.1 (State Occupancy):** The state occupancy measures characterize state visitation:
 
 $$d_{\mu,T}^\pi(s):=\frac{1}{T}\sum_{t=0}^{T-1} \mathbb{P}_\mu^\pi(S_t=s) \quad \text{(finite-horizon)}$$
 
 $$d_\mu^\pi(s):=(1-\gamma)\sum_{t=0}^{\infty}\gamma^{t} \mathbb{P}_\mu^\pi(S_t=s) \quad \text{(discounted)}$$
 
-The performance objective can be rewritten as:
+**Performance Objective:** The objective can be rewritten as:
+$$J(\pi)=\frac{1}{1-\gamma} \mathbb E_{s\sim d_\mu^\pi}[R_\pi(s)]$$
 
+> **Proposition 6.4 (LP Reformulation)**  
+> Let $d_\mu^\pi$ be the discounted occupancy measure.  Then maximising the expected return is equivalent to the **primal linear programme**  
+>  
+> \begin{aligned}
+>   \text{maximize}\quad & \sum_{s,a} d(s,a) R(s,a) \newline 
+>   \text{subject to}\quad &
+>   d(s') = (1-\gamma)\mu(s') + \gamma\sum_{s,a} d(s,a) P(s'\mid s,a), \newline
+>   & d(s,a)\ge 0, \sum_{s,a}d(s,a)=1.
+> \end{aligned}
+>   
+> The dual variables recover the optimal differential value function, linking LP theory with Bellman optimality.
+
+*Sketch.*  The constraints encode discounted flow‑balance; see Puterman (1994) Ch. 6 for a full derivation. ∎
+
+
+## 6.4 Theoretical Guarantees
+
+**Key Theoretical Results:**
+- **Sufficiency of Markovian policies:** Current state is sufficient statistic for optimal control
+- **Deterministic optimality:** A deterministic optimal policy always exists
+- **Existence of optimal policies:** Under regularity conditions, measurable optimal policies exist
+
+# 7. Algorithmic Regimes in Reinforcement Learning
+
+The theoretical study of Reinforcement Learning (RL) is primarily organized around three canonical regimes. These regimes are fundamentally distinguished by the information available to the learning agent *a priori* and the nature of the data that can be collected. The three domains are **Planning**, **Batch (or Offline) RL**, and **Online (or Interactive) RL**.
+
+## The Markov Decision Process: Unifying Framework
+
+Central to all three regimes is the **Markov Decision Process (MDP)**, which serves as the mathematical foundation that unifies these seemingly disparate approaches. An MDP is formally defined as a tuple $\mathcal{M} = (S, A, P, R, \gamma, \rho)$ where:
+
+- $S$ is the state space
+- $A$ is the action space  
+- $P: S \times A \rightarrow \Delta(S)$ is the transition probability function
+- $R: S \times A \rightarrow \mathbb{R}$ is the reward function
+- $\gamma \in [0,1)$ is the discount factor
+- $\rho$ is the initial state distribution
+
+The MDP framework provides the common language and theoretical foundation across all three regimes:
+
+![Venn diagram](https://raw.githubusercontent.com/13ryanC/13ryanC.github.io/main/content/posts/RLtheory/images/venn_diagram.png) 
+
+**In Planning:** The MDP is fully specified and known. The agent has complete access to $(S, A, P, R, \gamma)$ and must compute optimal policies through dynamic programming or approximate methods.
+
+**In Batch RL:** The MDP exists but is unknown. The agent observes a fixed dataset of transitions sampled from this underlying MDP under some behavior policy, and must infer a good policy without knowing the true $(P, R)$.
+
+**In Online RL:** The MDP is unknown and must be learned through interaction. The agent discovers the structure of $(S, A, P, R)$ by taking actions and observing the resulting states and rewards, balancing exploration with exploitation.
+
+This shared mathematical foundation allows for:
+- **Common performance metrics** (value functions, Q-functions, policies)
+- **Transferable theoretical tools** (Bellman equations, contraction properties, optimality conditions)
+- **Unified analysis frameworks** (regret bounds, sample complexity, approximation error)
+- **Cross-regime algorithm design** (model-based methods that bridge planning and learning)
+
+The MDP abstraction thus provides the theoretical bridge that connects discrete algorithmic approaches to a unified understanding of sequential decision-making under uncertainty.
+
+## 7.1 Planning (Model-Based Control)
+
+In the planning regime, the agent has complete and perfect knowledge of the environment's dynamics. The challenge is not to learn the world's rules but to compute an optimal plan of action given those rules, without the need for real-world interaction.
+
+### 7.1.1 Problem Statement
+
+The formal setup for the planning problem is as follows:
+
+> **Input:** Full knowledge of the Markov Decision Process (MDP), specified by the transition dynamics $P(s'|s,a)$, the reward function $R(s,a)$, and the discount factor $\gamma$. The state space $S$ and action space $A$ are assumed to be finite or compact.
+>
+> **Goal:** Compute a policy $\hat \pi$ that is approximately optimal, such that its value function $V^{\hat \pi}$ is within a specified tolerance $\varepsilon$ of the true optimal value function $V^\ast$. This is measured by the infinity norm:
+> $$\Vert V^{\hat \pi} - V^\ast \Vert_\infty \le \varepsilon$$
+> where $\Vert f \Vert_\infty = \sup_x |f(x)|$. This guarantees that the value of the computed policy at any state is no more than $\varepsilon$ worse than the optimal value.
+
+### 7.1.2 Computational Complexity of Dynamic Programming
+
+Dynamic Programming (DP) is the classical method for solving the planning problem. The computational cost depends on the problem's structure.
+
+| Setting | Algorithm | Time Complexity | Space Complexity |
+|---------|-----------|-----------------|------------------|
+| Discounted, Tabular | Value Iteration | $\mathcal{O}\left(S^2 A \frac{\log(1/\varepsilon)}{1-\gamma}\right)$ | $\mathcal{O}(S)$ |
+| Finite Horizon $H$ | Backward DP | $\mathcal{O}(H S^2 A)$ | $\mathcal{O}(S)$ |
+| $\varepsilon$-approximate policy, large $S$ | Fitted Value Iteration (FVI) | Depends on function class | (See §8 for sample complexity) |
+
+**Explanation:**
+
+- For standard tabular MDPs (where states and actions are discrete and enumerated), **Value Iteration** finds an $\varepsilon$-optimal policy with a time complexity that scales polynomially in the number of states ($S$) and actions ($A$), but depends on the discount factor $\gamma$ and the desired precision $\varepsilon$.
+- In a **finite horizon** setting of length $H$, **Backward Dynamic Programming** solves the problem exactly with a complexity linear in the horizon.
+- However, when the state space is enormous or continuous, exact methods are infeasible. **Fitted Value Iteration (FVI)** uses function approximation, and its complexity is tied to the chosen function class and the number of samples required (sample complexity).
+
+For more complex environments, such as factored MDPs or Partially Observable MDPs (POMDPs), the planning problem becomes computationally intractable. Exact planning is **PSPACE-hard**, and finding even a constant-factor approximation for POMDPs is **EXP-hard**, meaning the required computation scales exponentially with the problem size.
+
+### 7.1.3 Approximate Dynamic Programming and Error Propagation
+
+In practice, we often use an approximate Bellman operator, denoted $\tilde{T}$, which introduces some error at each step. If this single-step approximation error is bounded by $\delta$, such that:
+$$\Vert \tilde{T}V - TV \Vert_\infty \le \delta$$
+then the error of the resulting fixed-point value function $V^{\tilde{T}}$ is bounded by:
+$$\Vert V^{\tilde{T}} - V^* \Vert_\infty \le \frac{\delta}{1-\gamma}$$
+
+This fundamental result demonstrates how approximation errors accumulate. The term $(1-\gamma)^{-1}$ acts as an error amplification factor; for discount factors $\gamma$ close to 1 (i.e., long-term planning), even small single-step errors $\delta$ can lead to a large final error in the computed policy.
+
+## 7.2 Batch (Offline) Reinforcement Learning
+
+In Batch RL, the agent must learn a policy from a fixed, pre-collected dataset without any further interaction with the environment. This is common in applications where real-world interaction is expensive or risky, such as healthcare or robotics.
+
+### 7.2.1 Setup and Notation
+
+We are given a static, i.i.d. dataset of transitions:
+$$\mathcal D = \{ (S_i, A_i, R_i, S'_i) \}_{i=1}^{N} \sim \nu$$
+
+This dataset is generated by an unknown **behaviour policy** $\pi_b$ acting in the environment, starting from an initial state distribution $\rho$. The joint distribution $\nu$ is thus given by $\nu := d^\mu_\rho \otimes \pi_b \otimes R \otimes P$, where $d^\mu_\rho$ is the state-action occupancy measure induced by $\pi_b$.
+
+The objective is to leverage this fixed dataset $\mathcal{D}$ to output a high-performing policy $\hat{\pi}$ that can be deployed.
+
+### 7.2.2 The Challenge of Distribution Shift and Concentrability
+
+The core difficulty in Batch RL is **distribution shift**. The learned policy $\hat{\pi}$ may favour state-action pairs that were rarely or never visited by the behaviour policy $\pi_b$, leading to **extrapolation error** where the value of such actions cannot be reliably estimated.
+
+This difficulty is quantified by the **concentrability coefficient**:
+$$C^\ast := \sup_{s,a} \frac{d^\ast (s,a)}{d^\mu_\rho(s,a)}$$
+
+where $d^\ast$ is the discounted state-action occupancy measure of an optimal policy. 
+
+$C^\ast$ measures the mismatch between the optimal state-action distribution and the one present in the dataset. 
+
+A large $C^\ast$ implies that the optimal policy visits states and actions that are poorly covered by the data, making learning extremely difficult. Any sample complexity guarantee will necessarily scale with $C^\ast$.
+
+This leads to a fundamental limitation:
+
+> **Impossibility Theorem:** If the support of the data distribution $d^\mu_\rho$ fails to cover even a single state-action pair that is essential for an optimal policy, then no algorithm can guarantee finding a policy with a sub-optimality less than a constant factor using a finite dataset. This is known as the **support-deficiency barrier**.
+
+### 7.2.3 Sample-Complexity Upper Bounds
+
+Modern Batch RL algorithms provide guarantees that explicitly depend on the data quality ($C^*$) and quantity ($N$).
+
+| Assumption | Algorithm | Error Bound ($\varepsilon$) | Samples Needed ($N$) |
+|------------|-----------|------------------------------|------------------------|
+| Tabular, Full Support | CQL / Pessimistic FQI | $\tilde{\mathcal{O}}\left(C^* \sqrt{\frac{H^2 SA}{N}}\right)$ | $\tilde{\mathcal{O}}\left(\frac{(C^*)^2 H^2 SA}{\varepsilon^2}\right)$ |
+| Linear MDP, Features $d$ | Offline OFU-LSTD | $\tilde{\mathcal{O}}\left(\frac{d}{\sqrt{N}}\right)$ | $\tilde{\mathcal{O}}\left(\frac{d^2}{\varepsilon^2}\right)$ |
+
+*(Note: $\tilde{\mathcal{O}}$ hides logarithmic factors.)*
+
+These bounds are known to be **order-optimal**, as they match established minimax lower bounds up to logarithmic factors. The error $\varepsilon$ decreases at a rate of $1/\sqrt{N}$, but is penalized by the concentrability $C^*$.
+
+### 7.2.4 Algorithmic Themes
+
+To combat distribution shift, Batch RL algorithms are built on several key principles:
+
+- **Pessimism/Conservatism:** Value estimates are penalized based on their uncertainty. For actions outside the data support, where uncertainty is high, the algorithm assumes the worst-case outcome, preventing overestimation and discouraging deviation from the known data distribution.
+- **Behaviour-Cloning Constraints:** The learned policy is explicitly constrained to stay close to the behaviour policy, for instance by using a trust region or adding a KL-divergence regularizer like $\text{KL}(\pi \Vert \pi_b)$.
+- **Model-Based Synthesis:** A model of the MDP $(\hat{P}, \hat{R})$ is learned from the data, typically along with uncertainty estimates. Then, a policy is derived by solving a **robust MDP**, which finds a strategy that performs well even under the worst-case model within the uncertainty set.
+
+## 7.3 Online (Interactive) Reinforcement Learning
+
+In the Online RL setting, the agent learns by continuously interacting with an unknown environment. This introduces the quintessential challenge of balancing exploration with exploitation.
+
+### 7.3.1 Performance Criteria
+
+Performance in Online RL is measured over the course of the entire learning process.
+
+- **Regret:** Measures the total opportunity cost over time. For an episodic setting with $K$ episodes of horizon $H$ (total steps $T=KH$), the regret is the cumulative sum of the difference between the optimal value and the value achieved by the agent's policy in each episode:
+
+  $$\text{Regret}(T) = \sum_{k=1}^{K} \left[ V^*(s_{k,0}) - V^{\pi_k}(s_{k,0}) \right]$$
+
+  The goal is to design algorithms with regret that grows sub-linearly with $T$, implying that the agent's average performance converges to the optimum.
+
+- **PAC (Probably Approximately Correct):** Measures sample efficiency. A PAC algorithm guarantees that with high probability ($>1-\delta$), it will output a near-optimal policy ($\varepsilon$-sub-optimal) after a finite number of time steps. The focus is on the sample complexity required to find one good policy.
+
+### 7.3.2 Upper Bounds on Performance
+
+Theoretical bounds quantify the performance of leading online algorithms.
+
+| Setting | Algorithm | Regret / Sample Complexity |
+|---------|-----------|---------------------------|
+| Tabular, Horizon $H$ | **UCB-VI** | $\tilde{\mathcal{O}}\left(\sqrt{H S A T}\right)$ |
+| Communicating MDP, Diameter $D$ | **REGAL-KL / UCRL2** | $\tilde{\mathcal{O}}\left(D S \sqrt{A T}\right)$ |
+| Linear MDP | **Lin-UCB-VI** | $\tilde{\mathcal{O}}\left(d \sqrt{T}\right)$ |
+
+These rates are known to be **tight**, matching the minimax lower bounds and confirming that these algorithms are provably efficient. The regret typically scales with the square root of the total time steps $T$.
+
+### 7.3.3 Core Exploration Strategies
+
+Efficient online learning relies on sophisticated exploration strategies.
+
+| Principle | Example Algorithm | Theoretical Lever |
+|-----------|-------------------|-------------------|
+| **Optimism in the Face of Uncertainty** | UCB, RLSVI | Value estimates are boosted by an uncertainty bonus (confidence ellipsoids), encouraging exploration of actions with uncertain but potentially high outcomes. |
+| **Posterior Sampling** | PSRL (Posterior Sampling RL) | The agent maintains a posterior distribution over possible MDPs. In each episode, it samples one MDP from this posterior and follows the optimal policy for that sample. Analyzed via Thompson sampling regret decomposition. |
+| **Entropy Regularization** | Soft-Actor-Critic | An entropy bonus is added to the objective, encouraging policies that are as random as possible while still achieving high rewards, which naturally promotes exploration. Analyzed via mirror descent. |
+
+### 7.3.4 Converting PAC Guarantees to Regret Bounds
+
+The PAC and Regret frameworks are closely linked. A standard reduction shows that an $(\varepsilon, \delta)$-PAC algorithm with a polynomial sample complexity $N$ can be converted into an algorithm with a bounded regret of $O(\varepsilon T + N)$. This is achieved by running the PAC algorithm in episodes, using its learned policy, and periodically restarting to refine it, thereby balancing learning with deployment.
+
+## 7.4 Cross-Regime Summary
+
+The three regimes can be summarized by the information they assume, the core challenges they present, and the metrics by which they are judged.
+
+| Regime | Data Available | Core Difficulty Metric | Representative Rate (Best ↔ Worst Case) |
+|--------|----------------|------------------------|----------------------------------------|
+| **Planning** | Full Model $(P,R)$ | State Space Size $S$ | $\text{poly}(S)$ time (via DP) |
+| **Batch RL** | Fixed Dataset (Size $N$) | Concentrability $C^*$ | Error scales as $\Theta(C^* / \sqrt{N})$ |
+| **Online RL** | Interactive Learning | Horizon $H$, time $T$ | Regret scales as $\tilde{\Theta}(\sqrt{HSAT})$ or $\tilde{\Theta}(d\sqrt{T})$ |
+
+Each regime imposes a more demanding **information structure** as we move down the table: from complete knowledge (Planning), to passive, fixed data (Batch RL), to active learning under uncertainty (Online RL). This structure directly shapes the primary theoretical challenges and the design of effective algorithms.
+
+# 8. Learning Under Uncertainty
+
+## 8.1 The Fundamental Challenge
+
+**Central Problem:** How can an agent learn optimal policies when transition dynamics $P$ and rewards $R$ are unknown?
+
+This necessitates **exploration**—sometimes sacrificing immediate reward for information gathering.
+
+## 8.2 The Identifiability Barrier
+
+**Theorem 8.1 (Identifiability Barrier):** If two MDPs differ only in $P(\cdot \mid s,a)$ for some state-action pair $(s,a)$, any algorithm avoiding $(s,a)$ with probability 1 produces identical trajectories in both environments and cannot be simultaneously optimal.
+
+*Proof*  Construct two environments $\mathcal M_0,\mathcal M_1$ identical except for the transition from a single state–action pair $(\bar s,\bar a)$, toggling between a high‑value and low‑value next‑state.  Any algorithm that avoids $(\bar s,\bar a)$ w.p. 1 induces identical trajectory distributions under both MDPs, hence cannot distinguish them.  By Le Cam’s two‑point method, any learner must suffer at least $\Omega(T)$ regret in one of the two MDPs. ∎
+
+**Implication.**  Successful learning requires deliberate exploration; see also minimax lower bounds of Jaksch et al. (2010) and Dann & Brunskill (2015).
+
+### 8.2.1 Minimax Regret Lower Bounds (Tabular MDPs)
+
+Let $H$ be the episode length (finite‑horizon setting) and $T=KH$ the total number of time‑steps across $K$ episodes.  
+
+> **Theorem 8.2 (Minimax Regret, finite horizon).**  
+> For any RL algorithm $\mathcal A$ and any $S\ge2$, $A\ge2$, $H\ge2$, there exists an MDP with $S$ states, $A$ actions, horizon $H$, and rewards in $[0,1]$ such that the (expected) regret satisfies  
+> $$ 
+> \mathbf E\bigl[\text{Regret}(T \mathcal A)\bigr] \ge c\sqrt{HSAT},
+> $$ 
+> where $c>0$ is a universal constant.  This lower bound is information‑theoretic and matches the upper bounds of **UCB‑VI** (Azar et al., 2017) and later refinements *up to logarithmic factors*.
+
+For the undiscounted, communicating (average‑reward) case with diameter $D$, an analogous bound  
+$\Omega\bigl(D\sqrt{S A T}\bigr)$ is due to Jaksch et al. (2010).
+
+### 8.2.2 Linear Feature MDPs
+
+In a **linear MDP** the transition kernel admits the factorisation  
 $$
-J(\pi)=\frac{1}{1-\gamma} \mathbb E_{s\sim d_\mu^\pi}[R_\pi(s)]
+P(\cdot\mid s,a)=\sum_{i=1}^{d}\phi_i(s,a) P_i(\cdot),
 $$
+with known features $\phi\in[0,1]^d$, $\sum_i\phi_i=1$, and unknown base measures $P_i$.
 
-### Alternative Performance Criteria
+> **Theorem 8.3 (Minimax Regret, linear setting).**  
+> For every algorithm and dimension $d\ge 2$ there exists a linear MDP with $d$ features such that  
+> $$ 
+> \mathbf E[\text{Regret}(T)] \ge c d \sqrt{T},
+> $$ 
+> matching the $\tilde{\mathcal O}(d\sqrt{T})$ upper bounds of **OFU‑LSTD** and **Lin‑UCB‑VI** up to $\log T$ terms.  (He et al., 2023; Huang et al., 2025)
 
-Beyond discounted return, other objectives include:
+Thus *dimension* replaces the $SA$ factor in tabular problems, preserving the $\sqrt{T}$ scaling.
+
+### 8.2.3 General Function Approximation & Eluder Dimension
+
+For classes $\mathcal Q$ of candidate $Q$‑functions, Russo & Van Roy (2013) introduced the **eluder dimension** $\text{dim}_{\text{el}}(\mathcal Q)$ as the intrinsic measure of exploratory difficulty.  
+
+Jin et al. (2021) proved a lower bound
+$$
+\Omega \bigl(\text{dim}_{\text{el}}(\mathcal Q)\sqrt{T}\bigr),
+$$
+which recovers the $d\sqrt T$ and $\sqrt{S A T}$ results when $\mathcal Q$ is linear or tabular, respectively.  Tight upper bounds are only known for linear and *certain* kernelised classes, leaving deep‑network function approximation an open frontier.
+
+### 8.2.4 Heavy‑Tailed Rewards
+
+When rewards have finite $(1+\alpha)$‑th moment ($0<\alpha\le1$) but *infinite variance*, Huang et al. (2025) show a *minimax* regret lower bound  
+$$
+\Omega\bigl(dT^{\tfrac{1}{1+\alpha}}\bigr),
+$$
+achieved (up to logs) by *robust* Catoni‑type estimators.  Hence the classical $\sqrt{T}$ rate is unattainable without second‑moment control.
+
+### 8.2.5 Adversarial & Non‑Stationary Environments
+
+For **adversarial linear mixture MDPs** with *bandit* feedback, a recent dynamic‑regret lower bound  
+$\Omega\bigl(d^{1/2}(K+P_T)^{1/2}\bigr)$ (where $P_T$ is the path‑variation) was established by Wang et al. (NeurIPS 2023), matching their algorithm up to constants.  These results emphasise the extra cost of handling *non‑stationarity*.
+
+### Practical Take‑aways
+
+| Setting | Minimax lower bound | Tight up to… | Key reference |
+|---------|--------------------|--------------|---------------|
+| Tabular, horizon $H$ | $c\sqrt{HSA T}$ | $\log T$ | Jaksch 10; Azar 17 |
+| Communicating, diameter $D$ | $cD\sqrt{SA T}$ | constants | Jaksch 10 |
+| Linear MDP | $cd\sqrt{T}$ | $\log T$ | He 23 |
+| Heavy‑tailed | $cdT^{1/(1+\alpha)}$ | $\log T$ | Huang 25 |
+| Adversarial linear | $c\sqrt{d(K+P_T)}$ | constants | Wang 23 |
+
+Any algorithm claiming *order‑optimality* must hit these fundamental barriers; otherwise, a matching lower‑bound construction disproves the claim.
+
+
+## 8.3 Applications of the Mathematical Framework
+
+**Value Functions and Conditioning:**
+$$V_t^\pi := \mathbb{E}^\pi[G_t | \mathcal{F}_t]$$
+
+The conditioning on $\mathcal{F}_t$ ensures value functions depend only on available information.
+
+**Martingale Theory:** In temporal difference learning:
+$$\mathbb{E}[\delta_t | \mathcal{F}_t] = 0$$
+
+This martingale property is crucial for convergence proofs.
+
+**Stopping Times:** A random time $\tau$ is a stopping time if $\{\tau \leq t\} \in \mathcal{F}_t$, ensuring decisions depend only on available information.
+
+# 9. Extensions and Alternative Frameworks
+
+## 9.1 Alternative Performance Criteria
+
+Beyond discounted return:
 - **Finite-horizon return:** $G^H_t = \sum_{k=0}^{H-1} R_{t+k+1}$
-- **Average reward:** $\lim_{T\to\infty}\frac{1}{T}\sum_{t=1}^{T}R_t$
+- **Average reward:** $\displaystyle\lim_{T\to\infty}\frac{1}{T}\sum_{t=1}^{T}R_t$
 - **Cumulative regret:** $\text{Regret}(T) = \sum_{t=0}^{T-1}(V^*(S_t) - R_t)$
 
-### Theoretical Considerations
+> **Remark 9.1 (Ergodicity Conditions)**  
+> Average‑reward optimality presumes the Markov chain under any stationary policy is **positive Harris recurrent** with a unique invariant distribution $\eta_\pi$.  Under these conditions the long‑run average return exists a.s.\ and equals $\int_S R_\pid\eta_\pi$.  See Meyn & Tweedie (2009) for recurrence theory.
 
-**Key theoretical results:**
-- **Sufficiency of Markovian policies:** For MDPs, the current state is a sufficient statistic—optimal policies need only depend on current state, not full history
-- **Deterministic optimality:** While policies can be stochastic, a deterministic optimal policy always exists
-- **Existence of optimal policies:** Under regularity conditions (continuous bounded rewards, continuous transitions, compact action spaces), measurable optimal policies are guaranteed to exist
 
-**Simplifying assumptions** commonly made to avoid measure-theoretic complexity:
-1. **Finitude:** State and action spaces are finite
-2. **Full observability:** Agent has direct access to current state
-
-## The Three Domains of Reinforcement Learning
-
-The field can be conceptualized as three overlapping domains addressing different aspects of sequential decision-making:
-
-![Venn diagram](https://raw.githubusercontent.com/13ryanC/13ryanC.github.io/main/content/posts/RLtheory/images/venn_diagram.png)
-
-### 1. Planning (Model-Based Control)
-
-**Setting:** Known transition kernel $P(s' \mid s,a)$ and reward function $R(s,a)$
-
-**Objective:** Determine optimal actions without further environment interaction
-
-**Key approaches:**
-- **Dynamic programming:** Solving Bellman optimality equation for closed-loop optimal policy
-- **Trajectory optimization:** Open-loop optimization of action sequences $(a_{0:H-1})$ ignoring feedback during execution  
-- **Online search:** Look-ahead methods (e.g., MCTS, AlphaZero) that replan at each step under computational constraints
-
-**Computational complexity:** Even with perfect models, exact planning is computationally hard (P-complete for finite MDPs; PSPACE-hard for POMDPs).
-
-### 2. Batch (Offline) RL
-
-**Setting:** Static dataset $\mathcal{D} = \{(s_i, a_i, r_i, s'_i)\}$ from unknown behavior policy $\mu$, with no further interaction allowed
-
-**Core challenge:** **Extrapolation error** - learned policy $\pi$ may query state-action pairs outside $\mu$'s support
-
-**Solution approaches:**
-- **Behavioral constraints:** Constraining $\pi$ near $\mu$ (behavior cloning, KL penalties)
-- **Pessimistic value estimation:** Learning conservative value functions with uncertainty penalties (Conservative Q-Learning)
-- **Importance sampling:** Density-ratio estimation for off-policy correction
-
-### 3. Online RL (Interactive Learning)
-
-**Protocol:** At each time-step $t = 0, 1, \ldots$:
-1. Agent observes state $s_t$
-2. Chooses action $a_t \sim \pi_t(\cdot \mid H_t)$ 
-3. Environment yields reward $r_t$ and next state $s_{t+1}$
-4. Agent updates parameters, producing $\pi_{t+1}$
-
-**Central challenge:** **Exploration-exploitation trade-off** - gathering informative data while maximizing reward
-
-**Exploration strategies:**
-- **Random exploration:** ε-greedy, Boltzmann exploration
-- **Optimism under uncertainty:** UCB, RLSVI
-- **Posterior sampling:** Thompson sampling, PSRL
-
-**Learning paradigms:**
-- **On-policy:** Updates use current policy data (e.g., PPO)
-- **Off-policy:** Reuses past trajectories with importance sampling corrections (e.g., Q-learning, DDPG)
-
-## The Central Challenge: Learning Under Uncertainty
-
-The fundamental RL problem: *How can an agent learn an optimal policy when transition dynamics $P$ and rewards $R$ are unknown?*
-
-This necessitates **exploration**—sometimes sacrificing immediate reward to gather information for future exploitation. The theoretical limit is captured by the **identifiability barrier**:
-
-> **Identifiability Barrier**
-> 
-> If two MDPs differ only in $P(\cdot \mid s,a)$ for some state-action pair $(s,a)$, any algorithm avoiding $(s,a)$ with probability 1 produces identical trajectories in both environments and cannot be simultaneously optimal.
-
-Success is measured by how efficiently agents balance exploration and exploitation across diverse environments, guided only by self-generated trajectory data.
-
-### Extensions and Alternative Frameworks
-
-**Common MDP extensions:**
+## 9.2 MDP Extensions
 
 | Framework | Key Distinction | New Challenges |
 |-----------|-----------------|----------------|
@@ -240,12 +1019,53 @@ Success is measured by how efficiently agents balance exploration and exploitati
 | **CMDP** | Constrained optimization | Feasible-set identification; dual learning |
 | **Multi-objective RL** | Vector-valued rewards | Preference elicitation; Pareto optimality |
 
-Each framework preserves the core state → action → reward structure while addressing specific real-world complexities.
+# 10. Summary and Synthesis
 
-## References
+## 10.1 Hierarchical Structure
 
-* RL Theory. (2021, January 19). *Lecture 1 (2021-01-12)* [Video]. YouTube. [http://www.youtube.com/watch?v=0oJmSULoj3I](http://www.youtube.com/watch?v=0oJmSULoj3I)
-* RL Theory. (2022, January 9). *Lecture 1 (2022-01-05)* [Video]. YouTube. [http://www.youtube.com/watch?v=rjwxqcVrVws](http://www.youtube.com/watch?v=rjwxqcVrVws)
-* RL Theory. (2025, February 5). *The fundamental theorem* [Lecture notes]. [https://rltheory.github.io/w2021-lecture-notes/planning-in-mdps/lec2/](https://rltheory.github.io/w2021-lecture-notes/planning-in-mdps/lec2/)
-* RL Theory. (2025, February 5). *Introductions* [Lecture notes]. [https://rltheory.github.io/lecture-notes/planning-in-mdps/lec1/](https://rltheory.github.io/lecture-notes/planning-in-mdps/lec1/)
-* Jiang, N. (2024, September 27). *MDP preliminaries* [Lecture notes]. [https://nanjiang.cs.illinois.edu/files/cs542f22/note1.pdf](https://nanjiang.cs.illinois.edu/files/cs542f22/note1.pdf)
+The mathematical framework builds systematically:
+1. **Finite spaces** → discrete $\sigma$-fields (computational tractability)
+2. **Single time-step** → product structure (compositional building blocks)
+3. **Infinite trajectories** → product $\sigma$-field (infinite-dimensional probability)
+4. **Cylinder sets** → generating system (finite-dimensional specifications)
+5. **Uniqueness** → $\pi-\lambda$ theorem (well-posed probability measures)
+
+## 10.2 Information and Causality
+
+The history filtration $(\mathcal{F}_t)$ formalizes:
+- **Non-anticipation:** Decisions cannot depend on future information
+- **Adaptation:** Processes are measurable with respect to available information
+- **Causality:** Mathematical structure enforces temporal causality
+
+## 10.3 Practical Implications
+
+| Concept | Mathematical Role | Practical Importance |
+|---------|------------------|---------------------|
+| Cylinder sets | Generate σ-field | Computational tractability |
+| History filtration | Define admissible policies | Enforce causality |
+| Coordinate processes | Canonical representation | Model-free analysis |
+| Uniqueness theorem | Well-posed measures | Consistent probability models |
+
+## 10.4 Common Misconceptions
+
+**Misconception 1:** "Why not include $A_t$ in $\mathcal{F}_t$?"
+- **Answer:** This would assume the agent knows the action before choosing it, violating causality.
+
+**Misconception 2:** "Is this the same as the canonical filtration?"
+- **Answer:** No. The canonical filtration would include $A_t$ at time $t$. Our history filtration respects decision-making timing.
+
+**Misconception 3:** "Why not use topological methods?"
+- **Answer:** For finite spaces, measure theory provides the most natural framework without unnecessary complexity.
+
+# 11. Conclusion
+
+This unified mathematical framework provides the rigorous foundation for reinforcement learning, ensuring that all constructions respect causality and information constraints while maintaining computational tractability. The measure-theoretic approach, combined with the MDP formalism, creates a principled foundation for analyzing learning algorithms and their convergence properties in sequential decision-making under uncertainty.
+
+The framework's power lies in its ability to bridge abstract mathematical concepts with practical algorithmic considerations, providing both theoretical understanding and computational guidance for the design of intelligent agents operating in uncertain environments.
+
+# Appendix A: Analytic Sets and Measurable Selection
+
+Many RL proofs tacitly assume the existence of measurable maximisers (e.g.\ the $\arg\max$ in Bellman optimality).  In general Polish spaces this follows from the **Jankov–von Neumann measurable selection theorem**, which states that if $G\subseteq X\times Y$ is analytic with non‑empty vertical sections, then there exists a universally measurable selector $f:X\to Y$ such that $(x,f(x))\in G$.  This guarantees the existence of deterministic, universally measurable optimal policies when $A$ is compact and $R,P$ are continuous in $(s,a)$.
+
+Universal measurability matters because Bellman operators may map Borel functions outside the Borel σ‑field; working in the universal completion avoids pathological counter‑examples.
+
