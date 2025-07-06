@@ -44,12 +44,13 @@ image: /assets/images/card3.png
     * 2.2.1. Understanding Divergence: Off-policy learning, function approximation, and bootstrapping
     * 2.2.2. Baird's Star Counterexample and Analysis
 * **2.3. Statistical Toolkit: Concentration Inequalities, Uniform Convergence, and Martingales**
-    * 2.3.1. Concentration: Hoeffding, Bernstein, Azuma–Hoeffding (Martingales)
+    * 2.3.1. Concentration of Measure: Hoeffding, Bernstein, Azuma–Hoeffding (Martingales)
     * 2.3.2. Self-Normalised Bounds for Adaptive Data (Elliptical Potential Lemma)
     * 2.3.3. Uniform Convergence: Covering Numbers, Rademacher Complexity, and Chaining
-* **2.4. Error Decomposition: Approximation, Estimation, and Propagation**
+* **2.4. Error Decomposition: Structural, Data‑Driven, Algorithmic, and Propagated Errors**
     * 2.4.1. The Core Decomposition: Bias-Variance and Approximation-Estimation Trade-offs
-    * 2.4.2. Bellman Error Propagation and Stability Analysis
+    * 2.4.2  Algorithmic & Numerical Errors: Optimisation Limits and Hardware Precision
+    * 2.4.3  Bellman Error Propagation and Stability Analysis
 
 ---
 
