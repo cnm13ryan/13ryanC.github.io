@@ -11,7 +11,9 @@ image: /assets/images/card3.png
 
 # **Comprehensive Reinforcement Learning: Theory and Practice**
 
-## **1. MDP Foundations & Optimality**
+---
+
+## **Chapter 1: MDP Foundations & Optimality**
 
 ### **1.1. Mathematical Foundations**
 - **1.1.1.** Measure-theoretic set-up
@@ -32,11 +34,11 @@ image: /assets/images/card3.png
 - **1.3.5.** Greedy policies and the Fundamental Theorem
 
 ### **1.4. Concentration Inequalities**
-- **1.4.1.** Self-normalised concentration inequalities (Elliptical Potential, Bernstein)
+- **1.4.1.** Self-normalised concentration inequalities (**Elliptical Potential**, **Bernstein**)
 
 ---
 
-## **2. Exact Dynamic Programming**
+## **Chapter 2: Exact Dynamic Programming**
 
 ### **2.1. Value Iteration Theory**
 - **2.1.1.** Fundamental Theorem of Dynamic Programming (finite MDPs)
@@ -54,14 +56,14 @@ image: /assets/images/card3.png
 - **2.1.13.** $\delta$-$\varepsilon$ error-control summary
 
 ### **2.2. Policy Iteration Analysis**
-- **2.2.1.** Definition of the Policy Iteration (PI) algorithm
+- **2.2.1.** Definition of the Policy Iteration (**PI**) algorithm
 - **2.2.2.** Advantage function and the Performance-Difference Identity
 - **2.2.3.** Geometric-Progress Lemma
 - **2.2.4.** Geometric convergence of value error
 - **2.2.5.** Strict-Progress Lemma (sub-optimal action elimination)
 - **2.2.6.** Overall runtime bound (Scherrer)
 - **2.2.7.** Value Iteration vs. Policy Iteration comparison
-- **2.2.8.** Proof that PI is generally faster than VI
+- **2.2.8.** Proof that **PI** is generally faster than **VI**
 - **2.2.9.** Mixing rates and span-seminorm contraction
 - **2.2.10.** Upper and lower runtime bounds (Ye; Feinberg-Huang-Scherrer)
 - **2.2.11.** Measure-theoretic view of occupancy-measure projection
@@ -73,7 +75,7 @@ image: /assets/images/card3.png
 
 ---
 
-## **3. Online Planning in Discounted MDPs**
+## **Chapter 3: Online Planning in Discounted MDPs**
 
 ### **3.1. Problem Formulation**
 - **3.1.1.** Motivation (curse of dimensionality; local planning)
@@ -97,74 +99,119 @@ image: /assets/images/card3.png
 - **3.3.7.** Parameter selection for $\delta$-soundness: choosing $m, H, \zeta$
 
 ### **3.4. Extensions & Applications**
-- **3.4.1.** Open questions and extensions (e.g., links to MCTS)
+- **3.4.1.** Open questions and extensions (e.g., links to **MCTS**)
 - **3.4.2.** Model-Predictive Control with Learned Simulators
-    - **3.4.2.1.** Cross-Entropy Method (CEM) and trajectory optimisation
-    - **3.4.2.2.** TD-MPC algorithm and stability analysis
-    - **3.4.2.3.** Comparative runtime vs. MCTS
+    - **3.4.2.1.** Cross-Entropy Method (**CEM**) and trajectory optimisation
+    - **3.4.2.2.** **TD-MPC** algorithm and stability analysis
+    - **3.4.2.3.** Comparative runtime vs. **MCTS**
 
 ---
 
-## **4. Value-Function Approximation & Approximate Policy Iteration**
+## **Chapter 4: Value–Function Approximation, Policy Evaluation & Iteration**
+*A unified outline for a 2025 graduate‑level treatment*
 
-### **4.1. Value-Function Approximation**
-- **4.1.1.** Approximate Universal Value-Function Realizability
-- **4.1.2.** Approximate Policy Evaluation: Monte Carlo rollout + weighted Least Squares
-- **4.1.3.** Extrapolation-error control in weighted Least Squares
-- **4.1.4.** Kiefer–Wolfowitz Theorem (G-optimal design)
-- **4.1.5.** Corollary: Extrapolation control via optimal design
-- **4.1.6.** LSPE-G high-probability error bound
+### **4.0. Preliminaries & Notation**
+- **4.0.1.** Problem setting: discounted MDP $\langle\mathcal S,\mathcal A,P,R,\gamma\rangle$
+- **4.0.2.** Norms, concentrability, error decomposition (approximation + estimation + propagation)
+- **4.0.3.** Function classes: tabular, linear, kernel/RKHS, sparse, deep nets
+- **4.0.4.** Statistical toolbox: Hoeffding/Bernstein, covering numbers, Rademacher, martingales
 
-### **4.2. Approximate Policy Iteration (API)**
-- **4.2.1.** Geometric Progress Lemma with approximate improvement
-- **4.2.2.** API theorem: $\frac{\gamma^k}{1-\gamma} + \varepsilon$ bounds
-- **4.2.3.** API with approximate action-value functions (corollary)
-- **4.2.4.** Least-Squares Policy Iteration (LSPI) algorithm and guarantees
+### **4.1. Value‑Function Approximation**
+- **4.1.1.** Realizability & $\varepsilon$‑universal function classes (Deadly Triad motivation)
+- **4.1.2.** Monte‑Carlo evaluation & variance‑reduction (control variates, IS/WIS)
+- **Temporal‑Difference family**
+    - **4.1.3.** Single‑step TD (**TD(0)**, **GTD2**, **TDC**)
+    - **4.1.4.** Multi‑step & eligibility‑trace TD (**TD($\lambda$)**, **Tree‑Backup**, **Retrace($\lambda$)**, **V‑trace**)
+    - **4.1.5.** Variance‑reduced / emphatic TD (**ETD**, $\sigma$-$\lambda$)
+- **Least‑Squares & residual methods**
+    - **4.1.6.** **LSTD($\lambda$)**, **LSPE**, **LS‑TD**; incremental vs. batch solvers
+    - **4.1.7.** Residual‑minimisation & saddle‑point framing (**Minimax TD**, **GTD‑MP**)
+- **Extrapolation & design**
+    - **4.1.8.** Extrapolation error; $\kappa$‑factor; Kiefer–Wolfowitz G‑optimality (linear critics)
+    - **4.1.9.** Beyond linear: coverage coefficients, concentrability, KW limitations
+- **Non‑linear critics & generalisation**
+    - **4.1.10.** Neural‑network critics, NTK view, over‑parameterised convergence
+    - **4.1.11.** Generalisation bounds: covering‑number & Rademacher analyses
+    - **4.1.12.** Distributional value functions & risk measures (**C51**, **QR‑DQN**, **CVaR**)
+    - **4.1.13.** Off‑policy value estimation & OPE (**Per‑Decision IS**, **DR**, **MAGIC**)
+    - **4.1.14.** Safe / verified evaluation (Lyapunov critics, certified bounds)
 
-### **4.3. State Abstractions**
-- **4.3.1.** Motivation (sample sharing, dimensionality reduction)
-- **4.3.2.** Statistical trade-off: sample size vs. approximation error
-- **4.3.3.** Exact abstraction hierarchy ($\pi^*$, $Q^*$, model-irrelevance)
-- **4.3.4.** Key theorems on the hierarchy and error bounds
-- **4.3.5.** Improvements and variants (homomorphisms, utile distinctions)
-- **4.3.6.** Approximate abstractions and bisimulation metrics ($\varepsilon$-$\pi^*$, $\varepsilon$-$Q^*$, $\varepsilon_R$, $\varepsilon_P$ bisimulation)
-    - **4.3.6.1.** **Action-bisimulation** (Rudolph et al., 2024)
-    - **4.3.6.2.** **Effect-equivalent abstraction** (Mavor-Parker et al., 2025)
-- **4.3.7.** Bounding value loss for approximate abstractions
-- **4.3.8.** Finite-sample analysis ($n_\phi(D)$, Hoeffding bound)
-    - **4.3.8.1.** **Encoder bias term**: Bounding bias from a learned encoder $\hat{\phi}$ with $\|\hat{\phi} - \phi^*\|_\infty \le \varepsilon_{\text{enc}}$.
-- **4.3.9.** Bridging symbolic and learned abstractions
-    - **4.3.9.1.** Motivation and open problem statement
-    - **4.3.9.2.** **Self-supervised Markov latent-state discovery** (Sobal et al., 2025)
-    - **4.3.9.3.** Iterative *refine–plan* pipeline
-    - **4.3.9.4.** Conjectured regret bound: $\tilde{O}\bigl(H\sqrt{dT} + \frac{\varepsilon_{\text{enc}}}{1-\gamma}\bigr)$
+### **4.2. Approximate Policy Improvement & Iteration**
+- **4.2.1.** Policy‑improvement operators: greedy, $\varepsilon$‑greedy, soft‑max, entropy regularisation
+- **4.2.2.** Geometric progress lemma with additive error
+- **4.2.3.** API master theorem:
+    $$\|V^{\pi_k}-V^*\|_\infty \le \frac{2\gamma}{(1-\gamma)^2}\varepsilon + \frac{\gamma^k}{1-\gamma}V_{\max}$$
+- **4.2.4.** Classification‑based PI (**RCPI**, **DAGGER**); VC‑dimension sample bounds
+- **4.2.5.** Conservative / regularised PI (**CPI**, **DPI**, **TRPO**, **MPO**)
+- **4.2.6.** Least‑Squares Policy Iteration (**LSPI**): algorithm & $\tilde O\bigl(\frac{d}{(1-\gamma)^3\varepsilon^2}\bigr)$ sample bound
+- **Actor–Critic family**
+    - **4.2.7.** Compatible function approximation & natural gradients (**NAC**, **A3C**)
+    - **4.2.8.** Deterministic Policy Gradient methods (**DDPG**, **TD3**)
+    - **4.2.9.** Soft / entropy‑regularised actor–critic (**SAC**, $\alpha$‑tuning)
+- **Advanced topics**
+    - **4.2.10.** Distribution shift & concentrability in API; over‑estimation bias
+    - **4.2.11.** Risk‑sensitive & distributional PI (**CVaR‑PG**, distortion risk)
+    - **4.2.12.** Safe & verified policy improvement (Lyapunov constraints, barrier functions)
+
+### **4.3. State & Action Abstractions**
+- **4.3.1.** Motivation: sample sharing, transfer, planning acceleration
+- **4.3.2.** Exact abstraction hierarchy ($\pi^*$, $Q^*$, model‑irrelevance) & theorems
+- **4.3.3.** Approximate abstractions & bisimulation metrics
+    - **4.3.3.1.** $\varepsilon$-$\pi^*$ & $\varepsilon$-$Q^*$ abstractions
+    - **4.3.3.2.** Bisimulation, **action‑bisimulation** (Rudolph 2024), **effect‑equivalent abstraction** (Mavor‑Parker 2025)
+- **4.3.4.** Value‑loss bounds; Lipschitz & pseudo‑metric analyses
+- **4.3.5.** Finite‑sample complexity & encoder bias $\varepsilon_{\text{enc}}$
+- **4.3.6.** Symbolic $\leftrightarrow$ learned bridging
+    - **4.3.6.1.** Self‑supervised latent‑state discovery (Sobal 2025)
+    - **4.3.6.2.** Iterative *refine–plan* pipeline; conjectured regret $\tilde O\bigl(H\sqrt{dT}+\frac{\varepsilon_{\text{enc}}}{1-\gamma}\bigr)$
+- **4.3.7.** Action abstraction: options, skills, initiation–termination, homomorphisms
+- **4.3.8.** Group structure & utile distinctions
 
 ### **4.4. Offline / Batch Reinforcement Learning**
-- **4.4.1.** Motivation (logged data, safety, distribution shift, sample-efficiency)
-- **4.4.2.** Formal framework and assumptions (static dataset $\mathcal{D}$, behaviour policy $\beta$, realizability, Bellman-completeness, coverage $C$)
-- **4.4.3.** Core algorithm: **Fitted Q-Iteration (FQI)**
-- **4.4.4.** Error-analysis pipeline (uniform deviation, one-step error, propagation)
-- **4.4.5.** Pessimistic / Conservative algorithms (**CQL**, **OPAL**, **IQL**)
-- **4.4.6.** Robustness to corrupted or sub-optimal logs
-- **4.4.7.** Representation learning for Bellman completeness
-- **4.4.8.** Empirical benchmarks and practical guidelines (**D4RL-2025**, **MineRL-Offline**)
+- **4.4.1.** Motivation: safety, data reuse, distribution shift
+- **4.4.2.** Formal framework: static dataset $\mathcal D$, behaviour policy $\beta$, coverage $C$
+- **4.4.3.** Core control algorithms: Fitted Q‑Iteration (**FQI**), Fitted V‑Iteration
+- **4.4.4.** Offline policy evaluation (**OPE**): Fitted Q Evaluation (**FQE**), **IS/WIS**, **DR**, **MAGIC**
+- **4.4.5.** Error analysis pipeline: uniform deviation → one‑step error → propagation
+- **4.4.6.** Pessimistic & conservative control: **CQL**, **IQL**, **OPAL**
+- **4.4.7.** Distributionally‑robust offline RL: **ROMAN**, **DRO‑RL**, **OPPO**
+- **4.4.8.** Model‑based offline RL: **MOPO**, **COMBO**, pessimistic model rollouts
+- **4.4.9.** Robustness to corrupted or confounded logs
+- **4.4.10.** Representation learning for Bellman completeness & coverage
+- **4.4.11.** Benchmarks & evaluation protocols: **D4RL‑2025**, **MineRL‑Offline**, **RL‑Unplugged**
 
-### **4.5. Latent-World-Model Learning**
-- **4.5.1.** Recurrent State-Space Models (**RSSM**) and the ELBO
-- **4.5.2.** **Dreamer** variants (V2, V3) and KL balancing
-- **4.5.3.** Representation capacity and empirical scaling laws
+### **4.5. Latent‑World Models & Model‑Based Approximate RL**
+- **4.5.1.** Variational recurrent state‑space models (**RSSM**, **VRNN**) & ELBO
+- **4.5.2.** **Dreamer** family (V2, V3): latent imagination & KL balancing
+- **4.5.3.** Planning in learned latent spaces: **CEM**, gradient‑based shooting, **MuZero**
+- **4.5.4.** Scaling laws & generalist models (parameter–performance curves)
+- **4.5.5.** Uncertainty‑aware models: ensembles, Bayesian **RSSM**, epistemic vs aleatoric split
+- **4.5.6.** Hybrid model‑based / model‑free synergy: Latent **TD($\lambda$)**, cross‑consistency losses
+
+### **4.6. Safety, Verification & Compliance**
+- **4.6.1.** Safe exploration: reachability, shielded RL, conservative baselines
+- **4.6.2.** Lyapunov‑based critics & barrier‑function constraints
+- **4.6.3.** Verified approximate value functions (interval arithmetic, SMT)
+- **4.6.4.** Risk constraints: **CVaR**, chance‑constrained RL, robust MDPs
+
+### **4.7. Further Directions & Open Problems**
+- **4.7.1.** Approximate RL in POMDPs (predictive state representations, **CSC‑RL**)
+- **4.7.2.** Multi‑agent approximate RL (**CTDE**, mean‑field critics, differential games)
+- **4.7.3.** Scalable exploration & representation (**RND**, Laplacian embeddings, intrinsic control)
+- **4.7.4.** Hardware & systems (neural compression, GPU/TPU kernels for LS methods)
+- **4.7.5.** Human feedback & reward modelling (**RLHF**, preference‑based critics)
 
 ---
 
-## **5. Sampling and Computational Complexity**
+## **Chapter 5: Sampling and Computational Complexity**
 
 ### **5.1. Foundations & State-Representation Learning (SRL)**
 - **5.1.1.** Markov Decision Processes (recap)
 - **5.1.2.** Feature maps $\phi$: from hand-crafted bases to learned encoders $\phi_\psi$
 - **5.1.3.** Six SRL families (metric, contrastive, augmentation, world-model, reconstruction, auxiliary-task)
-- **5.1.4.** Evaluation protocols (DMControl-100k, Atari-100k, ProcGen)
+- **5.1.4.** Evaluation protocols (**DMControl-100k**, **Atari-100k**, **ProcGen**)
 - **5.1.5.** Norms and error metrics ($\|\cdot\|_\infty$, $\|\cdot\|_2$, bisimulation-metric)
-- **5.1.6.** Pre-computed core sets and LSPI recap
+- **5.1.6.** Pre-computed core sets and **LSPI** recap
 
 ### **5.2. Probabilistic Tools for Sampling Analysis**
 - **5.2.1.** Hoeffding's inequality
@@ -225,112 +272,326 @@ image: /assets/images/card3.png
 
 ---
 
-## **6. Robust & Safe Model-Based Reinforcement Learning**
+## **Chapter 6: Robust & Safe Model‑Based Reinforcement Learning**
+*Comprehensive Table of Contents (July 2025)*
 
-### **6.1. Distributionally Robust MDPs**
-- **6.1.1.** KL/TVD ambiguity sets and robust Bellman operators
-- **6.1.2.** Contraction and value-error guarantees under robustness
+### **6.0. Preface & Problem Setting**
+- **6.0.1.** Motivation, Applications, Stakes
+- **6.0.2.** Scope: Model‑Free vs Model‑Based Robust/Safe RL
+- **6.0.3.** Notation & Symbol Table
+- **6.0.4.** Running Example Preview (Quadrotor in Gusty Wind)
 
-### **6.2. $\mathcal{L}_1$-Adaptive Model-Based Control**
-- **6.2.1.** Online parameter estimator and adaptation law
-- **6.2.2.** Bounded tracking-error theorem
+### **6.1. Mathematical Foundations**
+- **6.1.1.** Markov Decision Processes & Constrained MDPs Recap
+- **6.1.2.** Types of Uncertainty (Epistemic / Aleatoric; Parametric / Structural)
+- **6.1.3.** Safety Formalisms (Hard constraints, Reach‑Avoid, Viability, Risk/CVaR)
+- **6.1.4.** Robustness Paradigms (Worst‑Case, Bayesian, DRO, Risk‑Sensitive)
+- **6.1.5.** Robust POMDPs & Belief‑Space Safety
+    - *Implementation:* Particle‑filter belief updates; Chance‑constrained belief MPC
 
-### **6.3. Ensemble Uncertainty & Risk Metrics**
-- **6.3.1.** Epistemic–aleatoric decomposition
-- **6.3.2.** CVaR and other coherent risk measures
+### **6.2. Model Learning under Uncertainty**
+- **6.2.1.** Parametric System Identification
+    - *Algorithms:* Least‑Squares, Koopman lifting, NN dynamics
+- **6.2.2.** Bayesian & Ensemble Methods
+    - *Algorithms:* Gaussian Processes, BNNs, Deep Ensembles
+- **6.2.3.** Out‑of‑Distribution & Covariate‑Shift Detection
+- **6.2.4.** Finite‑Sample & Uniform‑Convergence Guarantees
+- **6.2.5.** Partial‑Observation Model Learning
+    - *Algorithms:* Variational Auto‑Encoders for latent state discovery
 
-### **6.4. Safe Model-Predictive Control**
-- **6.4.1.** Terminal set and tube MPC with learned dynamics
-- **6.4.2.** Constraint-tightening for probabilistic safety
+### **6.3. Distributionally Robust Planning**
+- **6.3.1.** Ambiguity‑Set Construction ($f$-divergence, Wasserstein, Moment balls)
+- **6.3.2.** Robust Bellman Operators & Dynamic Programming
+- **6.3.3.** Solution Algorithms
+    - *Algorithms:* Robust Value/Policy Iteration; DRO Linear Programming; Ambiguous Policy Gradient
+- **6.3.4.** Sample‑Complexity & Performance Bounds
+- **6.3.5.** Interplay with Risk Metrics
 
-### **6.5. Runtime Monitoring & Verification**
-- **6.5.1.** Temporal-logic specifications
-- **6.5.2.** Online falsification and fallback policies
+### **6.4. Risk, Adversarial & Uncertainty Quantification**
+- **6.4.1.** Epistemic–Aleatoric Decomposition
+- **6.4.2.** Coherent Risk Measures (Variance, Entropic, CVaR, Spectral)
+- **6.4.3.** Distributional RL & Quantile Regression
+- **6.4.4.** Uncertainty‑Aware Exploration vs Pessimism
+- **6.4.5.** Adversarial Perturbations & Security Robustness
+    - *Topics:* Policy poisoning, reward hacking, robust training defenses
+
+### **6.5. Adaptive & Meta‑Adaptive Control**
+- **6.5.1.** Online Parameter Estimation Laws
+- **6.5.2.** $\mathcal{L}_1$ Adaptive Control Architecture
+    - *Implementation:* Low‑pass filter tuning; Robust stability proofs
+- **6.5.3.** Bounded Tracking‑Error Theorems
+- **6.5.4.** Integration with RL Critics / Actors
+- **6.5.5.** Meta‑Adaptive Safe Control
+    - *Topics:* Rapid system‑ID, context‑based policy adaptation
+
+### **6.6. Safe Model‑Predictive Control (MPC)**
+- **6.6.1.** Nominal, Robust & Stochastic MPC Taxonomy
+- **6.6.2.** Tube MPC & Invariant/Terminal Sets
+- **6.6.3.** Chance‑Constrained & CVaR‑MPC
+- **6.6.4.** Constraint Tightening with Learned Uncertainty
+- **6.6.5.** Real‑Time Optimisation & Warm‑Start Strategies
+
+### **6.7. Verification, Monitoring & Runtime Assurance**
+- **6.7.1.** Formal Specification Languages (LTL, STL, BLTL)
+- **6.7.2.** Reachability Analysis & Barrier Certificates
+- **6.7.3.** Shielding & Runtime Enforcement
+- **6.7.4.** Online Falsification & Counterexample Search
+- **6.7.5.** Fault Detection, Diagnosis & Recovery Policies
+
+### **6.8. Safe & Sample‑Efficient Exploration**
+- **6.8.1.** Confidence‑Based Safe Exploration (**PO‑CPS**, **C‑CBF**)
+- **6.8.2.** Opt‑in‑Uncertain vs Conservative Pessimism Trade‑off
+- **6.8.3.** Exploration in Continuous‐Control & High‑Dim Vision
+
+### **6.9. Offline Robust & Safe MBRL** *(New major section)*
+- **6.9.1.** Dataset Shift, Coverage & Support Mismatch
+- **6.9.2.** Offline Constrained & Distributionally Robust RL Algorithms
+    - *Algorithms:* **CAPS**, **ROOM**, **ROAM**, **OGSRL**
+- **6.9.3.** Heavy‑Tailed Rewards & Trajectory‑Level Safety
+- **6.9.4.** Offline‑to‑Online Fine‑Tuning with Safety Guarantees
+- **6.9.5.** Benchmark Suites for Offline Safety (e.g., **OSRL‑Bench**)
+
+### **6.10. Implementation & Scalability**
+- **6.10.1.** Software Frameworks & Auto‑Diff Toolchains
+    - *Tools:* PyTorch, JAX, CasADi, ACADOS
+- **6.10.2.** Parallel DP & GPU/TPU Acceleration
+- **6.10.3.** Numerical Robustness & Debugging Safety Violations
+- **6.10.4.** Resource‑Aware Real‑Time Deployment
+
+### **6.11. Multi‑Agent Robust & Safe RL** *(Promoted section)*
+- **6.11.1.** SafeMARL Formulations (**CMDP‑MARL**, Mean‑Field)
+- **6.11.2.** Robust Coordination & Communication under Uncertainty
+- **6.11.3.** Adversarial/Competitive Safety in MARL
+- **6.11.4.** Distributed Verification & Assurance
+- **6.11.5.** Scalable Multi‑Robot Case Studies
+
+### **6.12. Evaluation & Benchmarks**
+- **6.12.1.** Simulation Suites (**RobustRL‑Bench**, **Safe‑Gymnasium**, **DMC**)
+- **6.12.2.** Physical Testbeds (Quadrotors, Autonomous Racing, Micro‑grids)
+- **6.12.3.** Metrics & Reporting Standards (Safety Rate, Robustness Gap)
+- **6.12.4.** Reproducibility Checklists & Open‑Source Tooling
+
+### **6.13. Case Studies**
+- **6.13.1.** Quadrotor Navigation in Wind Gusts
+- **6.13.2.** Autonomous Racing with Uncertain Grip
+- **6.13.3.** Industrial Process Control under Sensor Noise
+- **6.13.4.** Energy Micro‑grids with Demand Spikes
+- **6.13.5.** Medical Treatment Planning with Patient Variability
+
+### **6.14. Open Challenges & Future Directions**
+- **6.14.1.** Formal Verification at Scale
+- **6.14.2.** Lifelong Learning & Continual Robustness
+- **6.14.3.** Human‑in‑the‑Loop Trust & Preference Integration
+- **6.14.4.** Fairness‑Aware Safe MBRL
+- **6.14.5.** Privacy‑Preserving Robust RL
+- **6.14.6.** Regulatory, Ethical & Societal Implications
+- **6.14.7.** Multi‑Modal & Foundation‑Model‑Based Control
 
 ---
 
-## **7. Model-Free Prediction**
+## **Chapter 7: Model‑Free Value Prediction**
+*An outline integrating on/off‑policy learning, multi‑step returns, eligibility traces, least‑squares methods, function approximation, average‑reward theory, distributional objectives, OPE, and finite‑sample guarantees.*
 
-### **7.1. Problem Formulation**
-- **7.1.1.** MDP refresher
-- **7.1.2.** Episodic vs. continuing tasks
-- **7.1.3.** Return $G_t$ and value-function target $v^\pi$
-- **7.1.4.** Mean-squared-error objective
+### **7.1. Foundations**
+- **7.1.1.** MDP formalism, notation, and Markov property
+- **7.1.2.** Task regimes: episodic, continuing (discounted), and average‑reward
+- **7.1.3.** Returns: $G_t^{\gamma}$, bias function, and undiscounted/average formulations
+- **7.1.4.** State‑ and action‑value functions; prediction vs control
+- **7.1.5.** Mean‑squared value error, projected Bellman equation, MSPBE
+- **7.1.6.** Data‑generation assumptions: on‑policy vs off‑policy (behavior & target)
+- **7.1.7.** Function approximation preliminaries (feature maps, parametric models)
 
-### **7.2. Monte-Carlo (MC) Prediction**
-- **7.2.1.** Full-return estimate and the variance problem
-- **7.2.2.** Incremental MC update
-- **7.2.3.** Bias–variance trade-off
+### **7.2. Function‑Approximation Fundamentals**
+- **7.2.1.** Linear approximation and feature engineering
+- **7.2.2.** Non‑linear approximation: kernels, neural networks, transformer critics
+- **7.2.3.** Semi‑gradient vs true‑gradient methods; target networks & stabilization
+- **7.2.4.** Representation learning and Bellman‑complete features
+- **7.2.5.** Divergence pathologies (Baird’s star, deadly triad)
 
-### **7.3. TD(0): One-Step Bootstrapping**
-- **7.3.1.** TD target and TD-error $\delta_t$
-- **7.3.2.** On-line incremental update
-- **7.3.3.** Geometric view (DP vs. MC)
-- **7.3.4.** Tabular convergence proof sketch
+### **7.3. Monte‑Carlo Prediction**
+- **7.3.1.** First‑visit vs every‑visit estimators; incremental sample averages
+- **7.3.2.** Variance analysis of full‑return MC
+- **7.3.3.** Continuing‑task and average‑reward MC variants
+- **7.3.4.** Off‑policy MC with importance sampling (Ordinary & weighted IS, Per‑decision IS, Weighted PDIS)
+- **7.3.5.** Confidence intervals & empirical Bernstein bounds
 
-### **7.4. $n$-Step TD & $\lambda$-Return (Forward View)**
-- **7.4.1.** Derivation of the $n$-step return $G_t^{(n)}$
-- **7.4.2.** Continuum from TD(0) to MC
-- **7.4.3.** Weighted mixture: the $\lambda$-return $G_t^\lambda$
-- **7.4.4.** Analytical bias–variance curve
+### **7.4. One‑Step Temporal‑Difference Learning**
+- **7.4.1.** **TD(0)** target, TD‑error, on‑line update rule
+- **7.4.2.** Bias–variance comparison: DP $\leftrightarrow$ TD $\leftrightarrow$ MC
+- **7.4.3.** Tabular convergence and contraction argument
+- **7.4.4.** Average‑reward TD (**RVI‑TD**, bias‑function estimation)
 
-### **7.5. Eligibility Traces (Backward View)**
-- **7.5.1.** Accumulating vs. replacing traces
-- **7.5.2.** Proof of forward $\leftrightarrow$ backward equivalence (tabular)
-- **7.5.3.** **TD($\lambda$)**, **Sarsa($\lambda$)**, and Watkins **Q($\lambda$)** update rules
-- **7.5.4.** **True-online TD($\lambda$)**
+### **7.5. Multi‑Step Returns & Eligibility Traces**
+- **7.5.1.** $n$‑step TD derivation and algorithm family
+- **7.5.2.** $\lambda$‑return (forward view) and **TD($\lambda$)**
+- **7.5.3.** Backward view: eligibility traces (Accumulating vs replacing, True‑online **TD($\lambda$)**, **GAE**)
+- **7.5.4.** Choosing $n$ or $\lambda$; analytical bias–variance curves
 
-### **7.6. Analysis & Guarantees**
-- **7.6.1.** Detailed bias–variance trade-off across $n$ and $\lambda$
-- **7.6.2.** Robbins-Monro conditions; convergence with linear function approximation
-- **7.6.3.** Divergence counter-example (off-policy + function approx.)
-- **7.6.4.** Practical heuristics (step-size schedules, trace resets, $\lambda$-sweeps)
+### **7.6. Least‑Squares & Low‑Rank Batch Methods**
+- **7.6.1.** Least‑Squares TD (**LSTD**) and **LS‑Sarsa** derivations
+- **7.6.2.** Incremental / low‑rank **LSTD** for high‑dimensional features
+- **7.6.3.** Connections to Kalman filtering and Gauss–Newton
+- **7.6.4.** Memory–computation trade‑offs and regularization
+
+### **7.7. Average‑Reward Prediction**
+- **7.7.1.** Bias‑function formulation and relative value operator
+- **7.7.2.** **RVI‑TD**, differential TD, and log‑average‑reward TD
+- **7.7.3.** Multi‑step & $\lambda$ extensions for $\gamma \neq 1$
+- **7.7.4.** Convergence proofs and finite‑sample rates
+
+### **7.8. Off‑Policy TD & Variance‑Reduction**
+- **7.8.1.** IS‑corrected **TD($\lambda$)**: ordinary, per‑decision, and weighted
+- **7.8.2.** Emphatic TD (**ETD**, **ETD($\lambda$)**)
+- **7.8.3.** Gradient‑TD family (**GTD**, **GTD2**, **TDC**, **PG‑TD**)
+- **7.8.4.** Safe return‑based algorithms: **Retrace($\lambda$)**, $Q^\pi(\lambda)$, **V‑trace**
+- **7.8.5.** Doubly‑robust TD and control‑variate techniques
+- **7.8.6.** Latest convergence results for off‑policy multi‑step TD
+
+### **7.9. Distributional & Risk‑Sensitive Prediction**
+- **7.9.1.** Distributional Bellman operator; categorical & quantile TD
+- **7.9.2.** Mixture‑of‑quantiles and implicit quantile networks (**IQN‑TD**)
+- **7.9.3.** Finite‑sample guarantees for distributional TD
+- **7.9.4.** Risk‑aware objectives: entropic, **CVaR**, and coherent measures
+- **7.9.5.** **CVaR‑TD**, risk‑sensitive **GAE**, and policy‑gradient links
+
+### **7.10. Offline Policy Evaluation (OPE)**
+- **7.10.1.** Problem setup and diagnostics for dataset shift
+- **7.10.2.** Importance‑sampling OPE: **WIS**, **PDIS**, **CWPDIS**
+- **7.10.3.** Doubly‑robust, **MAGIC**, **OPERA**, and **CEOPL** estimators
+- **7.10.4.** Model‑based OPE and Fitted Q‑Evaluation (**FQE**)
+- **7.10.5.** High‑confidence / PAC and bootstrap intervals
+- **7.10.6.** Benchmarking suites and practical pitfalls
+
+### **7.11. Theoretical Analysis & Guarantees**
+- **7.11.1.** Bellman operator contraction & projected fixed points
+- **7.11.2.** Stochastic approximation: Robbins–Monro and ODE methods
+- **7.11.3.** Asymptotic convergence (tabular & linear FA)
+- **7.11.4.** Finite‑sample and high‑probability error bounds
+- **7.11.5.** Divergence counter‑examples and negative results
+- **7.11.6.** Stability proofs for **ETD**, gradient‑TD, and off‑policy $n$‑step TD
+- **7.11.7.** Complexity lower bounds and ‘no‑free‑lunch’ theorems
+
+### **7.12. Practical Implementation & Engineering**
+- **7.12.1.** Step‑size schedules: adaptive (**Adam**, **RMSProp**) vs constant‑$\alpha$
+- **7.12.2.** Feature normalization, reward scaling, and clipping
+- **7.12.3.** Trace management: resetting, $\lambda$‑sweeps, **ETD** emphasis decay
+- **7.12.4.** Replay buffers, prioritization, and sample‑reuse gearing
+- **7.12.5.** Parallel rollout & hardware acceleration (GPU/JAX/TPU)
+- **7.12.6.** Reproducibility checklists and open‑source libraries
+
+### **7.13. Summary & Further Reading**
+- **7.13.1.** Comparative algorithm table and bias–variance map
+- **7.13.2.** Open research questions (variance‑reduced TD, OPE under deep FA, risk‑aware guarantees)
+- **7.13.3.** Annotated bibliography: core textbooks, surveys, and seminal papers (2018–2025)
 
 ---
 
-## **8. Model-Free Control (On- & Off-Policy)**
+## **Chapter 8: Model‑Free Control (On‑ & Off‑Policy)**
+*A rigorously structured roadmap reflecting both classical theory and contemporary advances.*
 
-### **8.1. Problem Formulation**
-- **8.1.1.** Control objective: $\max_\pi \mathbb{E}\left[\sum_{t=0}^\infty \gamma^{t} r_t\right]$
-- **8.1.2.** "Deadly triad" recap: bootstrapping + function approximation + off-policy
+### **8.0. Preliminaries & Notation**
+- **8.0.1.** MDP formalism, trajectories, data regimes (online / offline)
+- **8.0.2.** Return definitions: discounted, average‑reward, episodic, undiscounted continuing
+- **8.0.3.** On‑ vs. behaviour‑policy terminology; importance sampling ratios
+- **8.0.4.** Error decomposition: approximation $\leftrightarrow$ estimation $\leftrightarrow$ optimisation
 
-### **8.2. Sarsa & On-Policy TD Control**
-- **8.2.1.** Tabular **Sarsa** update and convergence
-- **8.2.2.** **Expected Sarsa** and variance comparison
-- **8.2.3.** $\lambda$-extension with eligibility traces
+### **8.1. Tabular On‑Policy Control**
+- **8.1.1.** One‑step **Sarsa**: update, GLIE condition, convergence theorem
+- **8.1.2.** **Expected Sarsa**: bias–variance analysis
+- **8.1.3.** Multi‑step extensions: **Sarsa($\lambda$)**, true‑online variants
+- **8.1.4.** Average‑reward / differential **Sarsa** for continuing tasks
 
-### **8.3. Q-Learning**
-- **8.3.1.** Watkins **Q-learning** update rule
-- **8.3.2.** Non-asymptotic sample-complexity: $\tilde{O}\bigl(\frac{SA}{(1-\gamma)^3\varepsilon^2}\bigr)$
-- **8.3.3.** **Double Q-learning** and bias correction
+### **8.2. Tabular Off‑Policy Control**
+- **8.2.1.** Watkins' **Q‑learning**: update, contraction proof
+- **8.2.2.** Non‑asymptotic sample complexity: $\tilde{O}\bigl(SA/(1-\gamma)^{4}\varepsilon^{2}\bigr)$
+- **8.2.3.** **Double Q‑learning**: maximisation‑bias correction
+- **8.2.4.** Safe‑target algorithms: **Expected Q‑learning**, **Tree‑Backup**, **Retrace**, **V‑trace**
 
-### **8.4. Variance-Reduced & Regularised Variants**
-- **8.4.1.** **Cascade Q-learning**; **RegQ** (provably convergent with linear FA)
-- **8.4.2.** Stability analysis under function approximation
+### **8.3. Finite‑Sample Theory**
+- **8.3.1.** PAC‑MDP and worst‑case regret frameworks
+- **8.3.2.** Upper bounds for **Q‑learning** + UCB exploration
+- **8.3.3.** Matching lower bounds and minimax gaps
+- **8.3.4.** Linear‑MDP and low‑rank structure reductions
 
-### **8.5. Deep Q-Networks & Rainbow**
-- **8.5.1.** Replay buffer and target network heuristics
-- **8.5.2.** Distributional Q-learning, prioritized replay, noisy nets, etc.
+### **8.4. Function Approximation Fundamentals**
+- **8.4.1.** Linear architectures: feature coverage, **LSTD‑Q**, LQR corner cases
+- **8.4.2.** Divergence pathology: **Baird’s counter‑example**
+- **8.4.3.** **Gradient‑TD** family (**GTD2**, **TDC**, **GQ($\lambda$)**); projected Bellman operator
+- **8.4.4.** Convergence rates under mixing & concentrability assumptions
 
-### **8.6. Actor-Critic Methods**
-- **8.6.1.** Policy-gradient theorem and importance-sampling ratios
-- **8.6.2.** **DDPG**, **TD3**, **SAC**; entropy regularisation
+### **8.5. Variance Reduction & Regularisation**
+- **8.5.1.** **SVRG‑TD** / **VR‑R‑TD**: theoretical guarantees
+- **8.5.2.** **VRCQ**, **RegQ**, and other linear‑FA algorithms with $\ell_\infty$ contraction
+- **8.5.3.** Operator regularisation: entropy, proximal & mirror‑descent views
+- **8.5.4.** Robust MDPs and adversarial reward perturbations
 
-### **8.7. Convergence with Function Approximation**
-- **8.7.1.** Baird's counter-example revisited
-- **8.7.2.** Gradient-TD view; projected Bellman operator contraction
+### **8.6. Deep Value‑Based Control**
+- **8.6.1.** **DQN** core: replay buffer, target network, $\varepsilon$‑greedy
+- **8.6.2.** Rainbow components: **Double‑DQN**, Dueling nets, prioritized replay, distributional targets, Noisy Nets, n‑step returns
+- **8.6.3.** Stability heuristics: loss clipping, gradient noise scale
+- **8.6.4.** Benchmarks & sample‑efficiency trends (**Atari 57** → **Crafter/Procgen**)
 
-### **8.8. Finite-Sample Regret Bounds**
-- **8.8.1.** Q-learning + UCB exploration upper bounds
-- **8.8.2.** Matching lower bounds and optimality gaps
+### **8.7. Representation Learning & State Abstraction**
+- **8.7.1.** Auxiliary‑task pipelines: **ATC**, **CURL**, **BYOL‑Expl**
+- **8.7.2.** Invariant & contrastive features; links to bisimulation metrics
+- **8.7.3.** Impact on sample complexity and transfer
 
-### **8.9. Open Questions**
-- **8.9.1.** Non-linear function approximation theory
-- **8.9.2.** Sample-efficient exploration strategies
+### **8.8. Hierarchical & Temporally‑Abstract Control**
+- **8.8.1.** Options framework & semi‑MDPs
+- **8.8.2.** **Option‑Critic**, **HIRO**, **HAC**; policy‑gradient variants
+- **8.8.3.** Skill discovery and curriculum learning
+
+### **8.9. Actor‑Critic & Policy‑Gradient Methods**
+- **8.9.1.** Policy‑gradient theorem; variance reduction via **GAE($\lambda$)**
+- **8.9.2.** On‑policy actors: **REINFORCE**, **A2C/A3C**, **TRPO**, **PPO**
+- **8.9.3.** Off‑policy deterministic and stochastic actors
+    - **8.9.3.1.** **DDPG**, **TD3** (twin critics, delayed policy)
+    - **8.9.3.2.** **SAC**: entropy‑regularised objective, temperature adaptation
+- **8.9.4.** Natural‑gradient and mirror‑descent actor updates
+
+### **8.10. Objectives & Evaluation Criteria**
+- **8.10.1.** Distributional RL: Bellman operator geometry, **C51**, **QR‑DQN**, **IQN**
+- **8.10.2.** Risk‑sensitive control: **CVaR**, entropic, coherent risk measures
+- **8.10.3.** Multi‑objective RL: scalarisation, Pareto fronts
+
+### **8.11. Exploration Strategies**
+- **8.11.1.** Count‑based & pseudo‑count bonuses
+- **8.11.2.** Optimism & posterior sampling: **UCB‑Q**, **PSRL**
+- **8.11.3.** Intrinsic‑motivation signals: **RND**, **ICM**, novelty search
+- **8.11.4.** Directed exploration in continuous action spaces
+
+### **8.12. Multi‑Agent & Game‑Theoretic Control**
+- **8.12.1.** Independent learners and instability pitfalls
+- **8.12.2.** Centralised‑training / decentralised‑execution (**CTDE**): **QMIX**, **MADDPG**
+- **8.12.3.** Convergence and regret in MARL; mean‑field approximations
+
+### **8.13. Offline (Batch) RL**
+- **8.13.1.** Distribution‑shift & extrapolation error
+- **8.13.2.** Conservative algorithms: **CQL**, **AWR**, **IQL**, **BRAC**
+- **8.13.3.** Behaviour‑regularisation and pessimistic lower‑bounds
+- **8.13.4.** Theoretical guarantees: concentrability coefficients
+
+### **8.14. Practical Engineering & Hyper‑Parameter Guidelines**
+- **8.14.1.** Replay‑buffer design: prioritisation, reservoir, segment trees
+- **8.14.2.** Target‑network cadence & Polyak averaging
+- **8.14.3.** Normalisation tricks: rewards, returns, layer‑norm
+- **8.14.4.** Distributed actor‑learner architectures (**IMPALA**, **R2D2**)
+- **8.14.5.** Large‑batch & data‑augmentation pipelines for pixel control
+
+### **8.15. Robustness, Risk & Safety**
+- **8.15.1.** Adversarial robustness: worst‑case perturbation bounds
+- **8.15.2.** Safe exploration: shielded RL, Lyapunov‑based constraints
+- **8.15.3.** Catastrophic‑action avoidance and runtime monitoring
+
+### **8.16. Emerging Directions & Open Questions**
+- **8.16.1.** Non‑linear TD theory: NTK & beyond
+- **8.16.2.** Provably efficient exploration in continuous control
+- **8.16.3.** Unified frameworks bridging online, offline & meta‑RL
+- **8.16.4.** Benchmarking reproducibility and evaluation standards
 
 ---
 
-## **9. Off-Policy Learning: Prediction & Control**
+## **Chapter 9: Off-Policy Learning: Prediction & Control**
 
 ### **9.1. Taxonomy**
 - **9.1.1.** Distinguishing OPE, prediction, and control
@@ -349,7 +610,7 @@ image: /assets/images/card3.png
 - **9.4.2.** Twin-critic and clipped-weighting tricks
 
 ### **9.5. Batch / Offline RL**
-- **9.5.1.** Cross-reference: Fitted Q-Iteration (§4.4)
+- **9.5.1.** Cross-reference: Fitted Q-Iteration (see §4.4)
 - **9.5.2.** **Conservative Q-Learning (CQL)**; pessimistic bootstrapping
 
 ### **9.6. High-Dimensional Action Spaces**
@@ -368,159 +629,461 @@ image: /assets/images/card3.png
 
 ---
 
-## **10. Policy Search & Policy-Gradient Methods**
+## **Chapter 10: Policy Search & Policy‑Gradient Methods**
 
-### **10.1. Foundations**
-- **10.1.1.** Objective functions and the likelihood-ratio gradient
-- **10.1.2.** Monte-Carlo Policy Gradient (**REINFORCE**)
-- **10.1.3.** Baselines and variance-reduction theory
+### **10.0. Scope, Notation, and Historical Context**
+- **10.0.1.** RL problem statement and objectives
+- **10.0.2.** Policy‑search taxonomy (direct vs gradient‑based vs hybrid)
+- **10.0.3.** Milestones in policy gradients (1992–2025)
+- **10.0.4.** Common symbols, environments, and evaluation conventions
 
-### **10.2. Actor–Critic Architecture**
-- **10.2.1.** Actor–Critic architecture and **GAE**
-- **10.2.2.** Natural Policy Gradient and compatible function approximation
+### **10.1. Gradient‑Estimation Fundamentals**
+- **10.1.1.** Likelihood‑ratio / score‑function estimator
+- **10.1.2.** Pathwise (reparameterisation) gradient
+- **10.1.3.** Finite‑difference & simultaneous‑perturbation estimators
+- **10.1.4.** Bias–variance trade‑offs and Cramér–Rao limits
+- **10.1.5.** Variance‑reduced score‑function PG (**RELAX**, **REBAR**, **DiCE**)
 
-### **10.3. Trust Region Methods**
-- **10.3.1.** Trust-Region Policy Gradient (**TRPO**)
-- **10.3.2.** **Proximal Policy Optimization (PPO)**: clip vs. KL penalty
+### **10.2. Monte‑Carlo Policy Gradient Methods**
+- **10.2.1.** **REINFORCE** and reward‑to‑go variants
+- **10.2.2.** Baselines & control‑variates (optimal constant, state‑value)
+- **10.2.3.** Generalised Advantage Estimation (**GAE**)
+- **10.2.4.** Batch vs online PG; return normalisation and whitening
 
-### **10.4. Deterministic Policy Gradients**
-- **10.4.1.** Deterministic PG, **DDPG**, **TD3**
-- **10.4.2.** Maximum-Entropy RL and **Soft Actor-Critic (SAC)**
+### **10.3. Actor–Critic & Natural Policy Gradient**
+- **10.3.1.** Actor–critic separation and bootstrapped TD critics
+- **10.3.2.** Compatible function approximation & Natural Policy Gradient (**NPG**) derivation
+- **10.3.3.** **TD($\lambda$)** critics, eligibility traces, bias–variance control
+- **10.3.4.** Asynchronous & distributed actor‑critics (**A3C**, **IMPALA**, **R2D2**)
 
-### **10.5. Advanced Topics**
-- **10.5.1.** Exploration, entropy regularisation, and KL constraints
-- **10.5.2.** Off-policy corrections and importance sampling (**IS**, **V-trace**, **Q-Prop**)
-- **10.5.3.** Gradient-free policy search (**ES**, **CEM**, **GPS**)
+### **10.4. KL‑Constrained & Proximal Policy Optimisation**
+- **10.4.1.** Trust‑region view of **NPG**; Fisher geometry & KL constraints
+- **10.4.2.** Trust‑Region Policy Optimisation (**TRPO**)
+- **10.4.3.** Proximal Policy Optimisation (**PPO**): clip vs adaptive KL penalty
+- **10.4.4.** Maximum‑likelihood & KL‑projection methods (**V‑MPO**, **MPO‑Q**)
+- **10.4.5.** Curvature‑aware PG: **K‑FAC**, **Shampoo**, **L‑BFGS‑PG**
 
-### **10.6. Theoretical Analysis**
-- **10.6.1.** Sample-complexity bounds, bias-variance analysis, lower bounds
-- **10.6.2.** Safe and constrained PG (**CPO**, Lagrangian, Lyapunov)
+### **10.5. Deterministic & Delayed Policy Gradients**
+- **10.5.1.** Deterministic Policy Gradient (**DPG**) theorem
+- **10.5.2.** Deep DPG (**DDPG**): target networks, experience replay
+- **10.5.3.** Twin‑Delayed DPG (**TD3**) & policy smoothing
+- **10.5.4.** Distributional & ensemble variants (**D4PG**, **ED2**)
 
-### **10.7. Implementation & Applications**
-- **10.7.1.** Implementation pragmatics (normalisation, clipping, LR schedules)
-- **10.7.2.** Case studies (MuJoCo, Atari, robotics)
+### **10.6. Entropy‑Regularised & Maximum‑Entropy RL**
+- **10.6.1.** Entropy bonuses, temperature schedules, exploration incentives
+- **10.6.2.** Soft Policy Iteration framework
+- **10.6.3.** Soft Actor–Critic (**SAC**): twin Q critics & auto‑entropy tuning
+- **10.6.4.** Energy‑based policies and stochastic relaxations
 
-### **10.8. Research Frontiers**
-- **10.8.1.** Credit assignment, large-action spaces
+### **10.7. Off‑Policy & Hybrid Policy Gradients**
+- **10.7.1.** Per‑decision importance sampling (IS) and variance control
+- **10.7.2.** Truncated IS, **V‑trace**, **Retrace**, **ACER**
+- **10.7.3.** **Q‑Prop** and doubly‑robust off‑policy PG
+- **10.7.4.** Replay buffers, prioritised sampling, stabilisation tricks
+- **10.7.5.** Hybrid offline‑enhanced PG (pre‑training with logged data)
+
+### **10.8. Safety, Constraints, and Risk‑Sensitive PG**
+- **10.8.1.** Constrained Policy Optimisation (**CPO**) & primal–dual methods
+- **10.8.2.** Lyapunov‑based safe RL and barrier functions
+- **10.8.3.** Risk measures: **CVaR**, variance‑constrained PG, distributional RL
+- **10.8.4.** Anytime Safe PG (**RL‑SGF**, **IPO‑2**) and last‑iterate guarantees
+
+### **10.9. Exploration & Intrinsic Motivation**
+- **10.9.1.** Intrinsic‑motivation signals (curiosity, **RND**, **ICM**)
+- **10.9.2.** Parameter‑space noise vs action‑space noise
+- **10.9.3.** KL‑regularisation schedules for exploration stability
+
+### **10.10. Temporal Credit Assignment & Regularisers**
+- **10.10.1.** Eligibility traces, **GAE‑$\lambda$** horizon tuning
+- **10.10.2.** KL & entropy regularisers as implicit credit‑shapers
+- **10.10.3.** Reward shaping, potential‑based methods
+
+### **10.11. Theoretical Analysis**
+- **10.11.1.** Convergence guarantees and stability conditions
+- **10.11.2.** Sample‑complexity upper bounds
+- **10.11.3.** Distribution‑dependent lower bounds and impossibility results
+- **10.11.4.** Mirror‑descent & policy‑iteration duality
+
+### **10.12. Implementation Engineering & Incremental Training**
+- **10.12.1.** Observation, reward, and advantage normalisation
+- **10.12.2.** Learning‑rate schedules, adaptive optimisers, Polyak averaging
+- **10.12.3.** Gradient clipping, orthogonal initialisation, parameter noise
+- **10.12.4.** Distributed training (GPU/TPU), pipeline parallelism
+- **10.12.5.** Incremental / resource‑bounded PG (**AVG**, buffer‑free updates)
+- **10.12.6.** Diagnostics: KL, entropy, gradient norms, loss decomposition
+
+### **10.13. Benchmarks & Domain‑Specific Applications**
+- **10.13.1.** Classic control & continuous toy tasks
+- **10.13.2.** Atari & image‑based discrete control
+- **10.13.3.** MuJoCo locomotion & manipulation
+- **10.13.4.** Robotics: sim‑to‑real transfer & impedance control
+- **10.13.5.** Industrial systems: recommender RL, energy optimisation
+- **10.13.6.** Language models & preference learning
+    - **10.13.6.1.** KL‑regularised RLHF (**PPO‑RLHF**)
+    - **10.13.6.2.** Direct Preference Optimisation (**DPO**)
+
+### **10.14. Multi‑Agent, Hierarchical, and Population‑Based PG**
+- **10.14.1.** Multi‑agent actor–critic frameworks
+    - **10.14.1.1.** **MADDPG**, **QMIX‑PG**
+    - **10.14.1.2.** **COMA** & counterfactual baselines
+    - **10.14.1.3.** Learning‑aware PG (opponent‑aware gradients)
+- **10.14.2.** Hierarchical PG & options
+- **10.14.3.** Population‑based training and evolutionary curricula
+
+### **10.15. Scaling Trends & Modern Variants**
+- **10.15.1.** Transformer policies & memory augmentation
+- **10.15.2.** Scaling laws for policy networks
+- **10.15.3.** Offline policy gradients & conservative objectives
+    - **10.15.3.1.** **CQL‑PG**, **IQL‑PG**
+    - **10.15.3.2.** Policy‑guided offline optimisation (model‑based)
+- **10.15.4.** Foundation agents & large‑action‑space optimisation
+- **10.15.5.** Continual, lifelong, and open‑ended learning
+
+### **10.16. Gradient‑Free & Evolutionary Policy Search**
+- **10.16.1.** Natural Evolution Strategies (**NES**) & **OpenAI‑ES**
+- **10.16.2.** Covariance‑Matrix Adaptation (**CMA‑ES**)
+- **10.16.3.** Cross‑Entropy Method (**CEM**)
+- **10.16.4.** Guided Policy Search (**GPS**) & hybrid supervised–RL pipelines
+- **10.16.5.** Bayesian optimisation & bandit black‑box search
+
+### **10.17. Open Problems & Future Directions**
+- **10.17.1.** Long‑horizon & sparse‑reward credit assignment
+- **10.17.2.** Robustness, generalisation, out‑of‑distribution shifts
+- **10.17.3.** Partial observability & belief‑state PG
+- **10.17.4.** Model‑based $\leftrightarrow$ policy‑gradient fusion
+- **10.17.5.** Human‑in‑the‑loop alignment and ethics
 
 ---
 
-## **11. Partially Observable Reinforcement Learning**
+## **Chapter 11: Partially Observable Reinforcement Learning**
+*Revised, Detailed Scaffold*
 
-### **11.1. POMDP Foundations**
-- **11.1.1.** Formal definition of a POMDP: $(S, A, O, T, \Omega, R, \gamma)$
-- **11.1.2.** Bayes filter and belief state: $b_{t+1} = \tau(b_t, a_t, o_{t+1})$
-- **11.1.3.** Optimality of belief-stationary policies
+### **11.1. Problem Formulation & Information States**
+- **11.1.1.** Formal models: POMDP, mixed‑observability MDP, Dec‑POMDP, belief‑MDP embedding
+- **11.1.2.** Information states: filtering vs. smoothing, beliefs, predictive state representations (**PSRs**), observable‑operator models (**OOMs**)
+- **11.1.3.** Observability & identifiability metrics: entropy, mutual/Fisher information, structural rank
+- **11.1.4.** Classes of policies: belief‑stationary, finite‑state controllers, history‑based, memory‑augmented neural policies
+- **11.1.5.** Value‑function structure: PWLC for finite POMDPs; continuity & Lipschitz results in continuous spaces
+- **11.1.6.** Computational complexity: PSPACE (finite POMDP), NEXP (Dec‑POMDP), undecidable hybrids
+- **11.1.7.** Belief compression & amortised filtering: lossy KL projection, variational and learned auto‑encoders
 
 ### **11.2. Exact Planning in Belief Space**
-- **11.2.1.** $\alpha$-vector value iteration; piece-wise-linear-convex value function
-- **11.2.2.** Complexity (PSPACE-complete) of exact POMDP planning
+- **11.2.1.** Dynamic programming: $\alpha$‑vector value iteration, incremental pruning, policy iteration
+- **11.2.2.** Policy‑graph search: exhaustive controller enumeration; proofs of bounded‑memory optimality
+- **11.2.3.** Special‑case tractability: deterministic transitions, tree‑structured POMDPs, mixed‑observability models
+- **11.2.4.** Hardness proofs & scalability limits: tight bounds, worst‑case instance constructions
+- **11.2.5.** Anytime deterministic $\alpha$‑updates: branch‑and‑bound refinements, real‑time guarantees
 
-### **11.3. Approximate Planning**
-- **11.3.1.** **Point-Based Value Iteration (PBVI)** and variants (**HSVI**, **SARSOP**)
-- **11.3.2.** Anytime guarantees and error bounds
+### **11.3. Offline / Batch Belief‑Space Planning**
+- **11.3.1.** Point‑based methods: **PBVI**, **Perseus**, **HSVI**, **SARSOP**; belief‑set selection
+- **11.3.2.** Sampling‑based dynamic programming: fitted $\alpha$‑iteration, **BELIEF‑QL**
+- **11.3.3.** Function approximation: linear bases, RKHS, deep neural surrogates
+- **11.3.4.** Continuous‑state solvers: local linearisation, Gaussian‑belief DDP, variational approaches
+- **11.3.5.** Error analysis & anytime bounds: contraction arguments, Bellman residual control
 
-### **11.4. Representation Learning under Partial Observability**
-- **11.4.1.** Predictive State Representations (PSRs)
-- **11.4.2.** Recurrent memory architectures and finite-memory controllers
-- **11.4.3.** Sample-complexity bounds with windowed histories
+### **11.4. Online / Real‑Time Planning**
+- **11.4.1.** Rollout & QMDP heuristics: one‑step look‑ahead, hindsight Q‑updates
+- **11.4.2.** Heuristic search in belief trees: **RTBSS**, **AEMS**, **LAO\*** adaptations
+- **11.4.3.** Discrete Monte‑Carlo tree search: **POMCP**, **DESPOT**, virtual loss tricks
+- **11.4.4.** Continuous‑space MCTS variants: **POMCPOW**, **PFT‑DPW**, weighted particle backups
+- **11.4.5.** Interruptible & anytime guarantees: bounded‑sub‑optimality under compute budgets
 
-### **11.5. PAC & Regret Guarantees**
-- **11.5.1.** PAC-RL for POMDPs with privileged simulators
-- **11.5.2.** Regret lower and upper bounds in latent-state environments
+### **11.5. Latent Dynamics & Observation‑Model Learning**
+- **11.5.1.** Maximum‑likelihood & EM: Baum–Welch generalisations, stabilisation techniques
+- **11.5.2.** Spectral & low‑rank PSR estimation: method‑of‑moments, **UCB‑PSR** sample‑complexity
+- **11.5.3.** Bayesian non‑parametric inference: **HDP‑HMM**, Dirichlet‑process POMDPs
+- **11.5.4.** Neural world models: recurrent state‑space models, contrastive latent dynamics, **Dreamer‑P**
+- **11.5.5.** Joint model‑learning + planning (Dyna‑style): imagination rollout, model‑error mitigation
 
-### **11.6. Software & Benchmarks**
-- **11.6.1.** **SARSOP** bindings and `pomdp` R package
-- **11.6.2.** Small-scale benchmarks (Tiger, Light-Dark, RockSample)
+### **11.6. Representation & Memory**
+- **11.6.1.** Belief compression & smoothing: lossy projections, neural importance sampling, amortised filters
+- **11.6.2.** Learned latent embeddings: contrastive/**BYOL** objectives, masked modelling for belief sharpening
+- **11.6.3.** Recurrent & transformer architectures: LSTM/GRU, **GTrXL**, **RWKV**, memory‑efficiency tricks
+- **11.6.4.** Memory‑capacity theory: finite‑state controller bounds, windowed‑history PAC rates
+- **11.6.5.** Causal representation learning: latent‑cause discovery, intervention‑aware policies
 
-### **11.7. Open Questions**
-- **11.7.1.** Efficient exploration with latent states
-- **11.7.2.** Memory size vs. sample complexity trade-off
+### **11.7. Online Model‑Free RL under Partial Observability**
+- **11.7.1.** Recurrent Q‑learning: **DRQN**, **R2D2/R2D3**, auxiliary loss variants
+- **11.7.2.** Actor–critic with memory: **A2C‑LSTM**, **IMPALA‑RNN**, Recurrent **PPO**
+- **11.7.3.** Deterministic & distributional methods: Recurrent **SAC**, **D4PG‑RNN**
+- **11.7.4.** Transformer‑based agents: **GTrXL‑RL**, Advantage Transformer, linear‑attention models
+- **11.7.5.** Self‑supervised auxiliaries: **CPC**, **BYOL‑Explore**, world‑model consistency
+
+### **11.8. Offline & Dataset‑Driven RL**
+- **11.8.1.** Behaviour cloning & sequence modelling: **Decision Transformer**, **DTQN**, **V‑MPO**
+- **11.8.2.** Conservative & regularised methods: **CQL‑RNN**, **BCQ‑RNN**, implicit Q‑learning with masks
+- **11.8.3.** Provably efficient offline POMDP RL: **U‑PAC‑UCLK**, batch **PSRL**, pessimistic latent‑model Q‑learning
+- **11.8.4.** Offline exploration & coverage diagnostics: density‑ratio tests, support mismatch bounds
+- **11.8.5.** Zero‑shot & OOD generalisation: latent adversarial test‑beds, policy‑conditioned models
+
+### **11.9. Exploration, PAC & Regret Guarantees**
+- **11.9.1.** Information‑theoretic bonuses: predictive entropy, curiosity via prediction gain
+- **11.9.2.** Optimism in belief space: **BA‑POMDP**, **EULER‑POMDP**, **KL‑UCRL**
+- **11.9.3.** PAC sample‑complexity results: **UCFH‑POMDP**, uniform‑PAC with sliding windows
+- **11.9.4.** Regret upper bounds: Thompson‑sampling **PSRL**, **O‑UCB‑POMDP**
+- **11.9.5.** Regret lower bounds & revealing‑POMDP hardness: information bottleneck instances
+- **11.9.6.** Hindsight‑privileged simulators: oracle‑augmented bounds, imitation‑kicker algorithms
+- **11.9.7.** Memory size vs. exploration trade‑off: finite memory vs. Bayes regret curves
+
+### **11.10. Safety, Robustness & Risk**
+- **11.10.1.** Risk‑sensitive criteria: **CVaR‑POMDP** algorithms, percentile constraints, distributional RL
+- **11.10.2.** Robust POMDPs: interval, polyhedral & Wasserstein uncertainty sets, minimax planning
+- **11.10.3.** Safe exploration & shielding: belief constraints, reach‑avoid under uncertainty
+- **11.10.4.** Verification & explainability: policy certificates, counterfactual tracing in latent space
+- **11.10.5.** Active perception & sensor management: information‑reward trade‑offs, value of sensing
+
+### **11.11. Multi‑Agent & Dec‑POMDPs**
+- **11.11.1.** Complexity landscape: NEXP‑completeness, undecidable hybrids, hardness gaps
+- **11.11.2.** Exact & approximate planning: **MAA\***, multi‑agent incremental pruning, finite‑state controllers
+- **11.11.3.** Neural approaches: **I‑POMDP‑Net**, **QMIX‑MA‑POMDP**, transformer belief sharing
+- **11.11.4.** Communication protocols: emergent signalling, bandwidth‑constrained coordination
+- **11.11.5.** Co‑operative vs. competitive scenarios: imperfect‑information games, opponent modelling
+
+### **11.12. Benchmarks & Datasets**
+- **11.12.1.** Classic small‑scale tasks: **Tiger**, **Light‑Dark**, **RockSample**, **Hallway**
+- **11.12.2.** Gridworld & procedural: **MiniGrid**, **Procgen‑POMDP**
+- **11.12.3.** Vision‑based high‑dimensional: Partially‑Observable Atari, **DM‑Lab‑30** PO variants
+- **11.12.4.** Continuous control & navigation: Dubins car, drone collision‑avoidance, Habitat
+- **11.12.5.** Dialogue & language POMDPs: **bAbI‑RL**, **MultiWOZ‑RL**, schema‑guided tasks
+- **11.12.6.** Robotics simulators: **Gazebo‑POMDP**, **Isaac‑Gym** partial‑obs suites
+- **11.12.7.** Real‑world offline datasets: sepsis treatment, industrial telemetry, stock‑LOB streams
+
+### **11.13. Software Ecosystem**
+- **11.13.1.** Planning libraries: **SARSOP**, **APPL**, **pomdp‑solve**, **DESPOT**
+- **11.13.2.** Deep RL frameworks: **RLlib**, **CleanRL**, **Stable‑Baselines3** (partial‑obs wrappers)
+- **11.13.3.** Belief‑tracking toolkits: **pomdp_py**, **PyParticleEst**, **Bayes‑Filters‑Lib**
+- **11.13.4.** Experiment management & reproducibility: **RL‑Zoo** configs, Weights‑and‑Biases templates
+- **11.13.5.** R & Julia ecosystems: `pomdp` (R), **POMDPs.jl**, **POMCPOW.jl**
+
+### **11.14. Empirical Methodology**
+- **11.14.1.** Evaluation metrics: return, regret, sample efficiency, belief calibration
+- **11.14.2.** Statistical power & confidence intervals: multiple seeds, effect sizes, bootstrap tests
+- **11.14.3.** Hyper‑parameter sensitivity under observation noise: robustness sweeps, tuning grids
+- **11.14.4.** Sim‑to‑real transfer diagnostics: dynamics mismatch tests, domain randomisation checks
+- **11.14.5.** Visualising uncertainty: belief heat‑maps, particle animations, saliency on observations
+
+### **11.15. Applications (Case Studies)**
+- **11.15.1.** Autonomous navigation & SLAM‑aware control
+- **11.15.2.** Healthcare: ICU sepsis, radiotherapy fraction planning
+- **11.15.3.** Dialogue systems: task‑oriented & open‑domain conversational POMDPs
+- **11.15.4.** Finance & trading: latent order‑book modelling, execution under partial info
+- **11.15.5.** Surgical tele‑operation & industrial robotics
+- **11.15.6.** Multi‑robot coordination & search‑and‑rescue
+
+### **11.16. Open Problems & Future Directions**
+- **11.16.1.** Scalable belief updates: neural importance sampling, amortised filters with guarantees
+- **11.16.2.** Provable deep recurrent & transformer RL: generalisation and stability bounds
+- **11.16.3.** Continual & lifelong POMDP learning: catastrophic forgetting under partial observability
+- **11.16.4.** Causality‑aware agents: counterfactual reasoning, intervention planning
+- **11.16.5.** Efficient offline exploration with limited coverage: theory & benchmarks
+- **11.16.6.** LLM‑integrated agents: natural‑language observations, large‑context memory compression
+- **11.16.7.** Standardised real‑world benchmarks & evaluation protocols: cross‑domain reproducibility
 
 ---
 
-## **12. Bayesian Reinforcement Learning**
+## **Chapter 12: Bayesian Reinforcement Learning**
+*(Final, Research‑Driven Table of Contents)*
 
-### **12.1. Bayes-Adaptive MDPs (BAMDPs)**
-- **12.1.1.** Unknown kernel as a latent parameter $\theta$
-- **12.1.2.** Augmented state $(s_t, \theta_t)$ and equivalence to POMDP
+### **12.0. Overview & Historical Context**
+- **12.0.1.** Motivation: exploration, calibrated uncertainty, and sample efficiency
+- **12.0.2.** Timeline of milestones (1968–2025)
+- **12.0.3.** Bayesian RL vs. frequentist, distributional, and control‑as‑inference paradigms
 
-### **12.2. Exact & Tree-Search Planning**
-- **12.2.1.** Bayes-adaptive forward-search (**BFS3**)
-- **12.2.2.** **ADA-MCTS** and non-stationary safe exploration
+### **12.1. Bayesian Inference Foundations for RL**
+- **12.1.1.** Bayesian decision‑theoretic formulation of MDP control
+- **12.1.2.** Priors over dynamics & rewards (Conjugate, Non‑conjugate)
+- **12.1.3.** Posterior updates from interaction histories
+- **12.1.4.** Belief states & Bayes‑Adaptive MDP (**BAMDP**)
+- **12.1.5.** Equivalence to POMDPs; sufficiency of beliefs
+- **12.1.6.** Computational intractability of exact belief planning
 
-### **12.3. Posterior-Sampling RL (PSRL)**
-- **12.3.1.** Thompson sampling over the MDP posterior
-- **12.3.2.** Regret bounds: $\tilde{O}(\sqrt{HSAT})$
+### **12.2. Approximate Inference & Uncertainty Representation**
+- **12.2.1.** Variational inference & ELBO‑regularised value functions
+- **12.2.2.** Expectation propagation & Laplace approximations
+- **12.2.3.** Sequential Monte‑Carlo / particle filtering in **BAMDPs**
+- **12.2.4.** Bootstrapped ensembles & randomised prior functions
+- **12.2.5.** Bayesian neural networks & hyper‑net priors for deep RL
+- **12.2.6.** Probabilistic latent world models (**PlaNet**, **Dreamer**, **PETS**)
 
-### **12.4. Variational & Approximate Bayesian RL**
-- **12.4.1.** Evidence Lower Bound (ELBO) on value functions
-- **12.4.2.** Regret under approximation error
+### **12.3. Algorithms for Belief‑Space Planning (Exact & Tree Search)**
+- **12.3.1.** Dynamic programming on discretised beliefs
+- **12.3.2.** Forward‑Search Sparse Sampling (**FSSS**, **BFS3**)
+- **12.3.3.** Bayes‑Adaptive Monte‑Carlo Planning (**BAMCP**, **BA‑UCT**)
+- **12.3.4.** **ADA‑MCTS** & safe non‑stationary extensions
+- **12.3.5.** Neural‑particle **BAMCP** for high‑dimensional states
+- **12.3.6.** Complexity bounds & anytime guarantees
 
-### **12.5. PAC-Bayes & Lifelong RL**
-- **12.5.1.** PAC-Bayes generalisation bounds for RL
-- **12.5.2.** **EPIC** algorithm and distilled priors
+### **12.4. Posterior‑Sampling & Randomised Value Functions**
+- **12.4.1.** Thompson/Posterior‑Sampling RL (**PSRL**) — episodic & discounted
+- **12.4.2.** Linear‑kernel **PSRL**, **LSVI‑PG**, and **Neural‑PSRL**
+- **12.4.3.** Bayesian regret bounds (tabular, linear, RKHS, general FA)
+- **12.4.4.** Gittins indices & indexability connections
 
-### **12.6. Computation vs. Statistical Efficiency**
-- **12.6.1.** Ensemble methods and bootstrap exploration
-- **12.6.2.** Connections to Fitted Q-Iteration (§4.4)
+### **12.5. Bayesian Confidence & Information‑Theoretic Exploration**
+- **12.5.1.** Bayesian UCRL (posterior confidence sets)
+- **12.5.2.** Value‑of‑information & expected information gain bonuses
+- **12.5.3.** **VIME**, $\eta$‑greedy, $\phi$‑exploration in deep settings
+- **12.5.4.** Risk‑constrained exploration and safe optimism
 
-### **12.7. Open Questions**
-- **12.7.1.** Bayesian exploration in continuous spaces
-- **12.7.2.** Structural priors and safe Bayesian RL
+### **12.6. Deep Bayesian Model‑Free Methods**
+- **12.6.1.** Bayesian Q‑learning variants (**RLSVI**, **B‑DQN**)
+- **12.6.2.** Bayesian actor‑critic & natural‑gradient methods
+- **12.6.3.** Bootstrapped DQN & deep ensemble exploration
+- **12.6.4.** Uncertainty propagation vs. distributional RL
+
+### **12.7. Offline & Offline‑to‑Online Bayesian RL** *(New section)*
+- **12.7.1.** Pessimistic posteriors & conservative value estimation
+- **12.7.2.** Uncertainty‑regularised offline Q‑learning
+- **12.7.3.** Bayesian Policy Optimisation with behaviour‑cloning priors
+- **12.7.4.** Safe offline‑to‑online fine‑tuning with calibrated risk bounds
+
+### **12.8. Multi‑Agent & Game‑Theoretic Bayesian RL** *(New section)*
+- **12.8.1.** Bayesian opponent modelling & belief inference in Dec‑POMDPs
+- **12.8.2.** Bayesian Nash and correlated‑equilibrium MARL
+- **12.8.3.** Robust Bayesian MARL under payoff uncertainty
+- **12.8.4.** Risk‑sharing & cooperative Bayesian exploration
+
+### **12.9. Continuous Control & Safe Bayesian RL**
+- **12.9.1.** Gaussian‑process dynamics models (**PILCO**, **GP‑MPC**)
+- **12.9.2.** **SafeOpt**, **SAFE‑CtrlBO**, and constraint‑feasible exploration
+- **12.9.3.** Online Bayesian LQR & stochastic MPC
+- **12.9.4.** Bayesian policy search for robotics & hardware‑in‑the‑loop
+
+### **12.10. Uncertainty, Risk & PAC‑Bayes Theory** *(Merged focus)*
+- **12.10.1.** Bayesian sample‑complexity & minimax lower bounds
+- **12.10.2.** **CVaR**, entropic & mean‑variance risk measures
+- **12.10.3.** Distributionally‑robust and Rényi‑divergence control‑as‑inference
+- **12.10.4.** PAC‑Bayes generalisation bounds for RL & lifelong learning
+- **12.10.5.** Information‑theoretic complexity (**IB**, **MERL**)
+
+### **12.11. Hierarchical Priors, Meta‑ & Lifelong Bayesian RL**
+- **12.11.1.** Hierarchical Bayes across tasks (meta‑BRL)
+- **12.11.2.** Dirichlet‑process & CRP priors for infinite task pools
+- **12.11.3.** **EPIC** & other PAC‑Bayes lifelong algorithms
+- **12.11.4.** Structural/symmetry‑aware priors (graphs, group invariance)
+- **12.11.5.** Neural function‑space priors & representation reuse
+
+### **12.12. Bayesian Inverse RL & Preference Learning**
+- **12.12.1.** Bayesian formulation of inverse RL
+- **12.12.2.** Gaussian‑process preference learning & active queries
+- **12.12.3.** Reward‑uncertainty calibration for **RLHF** & alignment
+
+### **12.13. Scalable Engineering Practice**
+- **12.13.1.** Posterior approximation at scale (variational, SMC, ensembles)
+- **12.13.2.** Distributed belief updates, GPUs & TPUs
+- **12.13.3.** Probabilistic programming frameworks (Pyro, NumPyro, Bean Machine)
+- **12.13.4.** Benchmarking, evaluation protocols & reproducibility guidance
+
+### **12.14. Applications**
+- **12.14.1.** Robotics & industrial automation
+- **12.14.2.** Healthcare & personalised medicine
+- **12.14.3.** Finance & portfolio management
+- **12.14.4.** Autonomous vehicles & UAVs
+- **12.14.5.** Content recommendation & adaptive experimentation
+
+### **12.15. Open Problems & Future Directions**
+- **12.15.1.** Unified exploration–exploitation–safety theory
+- **12.15.2.** Bayesian RL under environment non‑stationarity
+- **12.15.3.** Scalable BRL with high‑dimensional perception
+- **12.15.4.** Interpretable & formally verified Bayesian policies
+- **12.15.5.** Bayesian causal RL & causal discovery
+- **12.15.6.** BRL for foundation‑model alignment & hallucination control
+
+### **12.16. Summary & Further Reading**
 
 ---
 
-## **13. Imitation & Inverse Reinforcement Learning**
+## **Chapter 13: Imitation & Inverse Reinforcement Learning**
+*Revised & critically‑balanced scaffold incorporating emergent research lines through mid‑2025.*
 
-### **13.1. Problem Formulation**
-- **13.1.1.** MDP without a reward function; expert demonstrations $\mathcal{D}$
-- **13.1.2.** Occupancy measures and divergence objectives
+### **Part 1: Orientation & Foundations**
+- **13.0. Overview, Taxonomy & Historical Context**
+    - Situate IL/IRL; contrast imitation, reward inference, **RLHF**.
+    - Demonstration modalities: State–action, state‑only, preferences, corrections, language.
+    - Evaluation axes: Online vs offline, interaction budget, safety, reproducibility.
+- **13.1. Formal Problem Statements**
+    - Reward‑free MDP, demonstrations dataset, occupancy‑measure machinery, divergence minimisation.
+- **13.2. Statistical & Computational Pre‑liminaries**
+    - Trajectory concentration bounds, function‑approximation classes, optimisation toolkit.
 
-### **13.2. Behavioural Cloning (BC)**
-- **13.2.1.** Supervised log-likelihood objective
-- **13.2.2.** Compounding-error bound in horizon $T$
+### **Part 2: Behavioural & Interactive Imitation**
+- **13.3. Behavioural Cloning (BC)**
+    - **13.3.1.** MLE objective & compounding‑error analysis.
+    - **13.3.2.** Regularisation, data augmentation, and continual BC.
+    - **13.3.3.** Decision transformers as sequence models.
+- **13.4. Dataset Aggregation & Interactive IL**
+    - **13.4.1.** **DAgger** protocol & $\alpha$‑regret.
+    - **13.4.2.** **SafeDAgger**, **AggreVaTe**.
+    - **13.4.3.** Active querying, cost‑sensitive allocation, human‑in‑the‑loop logistics.
+- **13.5. Diffusion & Sequence‑Model Policies** *(New dedicated section)*
+    - **13.5.1.** Score‑based policy objectives.
+    - **13.5.2.** Theoretical open questions.
+    - **13.5.3.** Diffusion‑policy robotics case‑studies; robustness & uncertainty.
 
-### **13.3. Dataset Aggregation (DAgger)**
-- **13.3.1.** Interactive expert-label querying protocol
-- **13.3.2.** No-regret analysis and constant imitation error
+### **Part 3: Offline Imitation & Inverse RL**
+- **13.6. Offline Supervised IL**
+    - **13.6.1.** Importance‑weighted BC & doubly‑robust estimators.
+    - **13.6.2.** Distributional‑robust objectives and finite‑sample guarantees.
+- **13.7. Offline Adversarial IL / IRL**
+    - **13.7.1.** **Inverse Q‑learning (IQ‑Learn)** & Fisher‑divergence IL.
+    - **13.7.2.** **OPT‑AIL** polynomial complexity & empirical benchmarks.
 
-### **13.4. Offline Imitation Learning**
-- **13.4.1.** Importance-weighted BC under covariate shift
-- **13.4.2.** Statistical consistency and finite-sample rates
+### **Part 4: Classical & Modern IRL**
+- **13.8. Classical IRL Foundations**
+    - Ill‑posedness, feature‑expectation matching, apprenticeship‑learning bound.
+- **13.9. Maximum‑Entropy IRL**
+    - MaxEnt duality, partition‑function estimation, soft‑optimality.
+- **13.10. Bayesian, PAC & Causal IRL**
+    - Priors & posteriors, PAC reward‑set bounds, causal identifiability.
+- **13.11. Adversarial & Potential‑Based IRL**
+    - **AIRL**, dynamics‑invariant rewards, cross‑domain transfer, programmatic‑reward IRL.
 
-### **13.5. Adversarial Imitation Learning**
-- **13.5.1.** **GAIL**: Min-max objective and JS-divergence interpretation
-- **13.5.2.** Convergence guarantee via occupancy matching
+### **Part 5: Human Feedback & Preference‑Based Learning**
+- **13.12. Preference‑Based RL & RLHF Pipeline**
+    - Pairwise comparison models, active query design, reward‑model pathologies, KL‑regularised fine‑tuning.
+- **13.13. Interactive Reward Modelling**
+    - Coactive corrections, natural‑language supervision, multi‑modal signals, real‑time safety overrides.
 
-### **13.6. Foundations of Inverse RL (IRL)**
-- **13.6.1.** Ill-posedness and feature-expectation matching
-- **13.6.2.** Apprenticeship-learning value bound
+### **Part 6: Evaluation, Benchmarks & Reproducibility**
+- **13.14. Metrics & Protocols**
+    - Imitation loss, return gap, human‑satisfaction surveys, negative‑result reporting.
+- **13.15. Benchmark Suites & Leaderboards**
+    - **MuJoCo**, **CARLA**, **MineRL**, **RoboNet**, **ASIMOV**; pitfalls of leaderboard‑driven research.
+- **13.16. Reproducibility & Open Science**
+    - Dataset licensing, logging standards, hyper‑parameter disclosure, continual‑benchmark initiatives.
 
-### **13.7. Maximum-Entropy IRL**
-- **13.7.1.** MaxEnt principle and convex dual derivation
-- **13.7.2.** Sample complexity of partition-function estimation
+### **Part 7: Safety, Robustness & Security**
+- **13.17. Demonstration Corruption & Distribution Shift**
+    - Outliers, poisoning, causal misspecification, adversarial examples.
+- **13.18. Safe Policy Improvement & Risk‑Sensitivity**
+    - Constrained IL, **CVaR** objectives, shielded execution.
+- **13.19. Alignment Failures & Value Hand‑off**
+    - Specification gaming, side‑effect avoidance, governance considerations.
 
-### **13.8. Bayesian & PAC-style IRL**
-- **13.8.1.** Posterior over reward hypotheses
-- **13.8.2.** PAC reward-set estimation bounds
+### **Part 8: Foundation‑Model Era & Scaling**
+- **13.20. Large‑Scale Pre‑training for Control**
+    - Robot‑foundation‑model pipelines (**RT‑1/RT‑2**, **GR00T**), scaling laws.
+- **13.21. Language‑Conditioned & Tool‑Augmented Policies**
+    - Instruction following, code/tool use, embodied LLM benchmarks.
+- **13.22. Integration of Demonstrations, Preferences & Language**
+    - Unified objective functions, multi‑channel credit assignment.
 
-### **13.9. Adversarial IRL (AIRL)**
-- **13.9.1.** Potential-based reward recovery
-- **13.9.2.** Dynamics-invariant transfer theorem
+### **Part 9: Advanced Topics & Applications**
+- **13.23. Partial Observability** (Belief‑space occupancy, memory‑augmented IL/IRL).
+- **13.24. Multi‑Agent Settings** (Cooperative/competitive demos, inverse game theory).
+- **13.25. Hierarchical & Option‑Based Imitation** (Trajectory segmentation, sub‑goal IRL).
+- **13.26. Cross‑Domain Transfer & Meta‑Imitation** (Domain‑invariant features, sim‑to‑real).
+- **13.27. Domain‑Specific Case‑Studies** (Healthcare, dialogue, shared‑control robotics).
+- **13.28. Implementation & Engineering** (Data pipelines, training stability, distributed roll‑outs).
 
-### **13.10. Preference-Based & Human-in-the-Loop RL**
-- **13.10.1.** Binary preference models and active queries
-- **13.10.2.** Regret bounds for preference elicitation
-
-### **13.11. Open Questions & Complexity Gaps**
-- **13.11.1.** Lower bounds under partial observability
-- **13.11.2.** Robustness to corrupted demonstrations
-- **13.11.3.** Reward-poisoning attacks and defences
+### **Part 10: Theory, Open Problems & Resources**
+- **13.29. Complexity Gaps & Lower Bounds**
+- **13.30. Towards Robust Value Alignment**
+- **13.31. Conclusion & Community Resources** (Seminal papers, libraries, benchmarks).
 
 ---
 
-## **14. Hierarchical Reinforcement Learning & Temporal Abstraction**
+## **Chapter 14: Hierarchical Reinforcement Learning & Temporal Abstraction**
 
 ### **14.1. SMDP Foundations**
 - **14.1.1.** Formal definitions and notation (episodic & continuing)
@@ -534,13 +1097,13 @@ image: /assets/images/card3.png
 - **14.2.2.** Policy-over-Options $\iff$ SMDP Lemma
 - **14.2.3.** Fundamental Theorem of Options
 - **14.2.4.** Execution variants: call-and-return vs. interruptible
-- **14.2.5.** Worked example: bottleneck grid world (see §14.12)
+- **14.2.5.** Worked example: bottleneck grid world
 
 ### **14.3. Option-Learning & Hierarchical Policy Gradient**
 - **14.3.1.** Intra-Option Policy Gradient Theorem
 - **14.3.2.** Termination-Gradient Theorem
 - **14.3.3.** Convergence via Two-Time-Scale Stochastic Approximation
-- **14.3.4.** Variants: Natural Option-Critic, Diversity-Enriched OC
+- **14.3.4.** Variants: **Natural Option-Critic**, Diversity-Enriched **OC**
 - **14.3.5.** Practical tips: experience replay across option boundaries
 
 ### **14.4. Skill / Option Discovery**
@@ -549,13 +1112,13 @@ image: /assets/images/card3.png
 - **14.4.3.** Unsupervised MI methods (**DIAYN**, **DADS**, **VALOR**, **ADC**)
 - **14.4.4.** Diversity regularisers (DPP, Wasserstein, VIC)
 - **14.4.5.** Interest functions and state-density weighting
-- **14.4.6.** Evaluation benchmarks (Procgen Maze, MuJoCo AntMaze, Minigrid)
+- **14.4.6.** Evaluation benchmarks (**Procgen Maze**, **MuJoCo AntMaze**, **Minigrid**)
 
 ### **14.5. Multi-Level Architectures**
 - **14.5.1.** Feudal RL & **FuN**
 - **14.5.2.** Hierarchical Actor-Critic (**HAC**)
 - **14.5.3.** **HIRO** and off-policy correction
-- **14.5.4.** **SHIRO**: Entropy-Regularised HIRO
+- **14.5.4.** **SHIRO**: Entropy-Regularised **HIRO**
 - **14.5.5.** Planning architectures (**Dreamer-H**, **MCTS-HRL**)
 
 ### **14.6. Sample-Complexity & Regret Theory**
@@ -566,7 +1129,7 @@ image: /assets/images/card3.png
 - **14.6.5.** Exploration–exploitation trade-offs (open question)
 
 ### **14.7. Hierarchical Representation & World Models**
-- **14.7.1.** Latent goal spaces via MI objectives (CPC, InfoNCE)
+- **14.7.1.** Latent goal spaces via MI objectives (**CPC**, **InfoNCE**)
 - **14.7.2.** Bisimulation and successor features
 - **14.7.3.** World-model factorisation (manager latent vs. worker dynamics)
 - **14.7.4.** Planning-error propagation bound: $\varepsilon_{\text{model}} \le \varepsilon_{\text{high}} + H \cdot \varepsilon_{\text{low}}$
@@ -576,11 +1139,11 @@ image: /assets/images/card3.png
 - **14.8.1.** Option-indexing meta-learning
 - **14.8.2.** Zero-shot option reuse guarantees
 - **14.8.3.** Skill-composition transformers
-- **14.8.4.** Catastrophic interference mitigation (EWC, orthogonal regularisation)
+- **14.8.4.** Catastrophic interference mitigation (**EWC**, orthogonal regularisation)
 
 ### **14.9. Offline & Safe HRL**
 - **14.9.1.** Batch-RL foundations for SMDPs
-- **14.9.2.** Behaviour-Constrained Option Learning (BC-OC)
+- **14.9.2.** Behaviour-Constrained Option Learning (**BC-OC**)
 - **14.9.3.** Shielded and chance-constrained intra-option policies
 - **14.9.4.** Safe termination verification via temporal logic
 - **14.9.5.** Dataset shift and counterfactual corrections
@@ -589,16 +1152,16 @@ image: /assets/images/card3.png
 - **14.10.1.** Belief-space managers
 - **14.10.2.** Recurrent option policies
 - **14.10.3.** Information bottlenecks for options
-- **14.10.4.** Applications: ViZDoom, real-world navigation
+- **14.10.4.** Applications: **ViZDoom**, real-world navigation
 
 ### **14.11. Multi-Agent Hierarchical Coordination**
 - **14.11.1.** Shared skill libraries and Kronecker graphs
 - **14.11.2.** Hierarchical credit assignment across agents
 - **14.11.3.** Game-theoretic option selection
-- **14.11.4.** Case study: StarCraft II macro-actions
+- **14.11.4.** Case study: **StarCraft II** macro-actions
 
 ### **14.12. Applications & Case Studies**
-- **14.12.1.** Robotic manipulation (Meta-World, Franka Kitchen)
+- **14.12.1.** Robotic manipulation (**Meta-World**, **Franka Kitchen**)
 - **14.12.2.** Autonomous driving (lane merge, intersection)
 - **14.12.3.** Surgical robotics (sub-task libraries, safe terminations)
 - **14.12.4.** Listwise recommendation systems
@@ -620,7 +1183,7 @@ image: /assets/images/card3.png
 
 ---
 
-## **15. Multi-Agent Reinforcement Learning & Stochastic Games**
+## **Chapter 15: Multi-Agent Reinforcement Learning & Stochastic Games**
 
 ### **15.1. Overview & Taxonomy**
 - **15.1.1.** From single-agent RL to economic and societal systems
@@ -648,7 +1211,7 @@ image: /assets/images/card3.png
 - **15.4.1. Value-based learning**
     - Independent **Q-learning** (lenient, hysteretic)
     - Value decomposition: **VDN**, **QMIX**, **QPLEX**, **DCG**
-    - Zero-sum solvers: **Minimax-Q**, Nash-Q
+    - Zero-sum solvers: **Minimax-Q**, **Nash-Q**
     - Opponent-aware methods: **LOLA-DICE**, **LIO**
 - **15.4.2. Policy-gradient & actor–critic**
     - CTDE critics: **COMA**, **MADDPG**, **MAPPO**
@@ -696,16 +1259,16 @@ image: /assets/images/card3.png
 - **15.10.5.** Alignment and normative constraints (Constitutional RL for swarms)
 
 ### **15.11. Benchmarks, Environments & Evaluation**
-- **15.11.1.** Cooperative suites: **SMAC-v2**, Google Football, **Overcooked-MR-2024**
-- **15.11.2.** Competitive/mixed suites: Hanabi, Stratego, **MPE-DG**
+- **15.11.1.** Cooperative suites: **SMAC-v2**, **Google Football**, **Overcooked-MR-2024**
+- **15.11.2.** Competitive/mixed suites: **Hanabi**, **Stratego**, **MPE-DG**
 - **15.11.3.** Real-world control: traffic, warehouses, energy markets
 - **15.11.4.** Metrics: win-rate, exploitability, NashConv, generalisation
 - **15.11.5.** Reproducibility stacks: **PettingZoo**, **MARL-Bench**, **RLlib-MARL**
 
 ### **15.12. Theoretical Guarantees & Complexity**
 - **15.12.1.** PAC bounds for team and zero-sum stochastic games
-- **15.12.2.** Online regret minimisation (CFR, OMD)
-- **15.12.3.** Convergence of Gradient Descent/Ascent (GDA)
+- **15.12.2.** Online regret minimisation (**CFR**, **OMD**)
+- **15.12.3.** Convergence of Gradient Descent/Ascent (**GDA**)
 - **15.12.4.** Propagation-of-chaos and mean-field convergence
 - **15.12.5.** Sample-complexity gaps: CTDE vs. fully decentralised
 
@@ -718,7 +1281,7 @@ image: /assets/images/card3.png
 
 ---
 
-## **16. Task Distributions & Transfer Principles**
+## **Chapter 16: Task Distributions & Transfer Principles**
 
 ### **16.0. Orientation & Road-Map**
 - **16.0.1.** Motivation and historical context
@@ -726,122 +1289,79 @@ image: /assets/images/card3.png
 - **16.0.3.** Reader’s guide (theory → algorithms → evaluation flow)
 
 ### **16.1. Sample-Space Formulation of an MDP Family**
-1.  **16.1.1.** MDP recap & notation (states S, actions A, transitions P, rewards R, discount γ)
-2.  **16.1.2.** Task-generating random variables: latent θ, generative map $f:\Theta\to\mathcal M$
-3.  **16.1.3.** Sampling regimes: IID batches, non-IID streams, adversarial sequences
-4.  **16.1.4.** Structural assumption library: shared (S,A), Lipschitz in θ, compact support
-5.  **16.1.5.** Canonical task families: contextual bandits, linear systems, domain-randomised robotics
-6.  **16.1.6.** Extensions: belief-MDPs for partial observability, causal task graphs, exchangeable processes
-7.  **16.1.7.** Common pitfalls: support mismatch, hidden confounders, unverifiable priors
+- **16.1.1.** MDP recap & notation ($S, A, P, R, \gamma$)
+- **16.1.2.** Task-generating random variables: latent $\theta$, generative map $f:\Theta\to\mathcal M$
+- **16.1.3.** Sampling regimes: IID batches, non-IID streams, adversarial sequences
+- **16.1.4.** Structural assumption library: shared ($S,A$), Lipschitz in $\theta$, compact support
+- **16.1.5.** Canonical task families: contextual bandits, linear systems, domain-randomised robotics
+- **16.1.6.** Extensions: belief-MDPs, causal task graphs, exchangeable processes
+- **16.1.7.** Common pitfalls: support mismatch, hidden confounders, unverifiable priors
 
 ### **16.2. Quantifying Task Similarity**
-> *The metric chosen here is what § 16.5 measures when reporting forward/backward-transfer scores.*
-1.  **16.2.1.** Design desiderata: transfer correlation, sample computability, invariances
-2.  **16.2.2.** Distributional metrics: KL, χ², TV, Jensen–Shannon; Wasserstein & OT
-3.  **16.2.3.** Dynamics-focused metrics: state/action bisimulation, successor-feature distance
-4.  **16.2.4.** Representation-driven metrics: learned task embeddings, contrastive InfoNCE
-5.  **16.2.5.** Empirical estimation techniques: importance-weighting, kernel-MMD, GNN graph-matching
-6.  **16.2.6.** Theoretical properties: stability, invariance classes, sample-complexity lower bounds
-7.  **16.2.7.** Choosing a metric in practice: alignment with § 16.4 transfer mechanism, diagnostic checklist
-8.  **16.2.8.** **Value-aware & EPIC distances**: AVD, EPIC, DARD; regret and optimal-policy bounds
-9.  **16.2.9.** Metric-learning pitfalls: spurious similarity under sparse rewards, over-smooth embeddings
+- **16.2.1.** Design desiderata: transfer correlation, sample computability, invariances
+- **16.2.2.** Distributional metrics: KL, $\chi^2$, TV, Jensen–Shannon; Wasserstein & OT
+- **16.2.3.** Dynamics-focused metrics: bisimulation, successor-feature distance
+- **16.2.4.** Representation-driven metrics: learned task embeddings, contrastive **InfoNCE**
+- **16.2.5.** Empirical estimation: importance-weighting, kernel-MMD, GNN graph-matching
+- **16.2.6.** Theoretical properties: stability, invariance classes, sample-complexity lower bounds
+- **16.2.7.** Value-aware & EPIC distances: **AVD**, **EPIC**, **DARD**; regret and optimal-policy bounds
+- **16.2.8.** Metric-learning pitfalls: spurious similarity, over-smooth embeddings
 
 ### **16.3. Generalisation Guarantees Across Tasks**
-> *Bounds here guide algorithm design in § 16.6.*
-1.  **16.3.1.** PAC & PAC-Bayes refresher (single task)
-2.  **16.3.2.** Meta-PAC-Bayes bounds: hierarchical priors, task-conditioned posteriors
-3.  **16.3.3.** Online & lifelong regret bounds: memory-limited agents, task streams
-4.  **16.3.4.** Distribution-shift compensation terms: shift-aware KL, Wasserstein corrections
-5.  **16.3.5.** Information-theoretic objectives: MDL, mutual-information regularisers
-6.  **16.3.6.** Lower bounds & impossibility results: adversarial tasks, negative-transfer hardness
-7.  **16.3.7.** Practical implications: posterior sampling, optimism, Bayesian meta-RL recipes
+- **16.3.1.** PAC & PAC-Bayes refresher (single task)
+- **16.3.2.** Meta-PAC-Bayes bounds: hierarchical priors, task-conditioned posteriors
+- **16.3.3.** Online & lifelong regret bounds: memory-limited agents, task streams
+- **16.3.4.** Distribution-shift compensation terms: shift-aware KL, Wasserstein corrections
+- **16.3.5.** Information-theoretic objectives: MDL, mutual-information regularisers
+- **16.3.6.** Lower bounds & impossibility results: adversarial tasks, negative-transfer hardness
+- **16.3.7.** Practical implications: posterior sampling, optimism, Bayesian meta-RL recipes
 
 ### **16.4. Taxonomy of Transfer Mechanisms**
-> *Each mechanism links back to similarity (§ 16.2) and forward to evaluation (§ 16.5).*
-1.  **16.4.1.** Four transferable objects: representation ϕ, dynamics P, policy π, reward R
-2.  **16.4.2.** Representation transfer: SSL pre-training, successor features, Lipschitz guarantees
-3.  **16.4.3.** Dynamics transfer: latent SSMs, simulators, robust MPC residuals
-4.  **16.4.4.** Policy transfer: warm-starts, option libraries, distillation vs ensembling
-5.  **16.4.5.** Reward & preference transfer: potential-based shaping, inverse RL, RLHF preference reuse
-6.  **16.4.6.** Hybrid & hierarchical transfer: joint ϕ + π, meta-optimisation across levels
-7.  **16.4.7.** Negative transfer diagnostics: covariate shift, entangled dynamics-reward, goal mis-generalisation
-8.  **16.4.8.** Safety, fairness & privacy: robustness, demographic parity across tasks, data-privacy in meta-datasets
-9.  **16.4.9.** Case studies: sim-to-real manipulation, multi-game agents, personalised tutoring
-10. **16.4.10.** Unsupervised skill discovery & autonomous RL: DIAYN, APS, unsupervised RL pre-training
-11. **16.4.11.** Multi-agent & LLM-augmented transfer: opponent modelling, emergent communication, LLM tool-use
+- **16.4.1.** Four transferable objects: representation $\phi$, dynamics $P$, policy $\pi$, reward $R$
+- **16.4.2.** Representation transfer: SSL pre-training, successor features
+- **16.4.3.** Dynamics transfer: latent SSMs, simulators, robust MPC
+- **16.4.4.** Policy transfer: warm-starts, option libraries, distillation
+- **16.4.5.** Reward & preference transfer: potential-based shaping, inverse RL, **RLHF**
+- **16.4.6.** Hybrid & hierarchical transfer: joint $\phi + \pi$, meta-optimisation
+- **16.4.7.** Unsupervised skill discovery & autonomous RL: **DIAYN**, **APS**
+- **16.4.8.** Multi-agent & LLM-augmented transfer: opponent modelling, tool-use
 
 ### **16.5. Evaluation Protocols & Metrics**
-> *Standardises what practitioners must report; cross-links to theory (§ 16.3) and ethics (§ 16.4.8).*
-1.  **16.5.1.** Performance metrics: jump-start, asymptotic gain, forward/backward transfer
-2.  **16.5.2.** Efficiency metrics: sample complexity, wall-clock, **energy / CO₂ cost**
-3.  **16.5.3.** Continual-learning metrics: forgetting rate, knowledge-retention curves
-4.  **16.5.4.** Statistical methodology: hierarchical bootstrap, effect sizes, confidence intervals
-5.  **16.5.5.** Benchmark suites: Meta-World+, MT10/50, Procgen, RL-Unplugged-Meta
-6.  **16.5.6.** Experimental design standards: paired seeds, hyper-parameter transparency
-7.  **16.5.7.** Visualisation best practices: CI ribbons, FT/BT heat-maps, Pareto fronts
-8.  **16.5.8.** Task-difficulty normalisation & scoring
-9.  **16.5.9.** Responsible-AI metrics: safety violations, fairness gaps, privacy leakage
-10. **16.5.10.** Reproducibility check-lists & badges (ICML/NeurIPS 2025 requirements)
+- **16.5.1.** Performance metrics: jump-start, asymptotic gain, forward/backward transfer
+- **16.5.2.** Efficiency metrics: sample complexity, wall-clock, energy / CO₂ cost
+- **16.5.3.** Continual-learning metrics: forgetting rate, knowledge-retention
+- **16.5.4.** Statistical methodology: hierarchical bootstrap, effect sizes, CIs
+- **16.5.5.** Benchmark suites: **Meta-World+**, **MT10/50**, **Procgen**, **RL-Unplugged-Meta**
+- **16.5.6.** Responsible-AI metrics: safety violations, fairness gaps, privacy leakage
+- **16.5.7.** Reproducibility check-lists & badges (ICML/NeurIPS 2025 requirements)
 
 ### **16.6. Algorithmic Frameworks for Transfer & Meta-RL**
-- **A. Model-Free Meta-RL**
-    - A.1. Gradient-based (MAML, Reptile, ANIL)
-    - A.2. Memory-based (RL², SNAIL, Meta-GRU)
-    - A.3. Exploration-driven (MAESN, E-MAML, E3B)
-- **B. Model-Based & World-Model Meta-RL**
-    - B.1. Dreamer variants, PlaNet-meta, MBRL-in-context
-    - B.2. Latent dynamics adaptation (E2C-meta, RSSM++), safety-filtered MPC
-    - B.3. Skill-conditional world models & zero-shot planning
-- **C. Sequence Models & RLHF Transfer**
-    - C.1. Decision Transformers & Trajectory Diffusion Models
-    - C.2. In-context reinforcement learning with large sequence models
-    - C.3. RL from Human Feedback as a transfer pipeline (preference reuse, value alignment)
-- **D. Curriculum & Task-Sequencing Algorithms**
-    - D.1. Domain randomisation curricula
-    - D.2. Level replay & PLR
-    - D.3. Bayesian curriculum shaping
-- **E. Skill Discovery & Option Libraries** (links to § 16.4.10)
-    - E.1. DIAYN, CIC, APS
-    - E.2. Transferable option critiquing
-    - E.3. Skill distillation
-- **F. Safety- & multi-objective-aware variants**
-    - F.1. Constrained meta-RL
-    - F.2. Distributionally robust baselines
-    - F.3. Fairness-regularised objectives
+- **16.6.1. Model-Free Meta-RL:** Gradient-based (**MAML**), Memory-based (**RL²**), Exploration-driven (**MAESN**)
+- **16.6.2. Model-Based Meta-RL:** **Dreamer** variants, Latent dynamics adaptation (**E2C-meta**)
+- **16.6.3. Sequence Models & RLHF Transfer:** Decision Transformers, In-context RL, Preference reuse
+- **16.6.4. Curriculum & Task-Sequencing:** Domain randomisation, **PLR**, Bayesian curriculum shaping
+- **16.6.5. Skill Discovery & Option Libraries:** **DIAYN**, **CIC**, **APS**, Skill distillation
+- **16.6.6. Safety- & Multi-objective-aware variants:** Constrained meta-RL, Distributionally robust baselines
 
 ### **16.7. Applications & Case Studies**
-1.  **16.7.1.** Robotics (sim-to-real, multi-skill)
-2.  **16.7.2.** Multilingual dialogue & NLP
-3.  **16.7.3.** Healthcare personalisation
-4.  **16.7.4.** Autonomous driving & fleet learning
-5.  **16.7.5.** Game playing & procedural generalisation
-6.  **16.7.6.** Finance & energy grids optimisation
-7.  **16.7.7.** Multi-agent simulation & LLM-based agents
+- **16.7.1.** Robotics (sim-to-real, multi-skill)
+- **16.7.2.** Multilingual dialogue & NLP
+- **16.7.3.** Healthcare personalisation
+- **16.7.4.** Autonomous driving & fleet learning
+- **16.7.5.** Game playing & procedural generalisation
 
 ### **16.8. Open Problems & Future Directions**
 - **16.8.1.** Lifelong meta-learning under non-stationary drift
 - **16.8.2.** Causality-aware task transfer
 - **16.8.3.** Data-efficient world-model learning
 - **16.8.4.** Multi-objective safety-fairness trade-offs
-- **16.8.5.** Benchmark-to-real gap measurement & fidelity
-- **16.8.6.** Policy implications and societal impact
+- **16.8.5.** Policy implications and societal impact
 
 ### **16.9. Summary & Further Reading**
-- Key take-aways per section
-- Annotated bibliography (classic + 2024-25 papers)
-- Exercises, discussion prompts
-
-### **Cross-Reference Map (examples)**
-
-| Concept | Defined in | Evaluated/measured in |
-| :--- | :--- | :--- |
-| Equivalent-Policy Invariant Comparison (EPIC) | § 16.2.8 | § 16.5.1, 16.5.4 |
-| Lifelong regret bound | § 16.3.3 | § 16.5.3 |
-| Unsupervised skill library | § 16.4.10 | § 16.6.E, 16.5.2 |
 
 ---
 
-## **17. Meta-Reinforcement Learning**
+## **Chapter 17: Meta-Reinforcement Learning**
 
 ### **17.1. Foundations & Problem Formulation**
 - **17.1.1.** Historical context and motivations
@@ -861,13 +1381,13 @@ image: /assets/images/card3.png
 ### **17.3. Gradient-Based and Gradient-Free Meta-Learners**
 - **17.3.1.** **MAML** family (**FOMAML**, **Reptile**, **ANIL**)
 - **17.3.2.** Learn-to-Optimise approaches (LSTM/Transformer optimisers)
-- **17.3.3.** Gradient-free and evolution strategies (**CMA-ES**, PBT, ARS)
+- **17.3.3.** Gradient-free and evolution strategies (**CMA-ES**, **PBT**, **ARS**)
 - **17.3.4.** Meta-policy-gradient formulations
 - **17.3.5.** Hyper-parameter search and BO-MRL
 
 ### **17.4. Recurrent & Transformer In-Context Meta-Learners**
 - **17.4.1.** **RL²**, **L2RL**, and other RNN agents
-- **17.4.2.** Memory-augmented architectures (NTM, DND)
+- **17.4.2.** Memory-augmented architectures (**NTM**, **DND**)
 - **17.4.3.** Sequence-model meta-RL (**Decision Transformer-Meta**)
 - **17.4.4.** Hyper-networks and meta-controllers
 
@@ -878,7 +1398,7 @@ image: /assets/images/card3.png
 - **17.5.4.** Context-VAE / latent-PPO & SAC families
 
 ### **17.6. Model-Based Meta-RL**
-- **17.6.1.** **MB-MAML** and RLG-MAML
+- **17.6.1.** **MB-MAML** and **RLG-MAML**
 - **17.6.2.** Latent dynamics meta-learning (**Meta-PlaNet**, **Dreamer-Meta**)
 - **17.6.3.** Planning-as-Inference and world-model adaptation
 
@@ -916,106 +1436,46 @@ image: /assets/images/card3.png
 
 ---
 
-## **18. Continual Reinforcement Learning**
+## **Chapter 18: Continual Reinforcement Learning**
 
 ### **18.0. Overview & Motivation**
 - **18.0.1.** Why Continual Learning in RL?
 - **18.0.2.** Historical Trajectory (1990–2025)
-- **18.0.3.** Terminology & Scope
-    - Continual vs Lifelong vs Online vs Open-World
-    - Task-, Domain-, Class-Incremental RL
+- **18.0.3.** Terminology & Scope (Continual vs Lifelong vs Online vs Open-World)
 - **18.0.4.** Chapter Road-Map
 
 ### **18.1. Non-Stationary Environments & Task Sequences**
-- **18.1.1.** Drift Taxonomy
-    - a. Abrupt / piece-wise-stationary
-    - b. Gradual stochastic drift
-    - c. Periodic & seasonal
-    - d. Latent-context switches
-- **18.1.2.** Formal Definition: Non-Stationary MDP
-    - Time-indexed kernels $(P_t, R_t)$
-    - Task sequences & boundaries
-- **18.1.3.** Detecting Change
-    - Statistical tests & surprise signals
-    - Hidden-Mode MDP inference
+- **18.1.1.** Drift Taxonomy: Abrupt, Gradual, Periodic, Latent-context switches
+- **18.1.2.** Formal Definition: Non-Stationary MDP with time-indexed kernels $(P_t, R_t)$
+- **18.1.3.** Detecting Change: Statistical tests, surprise signals, Hidden-Mode MDP inference
 - **18.1.4.** Task Similarity & Transferability
 - **18.1.5.** Exploration–Exploitation under Drift
-- **18.1.6.** Problem Variants
-    - Curriculum with known order
-    - Unknown boundaries (online CL)
-    - Open-world / open-set RL
-- **18.1.7.** Practical Assumptions & Limits
-- **18.1.8.** Formalisms & Taxonomies
-    - Unified notation for task/domain/class-incremental RL
-- **18.1.9.** Special Settings
-    - a. POMDP & latent-state drift
-    - b. Hybrid Offline-to-Online Continual RL
+- **18.1.6.** Problem Variants: Curriculum, Unknown boundaries, Open-world RL
+- **18.1.7.** Special Settings: POMDP & latent-state drift, Hybrid Offline-to-Online CL
 
 ### **18.2. Algorithmic Approaches**
-- **18.2.1. Regularisation-Based Methods**
-    - **18.2.1.1.** Quadratic Priors (EWC, Online Laplace)
-    - **18.2.1.2.** Path-Integral & Sensitivity (SI, MAS)
-- **18.2.2. Replay-Based Methods**
-    - **18.2.2.1.** Experience & Reservoir Replay
-    - **18.2.2.2.** Generative / Model-Based Replay
-    - **18.2.2.3.** Selective & Compressed Replay (coresets, KD)
-- **18.2.3. Parameter Isolation & Modular Architectures**
-    - **18.2.3.1.** Dynamic Expansion (Progressive Nets, DEN)
-    - **18.2.3.2.** Mask-Based Reuse (PackNet, SupSup, Piggyback)
-    - **18.2.3.3.** Gated Routing / Mixture-of-Experts
-- **18.2.4. Meta-Learning & Hyper-Networks**
-    - **18.2.4.1.** Meta-Gradient Adaptation (MAML, OML)
-    - **18.2.4.2.** Learned Optimisers & Hyper-Policies
-- **18.2.5. Continual World-Models & Latent Dynamics**
-    - **18.2.5.1.** Recurrent & State-Space CL models
-    - **18.2.5.2.** Memory-Augmented Predictive Models
-- **18.2.6. Safety-Aware Algorithms**
-    - Safe replay buffers & risk-aware losses
-    - Constrained RL with certificate projection
-- **18.2.7. Dual-Memory & Consolidation Systems**
-    - Sleep replay, dream-erasure, latent rehearsal
-- **18.2.8. LLM-Augmented Continual RL**
-    - Skill-language models, tool-use agents
-- **18.2.9. Resource-Aware Design**
-    - Capacity-compute-plasticity trade-offs
+- **18.2.1. Regularisation-Based Methods:** Quadratic Priors (**EWC**), Path-Integral (**SI**, **MAS**)
+- **18.2.2. Replay-Based Methods:** Experience Replay, Generative Replay, Selective Replay (coresets, KD)
+- **18.2.3. Parameter Isolation & Modular Architectures:** Dynamic Expansion (**Progressive Nets**), Mask-Based Reuse (**PackNet**), Gated Routing (MoE)
+- **18.2.4. Meta-Learning & Hyper-Networks:** Meta-Gradient Adaptation (**MAML**, **OML**), Learned Optimisers
+- **18.2.5. Continual World-Models:** Recurrent & State-Space CL models, Memory-Augmented Models
+- **18.2.6. Safety-Aware Algorithms:** Safe replay buffers, constrained RL
+- **18.2.7. Dual-Memory & Consolidation Systems:** Sleep replay, latent rehearsal
+- **18.2.8. LLM-Augmented Continual RL:** Skill-language models, tool-use agents
+- **18.2.9. Resource-Aware Design:** Capacity-compute-plasticity trade-offs
 
 ### **18.3. Evaluation Methodology**
-> *Note: Moved ahead of theory section for practical flow.*
-- **18.3.1. Metrics**
-    - **18.3.1.1.** CL-Score (BWT, FWT, Forgetting)
-    - **18.3.1.2.** Efficiency (sample, compute, energy)
-    - **18.3.1.3.** Safety & Robustness
-    - **18.3.1.4.** Capacity & Memory Footprint
-    - **18.3.1.5.** Privacy & Fairness
-- **18.3.2. Benchmarks**
-    - **18.3.2.1.** Synthetic & Toy Streams
-    - **18.3.2.2.** Video-Game Suites (MineRL-CL, Lifelong-ProcGen, Atari-LL)
-    - **18.3.2.3.** Robotics (Meta-World-Seq, CORA, CompoSuite, Lifelong Manipulation)
-    - **18.3.2.4.** Multi-Agent & Language (LifelongAgentBench)
-- **18.3.3. Experimental Protocols**
-    - **18.3.3.1.** Single-Pass Online Evaluation
-    - **18.3.3.2.** Joint Validation after Each Task
-    - **18.3.3.3.** OOD & Safety Stress-Tests
-    - **18.3.3.4.** Task-Free Streams & Anytime Evaluation
-- **18.3.4. Reproducibility & Tooling**
-    - Drift generators, seed control
-    - Logging, visualisation, leaderboards
+- **18.3.1. Metrics:** CL-Score (BWT, FWT, Forgetting), Efficiency (sample, compute), Safety, Capacity
+- **18.3.2. Benchmarks:** Synthetic streams, **MineRL-CL**, **Lifelong-ProcGen**, **Meta-World-Seq**, **LifelongAgentBench**
+- **18.3.3. Experimental Protocols:** Single-Pass Online Evaluation, Joint Validation, OOD & Safety Stress-Tests
+- **18.3.4. Reproducibility & Tooling:** Drift generators, logging, leaderboards
 
 ### **18.4. Theoretical Foundations**
-- **18.4.1. Stability–Plasticity Information Theory**
-    - **18.4.1.1.** Information Bottleneck View
-    - **18.4.1.2.** Compression-Retention Trade-off
-- **18.4.2. Regret & Sample Complexity under Drift**
-    - **18.4.2.1.** Path-Regret Bounds (TV-drift)
-    - **18.4.2.2.** Adaptive Policy Gradient Methods
-    - **18.4.2.3.** Computational Complexity & Hardness
-- **18.4.3. Generalisation with Memory Constraints**
-    - **18.4.3.1.** PAC-Bayesian Replay Bounds
-    - **18.4.3.2.** Coreset Size vs Forgetting
-- **18.4.4. Constraint Retention Guarantees**
-- **18.4.5. Formal Verification & Barrier Certificates**
-- **18.4.6. Lower Bounds & No-Free-Lunch Results**
-- **18.4.7. Open Theoretical Questions**
+- **18.4.1.** Stability–Plasticity Information Theory: Information Bottleneck, Compression-Retention Trade-off
+- **18.4.2.** Regret & Sample Complexity under Drift: Path-Regret Bounds, Adaptive Policy Gradients
+- **18.4.3.** Generalisation with Memory Constraints: PAC-Bayesian Replay Bounds, Coreset Size vs Forgetting
+- **18.4.4.** Constraint Retention Guarantees & Formal Verification
+- **18.4.5.** Lower Bounds & No-Free-Lunch Results
 
 ### **18.5. Applications & Case Studies**
 - **18.5.1.** Robotics (manipulation, navigation)
@@ -1023,26 +1483,22 @@ image: /assets/images/card3.png
 - **18.5.3.** Autonomous Vehicles & Traffic
 - **18.5.4.** Industrial Process Control
 - **18.5.5.** Healthcare & Personalised Assistants
-- **18.5.6.** Multi-Agent & Societal-Scale Systems
-- **18.5.7.** LLM-Driven Agents & Tool Use
+- **18.5.6.** LLM-Driven Agents & Tool Use
 
 ### **18.6. Open Challenges & Future Directions**
 - **18.6.1.** Robust OOD Adaptation
 - **18.6.2.** Memory-Efficient CL at Scale
 - **18.6.3.** Long-Horizon Safety & Certification
-- **18.6.4.** Autonomous Task Discovery
-- **18.6.5.** Sim-to-Real Deployment
-- **18.6.6.** Unified Theory of Transfer & Forgetting
-- **18.6.7.** Human-in-the-Loop Continual RL
-- **18.6.8.** Ethical, Legal & Societal Impacts
-- **18.6.9.** Foundation World-Models & Pre-Training
-- **18.6.10.** Compositional Generalisation & Skill Libraries
+- **18.6.4.** Autonomous Task Discovery & Sim-to-Real Deployment
+- **18.6.5.** Unified Theory of Transfer & Forgetting
+- **18.6.6.** Human-in-the-Loop Continual RL
+- **18.6.7.** Foundation World-Models & Pre-Training
 
 ### **18.7. Chapter Summary & Further Reading**
 
 ---
 
-## **19. Synthesis & Open Questions**
+## **Chapter 19: Synthesis & Open Questions**
 - **19.1.** Unified Bayesian perspective linking representation, exploration, transfer, and continual learning
 - **19.2.** Exploration–adaptation trade-off across timescales
 - **19.3.** Scalability and safety in real-world lifelong RL
