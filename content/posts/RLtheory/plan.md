@@ -205,9 +205,10 @@ image: /assets/images/card3.png
 * **9.4. Offline and Hierarchical MARL**
     * 9.4.1. Offline MARL with Static Datasets
     * 9.4.2. Hierarchical Team Architectures
-* **9.5. Population-Based Methods and Game Theory Links (PSRO, CFR)**
+* **9.5. Population-Based Methods and Game Theory Links**
     * 9.5.1. Fictitious Play and Policy-Space Response Oracles (PSRO)
     * 9.5.2. Counterfactual Regret Minimisation (CFR)
+    * 9.5.3. Diversity‑Driven Population Learning & Creative Self‑Play (AZdb)
 
 ---
 
@@ -263,4 +264,8 @@ image: /assets/images/card3.png
     * 12.3.2. Representation-Aware Exploration and Planning
 * **12.4. The Future of Foundation Models in Decision-Making**
     * 12.4.1. Integration with Language, Vision, and Action
-    * 12.4.2. Alignment, Governance, and Societal Implications
+    * 12.4.2. Foundation Models as Policy Initialisers
+    * 12.4.3. LLM‑Guided Program Evolution for Mathematical & Heuristic Discovery (FunSearch)
+    * 12.4.4. Neuro‑Symbolic Theorem Proving & Geometry Reasoning (AlphaGeometry)
+    * 12.4.5. LLM-Guided Evolutionary Program Search (AlphaEvolve)
+
