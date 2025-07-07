@@ -77,9 +77,14 @@ image: /assets/images/card3.png
 * **Chapter 10: Mechanistic Interpretability and Explainability**
     * 10.1. The Black Box Problem: From Correlation to Causation
     * 10.2. Explainable AI (XAI): Saliency Maps, Feature Attribution, and Concept-Based Explanations
-    * 10.3. Mechanistic Interpretability: Finding and Analyzing "Circuits" in Transformers and CNNs
-    * 10.4. Probing and Diagnostic Classifiers
-    * 10.5. The Link Between Interpretability and Safety
+    * 10.3. Foundations of Mechanistic Interpretability
+    * 10.4. Feature-level Analysis 
+    * 10.5. Circuit‑Level Analysis 
+    * 10.6. Representation Pathologies & Diagnostics
+    * 10.7. Probing and Diagnostic Classifiers
+    * 10.8. The Link Between Interpretability and Safety
+    * 10.9. Scalable Tooling & Automation
+    * 10.10. Evaluation & Benchmarks
 * **Chapter 11: Biologically-Inspired Paradigms**
     * 11.1. Neuroscience as a Source of Architectural Priors
     * 11.2. Spiking Neural Networks (SNNs): Event-Driven and Efficient Computation
