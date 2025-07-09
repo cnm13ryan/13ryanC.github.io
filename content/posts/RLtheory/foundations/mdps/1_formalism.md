@@ -193,8 +193,25 @@ Let $(\Omega, \mathcal{F}, \mathbb{P})$ be a probability space, $X$ be a random 
 2.  For a fixed set $B \in \mathcal{B}(S)$, $\kappa(\cdot, B)$ is a $\mathcal{G}$-measurable function.
 3.  It satisfies the conditional probability definition: $\mathbb{P}(X \in B | \mathcal{G})(\omega) = \kappa(\omega, B)$ almost surely.
 
-This result, which fails for general measurable spaces, is precisely what allows us to define the transition kernel $p(ds'|s,a)$ and policy kernel $\pi(da|s)$ as functions that map points ($s$ or $(s,a)$) to measures. Without it, the structural integrity of the MDP definition and the Ionescu-Tulcea Extension Theorem would be compromised.
+This result is precisely what allows us to define the transition kernel $p(ds'|s,a)$ and policy kernel $\pi(da|s)$ as functions that map points to measures. Without it, the structural integrity of the MDP definition would be compromised.
 
+> **Remark: Why Polish Topology is the Key Ingredient**
+> The existence of regular conditional probabilities fails for general measurable spaces. The proof for Standard Borel spaces hinges on the properties of the underlying Polish topology. Here's the intuition:
+>
+> 1.  **Separability**: A Polish space has a countable dense subset. This allows us to "approximate" any open set with a countable collection of simpler sets (e.g., open balls centered on the dense points). By extension, this provides a countable family of sets (a $\pi$-system) that generates the entire Borel $\sigma$-algebra.
+>
+> 2.  **Characterizing Measures**: A probability measure is uniquely determined by its values on a generating $\pi$-system. Therefore, we only need to define our conditional probability kernel, $\kappa(\omega, \cdot)$, on this countable collection of simple sets.
+>
+> 3.  **Construction**: For each set $A$ in our countable generator, we can find a version of the conditional probability $\mathbb{P}(X \in A \mid \mathcal{G})$. We can then piece these together for all sets in the generator and, using a limiting argument (leveraging the completeness of the space), extend this definition to the entire $\sigma$-algebra. This process guarantees that for almost every $\omega$, the resulting function is a true, countably additive probability measure.
+>
+> In essence, the topological "niceness" of Polish spaces ensures there's a countable "scaffolding" upon which we can construct the conditional measure, avoiding the paradoxes of uncountable sets.
+ 
+
+> **Remark: What Breaks Without Regularity?**
+> If the space is not Standard Borel, the existence of a regular conditional probability is not guaranteed. This means that while a conditional probability might exist as an abstract object, there may be no function-like kernel $\kappa(\omega, \cdot)$ to represent it. Specifically, one of two things could fail:
+> 1.  For some conditioning events $\omega$, the object $\kappa(\omega, \cdot)$ might not be a valid, countably additive probability measure.
+> 2.  For some outcome sets $B$, the function $\omega \mapsto \kappa(\omega, B)$ might not be measurable, making it impossible to integrate and compute expectations.
+> Without this guarantee, the transition kernel $p(ds'|s,a)$ itself might not be well-defined for all $(s,a)$, causing the entire MDP formalism to collapse.
 
 **Common Examples**:
 
@@ -360,9 +377,14 @@ The integral is constructed in three steps:
 
 2.  **Non-negative Functions**: If $X \ge 0$, $\mathbb{E}[X]$ is the supremum of expectations of all simple functions $Y$ such that $0 \le Y \le X$.
 
-3.  **General Functions**: For any $X$, we write $X = X^+ - X^-$, where $X^+ = \max(X, 0)$ and $X^- = \max(-X, 0)$. The variable $X$ is said to be **integrable** if $\mathbb{E}[|X|] = \mathbb{E}[X^+] + \mathbb{E}[X^-] < \infty$. If it is integrable, its expectation is defined as $\mathbb{E}[X] = \mathbb{E}[X^+] - \mathbb{E}[X^-]$. This condition is crucial to ensure the result is not an undefined form like $\infty - \infty$.
- +> **Remark: The Power of the Lebesgue Integral**
+3.  **General Functions**: 
+    * For any $X$, we write $X = X^+ - X^-$, where $X^+ = \max(X, 0)$ and $X^- = \max(-X, 0)$. 
+    * The variable $X$ is said to be **integrable** if $\mathbb{E}[|X|] = \mathbb{E}[X^+] + \mathbb{E}[X^-] < \infty$. 
+    * If it is integrable, its expectation is defined as $\mathbb{E}[X] = \mathbb{E}[X^+] - \mathbb{E}[X^-]$. 
+    * This condition is crucial to ensure the result is not an undefined form like $\infty - \infty$.
 
+
+> **Remark: The Power of the Lebesgue Integral**
 > The true analytical power of the Lebesgue integral comes from its behavior with limits. Two cornerstone results, omitted here for brevity but essential for rigorous proofs, are the **Monotone Convergence Theorem (MCT)** and the **Dominated Convergence Theorem (DCT)**. These theorems provide precise conditions under which one can exchange the order of limits and integration ($\lim \int = \int \lim$). This operation is fundamental to proving the convergence of iterative algorithms and establishing the completeness of function spaces used in dynamic programming.
 
 
@@ -580,14 +602,16 @@ A **policy** $\pi$ is a **probability kernel** from the state space $(S, \mathca
 
 As previously defined, a policy $\pi$ is a probability kernel mapping states to distributions over actions. This definition is both general and powerful, encompassing several crucial special cases that form the basis of reinforcement learning algorithms.
 
+* **General vs. Memoryless Policies**:
+    * A **general (or history-dependent) policy** is the most expansive class of strategies, where the action at time $t$ can depend on the entire history up to that point, $h_t = (s_0, a_0, r_1, \dots, s_t)$. Formally, it is a sequence of kernels $\pi_t(da_t | h_t)$. Such policies are necessary for finite-horizon problems or when the state signal is not fully Markovian.
+
+    * A **memoryless (or stationary) policy** is a crucial subclass where the action distribution depends only on the current state $s_t$, not on the time step $t$ or the prior history. It is represented by a single, time-independent kernel $\pi(da|s)$. For the discounted, infinite-horizon MDPs considered here, a foundational result is that an optimal policy can always be found within this simpler class, making the search for solutions tractable.
+
 * **Stochastic vs. Deterministic Policies**:
-    * A **stochastic policy** is the general form, where for a state $s$, $\pi(\cdot|s)$ is a non-degenerate probability measure over the action space $A$. The agent samples an action $a_t \sim \pi(\cdot|s_t)$ at each step. This inherent randomness is essential for exploration and can be optimal in partially observed environments or when facing a stochastic opponent.
-    * A **deterministic policy** is a special case where the policy kernel is a Dirac delta measure concentrated on a single action for each state. That is, for each $s \in S$, there exists an action $\mu(s) \in A$ such that $\pi(da|s) = \delta_{\mu(s)}(da)$. Such a policy can be represented more simply as a measurable function $\mu: S \to A$. While conceptually simpler, finding an optimal deterministic policy is often the ultimate goal in fully-observed, discounted MDPs.
+    * A **stochastic policy** is the general form where for a state $s$, $\pi(\cdot|s)$ is a non-degenerate probability measure over the action space $A$.
 
-* **Stationary vs. Non-Stationary Policies**:
-    * A **stationary policy**, also known as a Markovian policy, is a policy where the action distribution depends only on the current state $s_t$, not on the time step $t$ or the prior history. The definition $\pi(da|s)$ represents a stationary policy. For the class of discounted, infinite-horizon MDPs considered here, there is always a stationary policy that is optimal. This is a foundational result that makes the search for solutions tractable.
-    * A **non-stationary (or history-dependent) policy** is a more general construct where the action at time $t$ can depend on the entire history up to that point, $h_t = (s_0, a_0, r_1, \dots, s_t)$. Formally, it is a sequence of kernels $\pi_t(da_t | h_t)$. Such policies are necessary for finite-horizon problems or when the state signal is not fully Markovian.
-
+    * A **deterministic policy** is a special case where the policy kernel is a Dirac delta measure concentrated on a single action for each state, representable as a measurable function $\mu: S \to A$.
+ 
 For the remainder of this analysis, we will focus on **stationary, stochastic policies**, whose optimality is a direct consequence of the time-independent nature of the Bellman optimality principle.
 
 ### 2.2.2 Trajectories, Returns, and the Objective
@@ -722,7 +746,7 @@ The construction is governed by three fundamental conditions that define the pro
 The probability of a specific finite history (a cylinder set) $H_t = (s_0, a_0, \dots, s_{t-1}, a_{t-1}, s_t)$ is given by integrating over the sequence of kernels:
 
 $$
-\mathbb{P}_\mu^\pi (S_0 \in ds_0, \dots, S_t \in ds_t) = \mu(ds_0) \left( \prod_{k=0}^{t-1} \pi(da_k|s_k) p(ds_{k+1}|s_k, a_k) \right)
+\mathbb P_\mu^\pi (S_0 \in ds_0, \dots, S_t \in ds_t) = \mu(ds_0) \left( \prod_{k=0}^{t-1} \pi(da_k|s_k) p(ds_{k+1}|s_k, a_k) \right)
 $$
 
 This explicit construction for cylinder sets forms the basis that the Ionescu-Tulcea theorem extends to the entire infinite-horizon $\sigma$-algebra $\mathcal{F}$.
@@ -762,14 +786,19 @@ This property states that the process probabilistically "restarts" from the stat
 >
 > A kernel has the **Feller property** if its corresponding Markov operator (Definition 1.6.3) maps the space of bounded, *continuous* functions to itself. That is, if $g$ is a bounded and continuous function, then the function $(Pg)(x) = \int g(y) \kappa(x, dy)$ is also bounded and continuous in $x$.
 >
+> **Proof Sketch: Why Feller implies Strong Markov**
+> 1.  **Approximation**: The core idea is to approximate a stopping time $\tau$ from above by a sequence of discrete-valued stopping times, $\tau_n = \lceil 2^n \tau \rceil / 2^n$. The event $\{\tau = t\}$ is $\mathcal F_t$-measurable, but for a general stopping time, the conditional expectation $\mathbb E [g(S_{\tau+1}) \mid \mathcal F_\tau]$ is tricky.
+> 2.  **Simple Case**: For a fixed time $t$, the simple Markov property holds: $\mathbb E [g(S_{t+1}) \mid \mathcal F_t] = (Pg)(S_t)$.
+> 3.  **Martingale Connection**: One can construct a martingale related to the process. For a Feller process, the function $v(s) = (Pg)(s)$ is continuous. The process $M_t = v(S_t) - \sum_{k=0}^{t-1} (Pv)(S_k)$ is related to a martingale. Doob's Optional Stopping Theorem states that under certain conditions, the expectation of a martingale is conserved at stopping times.
+> 4.  **Continuity is Key**: When we take the limit as $\tau_n \to \tau$, the continuity of $g$ and, crucially, the continuity of $Pg$ (guaranteed by the Feller property) ensure that the expectation converges correctly: $\mathbb E [g(S_{\tau_n}) \mid \mathcal F_{\tau_n}] \to \mathbb{E}[g(S_\tau) | \mathcal F_\tau]$. Without Feller continuity, $S_{\tau_n} \to S_\tau$ would not imply $(Pg)(S_{\tau_n}) \to (Pg)(S_\tau)$, and the proof would fail. The specific path taken to arrive at $S_\tau$ would provide extra information, breaking the "restart" property. Feller continuity ensures that the future evolution depends smoothly on the present state $S_\tau$, regardless of the history of how that state was reached.
+
 > For the policy-conditioned process to be Feller, certain regularity assumptions must be placed on the MDP's primitive components. For instance, the property holds if the environment kernel $p(ds'|s,a)$ and the policy kernel $\pi(da|s)$ are both weakly continuous in their respective arguments.
-> This topological continuity of the operator with respect to the state variable is the crucial property that allows the conditioning argument, which holds for a fixed time `t`, to also hold in the limit for a random stopping time `τ`. It ensures that the probabilistic state of the system does not "jump" unexpectedly at the stopping time, allowing the process to be treated as if it is restarting. Without this property, the analysis of many optimal stopping and control problems in reinforcement learning would be mathematically intractable.
+> This continuity is what bridges the gap between fixed and random times. For a fixed time `t`, the Markov property is a direct consequence of the process's construction. For a random stopping time `τ`, we must be sure that the history leading up to the stop does not provide extra information. If the kernel were not Feller, the transition probabilities could be discontinuous in the state. An agent could then exploit this discontinuity; the specific path taken to arrive at state $S_\tau$ would inform it about a likely "jump" in transition dynamics, breaking the "restart" property. Feller continuity ensures that the future evolution depends smoothly on the present state $S_\tau$, regardless of the history of how that state was reached.
+ 
 
 
 > **Remark: Beyond Borel Measurability**
 > This entire framework relies on Borel measurability. However, in more advanced analyses, key sets (e.g., the set of states where one policy is better than another) are not guaranteed to be Borel but rather **analytic**. An analytic set is a continuous image of a Borel set.
 >
 > A cornerstone of advanced theory is that analytic subsets of standard Borel spaces are **universally measurable**, meaning they are measurable with respect to the completion of any probability measure. This wider class of sets and functions is often necessary to establish the existence of optimal value functions and policies under the most general conditions, providing a deeper layer of rigor than a strict adherence to Borel sets allows.
- 
- 
-
+> The primary motivation for this extension arises when proving the existence of optimal policies under the most general conditions. For instance, a key step in policy iteration involves analyzing the set of states where one policy is superior to another, i.e., the set $U = \{s \in S \mid v_{\pi_1}(s) > v_{\pi_2}(s)\}$. While the value functions $v_\pi$ are guaranteed to be measurable, the optimal value function $v^* = \sup_{\pi} v_\pi$ is not guaranteed to be Borel-measurable when the supremum is taken over an uncountable number of policies. It is, however, **analytic**. This means the set $\{s \in S \mid v^*(s) > c\}$ may not be a Borel set, which would prevent us from verifying the measurability of policies derived from it. Universal measurability guarantees that these crucial analytic sets are still part of a valid, extended $\sigma$-algebra, ensuring that all integrals in the analysis remain well-defined and the theory holds.
