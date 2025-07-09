@@ -178,12 +178,23 @@ A measurable space $(S, \Sigma_S)$ is called a **standard Borel space** if it is
 Therefore, a standard Borel space is any measurable space $(S, \Sigma_S)$ for which there exists some Polish space $P$ and a measurable isomorphism $f: S \to P$. 
 
 This abstraction is powerful: it allows us to apply the strong results from Polish spaces to other spaces that are not naturally Polish but are structurally equivalent from a measure-theoretic perspective (e.g., the space of all policies). From this viewpoint, $S$ is indistinguishable from a Polish space like the real numbers.
- 
-
 
 The definition relies on a deep result in descriptive set theory: any two uncountable standard Borel spaces are isomorphic to each other. This means that for many purposes, they can all be treated as if they were the real numbers with their Borel sets, $(\mathbb{R}, \mathcal{B}(\mathbb{R}))$.
 
 Standard Borel spaces are crucial in probability theory and stochastic processes because they are "well-behaved" and exclude the pathological sets that can complicate measure theory.
+
+### 1.2.5 The Role of Regularity: Why Standard Borel?
+
+The requirement for state and action spaces to be Standard Borel is not merely a technical convenience; it is the bedrock upon which the theory of stochastic processes is built. Its primary importance lies in guaranteeing the existence of **regular conditional probability distributions**.
+
+Let $(\Omega, \mathcal{F}, \mathbb{P})$ be a probability space, $X$ be a random variable taking values in a Standard Borel space $(S, \mathcal{B}(S))$, and $\mathcal{G} \subseteq \mathcal{F}$ be a sub-$\sigma$-algebra. The theory ensures that a function $\kappa: \Omega \times \mathcal{B}(S) \to [0,1]$ exists, such that:
+
+1.  For a fixed $\omega \in \Omega$, $\kappa(\omega, \cdot)$ is a probability measure on $(S, \mathcal{B}(S))$.
+2.  For a fixed set $B \in \mathcal{B}(S)$, $\kappa(\cdot, B)$ is a $\mathcal{G}$-measurable function.
+3.  It satisfies the conditional probability definition: $\mathbb{P}(X \in B | \mathcal{G})(\omega) = \kappa(\omega, B)$ almost surely.
+
+This result, which fails for general measurable spaces, is precisely what allows us to define the transition kernel $p(ds'|s,a)$ and policy kernel $\pi(da|s)$ as functions that map points ($s$ or $(s,a)$) to measures. Without it, the structural integrity of the MDP definition and the Ionescu-Tulcea Extension Theorem would be compromised.
+
 
 **Common Examples**:
 
@@ -379,7 +390,21 @@ Essentially, a probability kernel $\kappa(x, B)$ can be interpreted as the proba
 > **Remark**: The measurability condition for $\kappa$ is crucial: for any measurable set of outcomes $C \in \mathcal{B}(S) \otimes \mathcal{B}(\mathbb{R})$, the function $(s, a) \mapsto \kappa(s, a, C)$ must be a measurable function. This ensures the dynamics are well-behaved. This joint formulation is more general and rigorous than separating transitions and rewards, as it naturally models situations where the distribution of the reward $r'$ is statistically dependent on the resulting next state $s'$.
 
 > Without this condition, fundamental quantities like the expected reward $r(s,a)$ or the state-value function $v_\pi(s)$ might not be well-defined, as their definitions rely on integrals that require measurable integrands.
- ---
+
+A profound result connecting kernels to conditioning is that, on standard Borel spaces, conditional probabilities can always be represented by a kernel.
+
+**Theorem 1.6.2 (Rokhlin's Regular Conditional Probability Theorem)**
+
+Let $(\Omega, \mathcal{F}, \mathbb{P})$ be a probability space, $X$ be a random variable taking values in a standard Borel space $(E, \Sigma_E)$, and $\mathcal{G} \subseteq \mathcal{F}$ be a sub-σ-field. 
+
+Then there exists a probability kernel $K: \Omega \times \Sigma_E \to [0, 1]$ such that for any $B \in \Sigma_E$:
+$$
+K(\omega, B) = \mathbb{P}(X \in B \mid \mathcal{G})(\omega) \quad \text{for } \mathbb{P}\text{-almost every } \omega \in \Omega
+$$
+
+This kernel is called the **regular conditional distribution** of $X$ given $\mathcal{G}$. Its existence is fundamental for defining belief states in partially observable models and for disintegrating measures.
+
+> **Remark (Rigorous Belief States).** This theorem provides the rigorous foundation for the concept of a **belief state** in POMDPs. It guarantees that an agent's belief—the conditional probability distribution over a hidden state, given a history of actions and observations—exists as a well-defined probability kernel. This allows the belief itself to be treated as the state in a new, fully-observable decision process.
  
 
 ---
@@ -397,7 +422,9 @@ For any $x \in E$ and any measurable set $C \in \Sigma_G$, the composition is gi
 
 $$(\kappa_1 \otimes \kappa_2)(x, C) := \int_{F} \kappa_2(y, C)  \kappa_1(x, dy)$$
 
-This integral represents the expected probability of reaching the set $C$ from an intermediate point $y \in F$, where the intermediate point $y$ is chosen according to the probability measure $\kappa_1(x, \cdot)$.
+This integral represents the expected probability of reaching the set $C$ from an intermediate point $y \in F$, where the intermediate point $y$ is chosen according to the probability measure $\kappa_1(x, \cdot)$. 
+
+The integral is well-defined because the integrand $y \mapsto \kappa_2(y, C)$ is a measurable function, a direct consequence of the definition of $\kappa_2$ as a probability kernel.
 
 > **Remark**: Kernel composition is important for analysing multi-step dynamics. Apply a policy kernel to a transition kernel yields the system's evolution under that policy. Repeatedly composing this resulting kernel with itself allows for the evaluation of the system over horizons, useful for deriving theoretical results for value iteration and policy iteration.
 
@@ -515,7 +542,29 @@ $$
 r(s, a) := \int_{S \times \mathbb{R}} r' \ \kappa(ds', dr' | s, a)
 $$
 
-This formulation, by treating the reward as a component of the transition's outcome, is the proper and most general application of the measure-theoretic framework.
+For this integral to be well-defined and finite, the reward variable must be integrable. 
+
+This requires the explicit assumption that $\int |r'| \kappa(ds'dr'|s,a) < \infty$ for all $(s,a)$. 
+
+A common sufficient condition is that all rewards are uniformly bounded. This formulation, by treating the reward as a component of the transition's outcome, is the proper and most general application of the measure-theoretic framework.
+
+#### Concrete Construction of the Unified Kernel
+
+To bridge the gap between this abstract formulation and the more common $(S, A, P, R, \gamma)$ tuple, consider an MDP where the reward is a deterministic function of the state and action, $R(s,a)$. The environment's dynamics are given by the state transition kernel $p(ds'|s,a)$.
+
+In this common scenario, the unified kernel $\kappa$ takes a specific form. The distribution over the next reward $r'$ is a **Dirac delta measure** concentrated at the point $R(s,a)$. The kernel is therefore the product of the state transition measure and this Dirac measure:
+
+$$
+\kappa(ds' dr' | s, a) = p(ds' | s, a) \otimes \delta_{R(s,a)}(dr')
+$$
+
+When we compute the expected reward function $r(s,a)$ using this kernel, we recover the original function:
+
+$$
+r(s, a) := \int_{S \times \mathbb{R}} r' \ [p(ds' | s, a) \otimes \delta_{R(s,a)}(dr')] = \int_{\mathbb{R}} r' \delta_{R(s,a)}(dr') = R(s,a)
+$$
+
+
 
 ---
 
@@ -670,6 +719,16 @@ The construction is governed by three fundamental conditions that define the pro
  
 3.  **Unique Extension**: The theorem guarantees that $\mathbb{P}_\mu^\pi$ is the **unique measure** on the infinite path space that is consistent with the initial distribution $\mu$ and the recursive kernel $p^\pi$ for all time steps.
 
+The probability of a specific finite history (a cylinder set) $H_t = (s_0, a_0, \dots, s_{t-1}, a_{t-1}, s_t)$ is given by integrating over the sequence of kernels:
+
+$$
+\mathbb{P}_\mu^\pi (S_0 \in ds_0, \dots, S_t \in ds_t) = \mu(ds_0) \left( \prod_{k=0}^{t-1} \pi(da_k|s_k) p(ds_{k+1}|s_k, a_k) \right)
+$$
+
+This explicit construction for cylinder sets forms the basis that the Ionescu-Tulcea theorem extends to the entire infinite-horizon $\sigma$-algebra $\mathcal{F}$.
+
+
+
 The resulting stochastic process $(S_0, A_0, S_1, A_1, \dots)$ on the probability space $(H, \mathcal F, \mathbb P_\mu^\pi)$ has the **Markov Property** as a direct consequence of its construction. 
 
 The history of the process up to time $t$ is captured by the **natural filtration**, $\mathcal F_t = \sigma(S_0, A_0, \dots, S_t)$. 
@@ -703,5 +762,14 @@ This property states that the process probabilistically "restarts" from the stat
 >
 > A kernel has the **Feller property** if its corresponding Markov operator (Definition 1.6.3) maps the space of bounded, *continuous* functions to itself. That is, if $g$ is a bounded and continuous function, then the function $(Pg)(x) = \int g(y) \kappa(x, dy)$ is also bounded and continuous in $x$.
 >
-> This continuity is precisely the "regularity" needed to prove that the Markov property, which holds for deterministic times $t$, also holds for random stopping times $\tau$. Without this property, which is guaranteed by the Polish space assumption, the analysis of many optimal stopping and control problems in reinforcement learning would be mathematically intractable.
+> For the policy-conditioned process to be Feller, certain regularity assumptions must be placed on the MDP's primitive components. For instance, the property holds if the environment kernel $p(ds'|s,a)$ and the policy kernel $\pi(da|s)$ are both weakly continuous in their respective arguments.
+> This topological continuity of the operator with respect to the state variable is the crucial property that allows the conditioning argument, which holds for a fixed time `t`, to also hold in the limit for a random stopping time `τ`. It ensures that the probabilistic state of the system does not "jump" unexpectedly at the stopping time, allowing the process to be treated as if it is restarting. Without this property, the analysis of many optimal stopping and control problems in reinforcement learning would be mathematically intractable.
+
+
+> **Remark: Beyond Borel Measurability**
+> This entire framework relies on Borel measurability. However, in more advanced analyses, key sets (e.g., the set of states where one policy is better than another) are not guaranteed to be Borel but rather **analytic**. An analytic set is a continuous image of a Borel set.
+>
+> A cornerstone of advanced theory is that analytic subsets of standard Borel spaces are **universally measurable**, meaning they are measurable with respect to the completion of any probability measure. This wider class of sets and functions is often necessary to establish the existence of optimal value functions and policies under the most general conditions, providing a deeper layer of rigor than a strict adherence to Borel sets allows.
+ 
+ 
 
