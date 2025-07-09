@@ -723,9 +723,69 @@ These equations establish a self-consistency condition:
 
 * This relationship is the foundation for nearly all policy evaluation and control algorithms in reinforcement learning.
 
-### 2.2.4 The Process Measure and Markov Properties
+### 2.2.4 The State Occupancy Measure: A Dual Perspective
 
-Here we connect the conceptual objects above to their measure-theoretic foundations.
+While value functions provide a recursive, state-centric view of a policy's performance, the **state occupancy measure** offers an alternative, holistic perspective. 
+
+It quantifies the expected total discounted time a process spends in each state or state-action pair, effectively transforming the RL problem from a dynamic program into a linear one.
+
+**Definition 2.2.4 (State and State-Action Occupancy Measures)**
+
+Let $\pi$ be a stationary policy and $\mu$ be an initial state distribution.
+
+1.  The **discounted state occupancy measure** $\rho_\mu^\pi$ is a measure on the state space $(S, \mathcal{B}(S))$ defined for any measurable set $B \in \mathcal{B}(S)$ as:
+
+$$
+\rho_\mu^\pi(B) := \mathbb E_\mu^\pi \left[ \sum_{t=0}^{\infty} \gamma^t \mathbf 1_{\{S_t \in B\}} \right] = \sum_{t=0}^{\infty} \gamma^t \mathbb P_\mu^\pi(S_t \in B)
+$$
+This measures the total expected discounted number of visits to the set of states $B$.
+
+2.  The **discounted state-action occupancy measure** $\rho_\mu^\pi$ is a measure on the product space $(S \times A, \mathcal{B}(S) \otimes \mathcal{B}(A))$ defined for any measurable set $C \in \mathcal{B}(S) \otimes \mathcal{B}(A)$ as:
+
+$$
+\rho_\mu^\pi(C) := \mathbb E_\mu^\pi \left[ \sum_{t=0}^{\infty} \gamma^t \mathbf 1_{\lbrace (S_t, A_t) \in C \rbrace} \right]
+$$
+
+This measure is fundamental because it directly relates to the policy's total expected return.
+
+**Theorem 2.2.2 (Objective as an Inner Product)**
+
+The total expected discounted return of a policy $\pi$ for an initial distribution $\mu$ can be expressed as the integral of the immediate expected reward function $r(s,a)$ with respect to the state-action occupancy measure:
+
+$$
+J(\pi) = \mathbb E_\mu^\pi \left[ \sum_{t=0}^{\infty} \gamma^t R_{t+1} \right] = \int_{S \times A} r(s,a) d \rho_\mu^\pi(s,a)
+$$
+
+**Proof Sketch:**
+The proof relies on a direct application of the Tonelli-Fubini theorem.
+
+$$
+J(\pi) = \mathbb E_\mu^\pi \left[ \sum_{t=0}^{\infty} \gamma^t r(S_t, A_t) \right] = \sum_{t=0}^{\infty} \gamma^t \mathbb E_\mu^\pi [r(S_t, A_t)]
+$$
+
+By definition of expectation and the state-action occupancy measure, this is precisely $\int_{S \times A} r(s,a) d\rho_\mu^\pi(s,a)$.
+
+This formulation is powerful because the set of all valid state-action occupancy measures forms a convex set defined by a linear constraint. 
+
+Any such measure $\rho$ induced by a policy must satisfy a "Bellman flow" equation: the total flow into a set of states $B$ must equal the initial flow plus the discounted flow from all other states.
+
+**Bellman Flow Constraint:** 
+
+For any state-action measure $\rho$ to be valid (i.e., induced by some policy $\pi$), it must satisfy:
+$$
+\int_A \rho(B, da) = \mu(B) + \gamma \int_{S \times A} p(B|s,a) d\rho(s,a) \quad \text{for all } B \in \mathcal{B}(S)
+$$
+
+The reinforcement learning problem can thus be reframed as a linear program:
+$$\max_{\rho} \int_{S \times A} r(s,a) d\rho(s,a)$$
+subject to the Bellman flow constraint.
+
+> **Remark: Duality in Reinforcement Learning**
+> This formulation is the linear programming **dual** to the problem solved by the Bellman optimality equation. The Bellman equation seeks a value function in a function space (a dynamic programming approach), while this method seeks an occupancy measure in a space of measures. This dual view is not only computationally useful but also provides deep theoretical insights, particularly for analyzing policy gradient methods and imitation learning algorithms, where matching occupancy measures is the central goal.
+
+---
+
+### 2.2.5 The Process Measure and Markov Properties
 
 Given an initial distribution $\mu$ on $S$ and a policy $\pi$, we can define the state-to-state dynamics kernel $p^\pi(ds'|s) := \int_A p(ds'|s, a) \pi(da|s)$.
 
