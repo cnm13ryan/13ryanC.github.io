@@ -4,204 +4,188 @@ title: "(Part 2.1) Dynamic Programming: Value Iteration"
 summary: "Two classic planning algorithms for solving known MDPs. Present VI/ PI side by side; prove convergence rates, complexity"
 category: "Tutorial"
 series: ["RL Theory"]
+legacy: ["legacy"]
 author: "Bryan Chan"
 hero: /assets/images/hero4.png
 image: /assets/images/card4.png
 ---
 
-### 0 Motivation for Value Iteration — Why start with a fixed‑point update?
+# Value Iteration: Motivation and Fundamentals
 
-Optimal sequential decision‑making in a finite Markov decision process (MDP) ultimately reduces to finding the unique fixed point of the **Bellman‑optimality operator**
+## Motivation for Value Iteration — Why Start with a Fixed-Point Update?
 
-$$
-(Tv)(s)=\max_{a\in A}\Bigl[r_a(s)+\gamma\,P_a(s)^{\top}v\Bigr],\qquad s\in S.
-\tag{0.1}
-$$
-
-Two facts make an **iterative fixed‑point scheme** especially attractive:
-
-1. **Contraction & uniqueness.** $T$ is a $\gamma$-contraction on $(\mathbb R^{|S|},\lVert \cdot \rVert_\infty)$, hence it admits a *single* fixed point $v^*$ and simple Picard iterations $v_{k+1}=Tv_k$ converge geometrically .
-
-2. **No inner linear solves.** Unlike policy‑iteration (which alternates greedy improvement with a *policy‑evaluation* linear solve) or the primal/dual LP formulations (which solve a global linear or quadratic programme), each Bellman update is a *local* maximisation followed by a sparse matrix–vector product, costing
+Optimal sequential decision-making in a finite Markov decision process (MDP) ultimately reduces to finding the unique fixed point of the **Bellman optimality operator**:
 
 $$
-O \bigl(|S|^2|A|\bigr)\quad\text{arithmetic ops.}
-\tag{0.2}
+(Tv)(s) = \max_{a \in A} \left[ r_a(s) + \gamma P_a(s)^\top v \right], \quad s \in S
+\tag{1}
 $$
 
-   For table‑input MDPs this is within a logarithmic factor of the Chen–Wang lower bound for any planning algorithm .
+Two facts make an **iterative fixed-point scheme** especially attractive:
 
----
+1. **Contraction & uniqueness.** $T$ is a $\gamma$-contraction on $(\mathbb R^{|S|}, \Vert \cdot \Vert_\infty)$, hence it admits a *single* fixed point $v^*$ and simple Picard iterations $v_{k+1} = Tv_k$ converge geometrically.
 
-#### 0.1 From Dynamic Programming to Value Iteration
+2. **No inner linear solves.** Unlike policy iteration (which alternates greedy improvement with a *policy evaluation* linear solve) or the primal/dual LP formulations (which solve a global linear or quadratic program), each Bellman update is a *local* maximization followed by a sparse matrix–vector product, costing
+   $$
+   O(|S|^2|A|) \quad \text{arithmetic operations}
+   \tag{2}
+   $$
+   For tabular MDPs this is within a logarithmic factor of the Chen–Wang lower bound for any planning algorithm.
 
-The **Fundamental Theorem of Dynamic Programming** (next section) guarantees that a memory‑less deterministic policy $\pi^\*$ achieving $v^\*$ exists and satisfies the Bellman optimality equation.  Acting greedily with respect to $v^\*$ is therefore sufficient for optimality.
+## From Dynamic Programming to Value Iteration
 
-Value iteration provides the *simplest constructive proof*: starting from any $v_0\in\mathbb R^{|S|}$,
+The **Fundamental Theorem of Dynamic Programming** guarantees that a memoryless deterministic policy $\pi^\ast$ achieving $v^\ast$ exists and satisfies the Bellman optimality equation. 
+
+Acting greedily with respect to $v^\ast$ is therefore sufficient for optimality.
+
+Value iteration provides the *simplest constructive proof*: starting from any $v_0 \in \mathbb R^{|S|}$,
 
 $$
-\lVert v_k-v^\ast \rVert_\infty\le\gamma^k \lVert v_0-v^\ast \rVert_\infty,\tag{0.3}
+\Vert v_k - v^\ast \Vert_\infty \leq \gamma^k \Vert v_0 - v^\ast \Vert_\infty
+\tag{3}
 $$
 
 so an $\varepsilon$-accurate approximation is reached after
 
 $$
-k \ge H_{\gamma,\varepsilon} := \frac{\ln \bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}\tag{0.4}
+k \geq H_{\gamma,\varepsilon} := \frac{\ln(1/(\varepsilon(1-\gamma)))}{1-\gamma}
+\tag{4}
 $$
 
-iterations, the **effective discount‑horizon** .
+iterations, the **effective discount horizon**.
+
+## Role in Approximate Planning
+
+Stopping after $k = H_{\gamma,\varepsilon}$ updates and taking a *single* greedy step yields an $\varepsilon$-optimal policy with total runtime
+
+$$
+\tilde{O}\left(\frac{|S|^2|A|}{1-\gamma} \ln \frac{1}{\varepsilon}\right)
+\tag{5}
+$$
+
+establishing value iteration as the canonical baseline for sample-free approximate planning.
+
+## When is Value Iteration Preferable?
+
+| Criterion | Value Iteration | Policy Iteration | LP Methods |
+|-----------|----------------|------------------|------------|
+| **Per-iteration cost** | $O(S^2A)$ | $O(S^3)$ solve | Depends on solver |
+| **Convergence rate** | Geometric | Typically quadratic | One shot |
+| **Parallelism** | High (state-wise max) | Lower | Solver dependent |
+| **Memory** | $O(S)$ | $O(S^2)$ | Large |
+
+Hence value iteration is the *method of choice* when memory or per-iteration compute dominate, or when only an approximate policy is needed quickly (e.g., as a rollout baseline or warm-start for simulation-based learning).
 
 ---
 
-#### 0.2 Role in Approximate Planning
+Here is the cleaned-up and refined version of the text on the Fundamental Theorem of Dynamic Programming for Finite MDPs.
 
-Stopping after $k=H_{\gamma,\varepsilon}$ updates and taking a *single* greedy step yields an $\varepsilon$-optimal policy with total runtime
+-----
 
-$$
-\tilde O \Bigl(\tfrac{|S|^2|A|}{1-\gamma}\ln\tfrac1\varepsilon\Bigr),\tag{0.5}
-$$
+# Fundamental Theorem of Dynamic Programming for Finite MDPs
 
-establishing value iteration as the canonical baseline for sample‑free approximate planning .
-
----
-
-#### 0.3 When is Value Iteration Preferable?
-
-| Criterion              | Value Iteration        | Policy Iteration       | LP Methods           |
-| ---------------------- | ---------------------- | ---------------------- | -------------------- |
-| **Per‑iteration cost** | O(S²A)                 | O(S³) solve            | Depends on solver    |
-| **Convergence rate**   | Geometric              | Typically quadratic    | One shot             |
-| **Parallelism**        | High (state‑wise max) | Lower                  | Solver dependent     |
-| **Memory**             | O(S)                   | O(S²)                  | Large                |
-
-Hence value iteration is the *method of choice* when memory or per‑iteration compute dominate, or when only an approximate policy is needed quickly (e.g. as a roll‑out baseline or warm‑start for simulation‑based learning).
-
----
-
-### 1 Fundamental Theorem of Dynamic Programming for Finite MDPs
-
-#### 1.1 Formal set‑up and notation
+## 1.1 Formal Setup and Notation
 
 Let
+$$M = (S, A, P, r, \gamma), \quad 0 \leq \gamma < 1$$
+be a *finite*, $\gamma$-discounted Markov decision process (MDP) with:
 
-$$
-M=\bigl(S,A,P,r,\gamma\bigr),\qquad 0\le\gamma<1,
-$$
+- $S = \{1, \ldots, |S|\}$ finite state set
+- $A = \{1, \ldots, |A|\}$ finite action set  
+- $P_a(s, s') = \Pr\{s_{t+1} = s' \mid s_t = s, a_t = a\}$ transition matrix for each $a \in A$
+- $r_a(s) \in [0, 1]$ bounded reward
+- $\gamma$ discount factor
 
-be a *finite*, $\gamma$-discounted Markov decision process (MDP) with
+A **(stationary) policy** is a mapping $\pi: S \to \Delta(A)$ with $\pi(a \mid s)$ the probability of choosing $a$ in $s$.
 
-* $S=\{1,\dots,|S|\}$ finite state set;
-* $A=\{1,\dots,|A|\}$ finite action set;
-* $P_a(s,s')=\Pr\{s_{t+1}=s'\mid s_t=s,\;a_t=a\}$ transition matrix for each $a\in A$;
-* $r_a(s)\in[0,1]$ bounded reward;
-* $\gamma$ discount factor.
+Define the **state-value function**
+$$v^\pi(s) = \mathbb{E}^\pi_s \left[\sum_{t=0}^{\infty} \gamma^t r_{a_t}(s_t)\right] \tag{1.1}$$
 
-A **(stationary) policy** is a mapping $\pi:S\to\Delta(A)$ with $\pi(a\mid s)$ the probability of choosing $a$ in $s$.
-Define the **state‑value function**
+and the **state-action value**
+$$q^\pi(s, a) = r_a(s) + \gamma \sum_{s'} P_a(s, s') v^\pi(s') \tag{1.2}$$
 
-$$
-v^\pi(s)=\mathbb E^\pi_s \Bigl[\sum_{t=0}^{\infty}\gamma^t r_{a_t}(s_t)\Bigr],
-\tag{1.1}
-$$
+For any policy $\pi$, let
+$$\begin{align}
+(T_\pi v)(s) &= \sum_a \pi(a \mid s) \left[r_a(s) + \gamma P_a(s)^\top v\right] \\
+(Tv)(s) &= \max_a \left[r_a(s) + \gamma P_a(s)^\top v\right]
+\end{align} \tag{1.3}$$
 
-and the **state–action value**
-
-$$
-q^\pi(s,a)=r_a(s)+\gamma\sum_{s'}P_a(s,s')\,v^\pi(s').
-\tag{1.2}
-$$
-
-For any policy $\pi$ let
-
-$$
-(T_\pi v)(s)=\sum_{a}\pi(a\!\mid\! s)\bigl[r_a(s)+\gamma P_a(s)^\top v\bigr],\qquad
-(Tv)(s)=\max_a\bigl[r_a(s)+\gamma P_a(s)^\top v\bigr].
-\tag{1.3}
-$$
-
-$T_\pi$ and $T$ are, respectively, the **policy** and **optimality Bellman operators**. Both are $\gamma$-contractions on $(\mathbb R^{|S|},\|\cdot\|_\infty)$.&#x20;
+$T_\pi$ and $T$ are, respectively, the **policy** and **optimality Bellman operators**. Both are $\gamma$-contractions on $(\mathbb{R}^{|S|}, \|\cdot\|_\infty)$.
 
 ---
 
-#### 1.2 Statement of the theorem
+## 1.2 Statement of the Theorem
 
-> **Theorem 1 (Fundamental Theorem of Dynamic Programming).**
+> **Theorem 1 (Fundamental Theorem of Dynamic Programming).**  
 > For every finite discounted MDP $M$:
 >
-> 1. There exists a deterministic stationary policy $\pi^\*$ such that
+> 1. There exists a deterministic stationary policy $\pi^*$ such that
+>    $$v^{\pi^*} = Tv^{\pi^*} =: v^* \tag{1.4}$$
+>    and $v^* \geq v^\pi$ for *all* policies $\pi$.
 >
->    $$
->    v^{\pi^\*}=Tv^{\pi^\*}=:\,v^\*,\tag{1.4}
->    $$
->
->    and $v^\*\ge v^\pi$ for *all* policies $\pi$.
-> 2. Any policy that is **greedy** with respect to $v^\*$,
->
->    $$
->      \pi_{\text{greedy}}(s)\in\arg\max_{a\in A}\bigl[r_a(s)+\gamma P_a(s)^\top v^\*\bigr],\tag{1.5}
->    $$
->
+> 2. Any policy that is **greedy** with respect to $v^*$,
+>    $$\pi_{\text{greedy}}(s) \in \arg\max_{a \in A} \left[r_a(s) + \gamma P_a(s)^\top v^*\right] \tag{1.5}$$
 >    is optimal.
-> 3. $v^\*$ is the **unique** fixed point of $T$.
+>
+> 3. $v^*$ is the **unique** fixed point of $T$.
 
-*(cf. Szepesvári, Lec 2, Thm. “Fundamental Theorem”) *
-
----
-
-#### 1.3 Proof sketch
-
-1. **Restriction to memoryless policies.**
-   For any (possibly history‑dependent) policy π and start‑state distribution μ, the *discounted occupancy measure*
-
-   $$
-   \nu^{\pi}_{\mu}(s,a)=\sum_{t=0}^{\infty}\gamma^{t}\Pr_\mu^\pi\{s_t=s,a_t=a\}
-   \tag{1.6}
-   $$
-
-   satisfies $\langle\nu^{\pi}_{\mu},r\rangle=v^{\pi}_\mu$.
-   Given $\nu^{\pi}_{\mu}$ define $\tilde\pi(a\mid s)=\nu^{\pi}_{\mu}(s,a)\big/\!\sum_{a'}\nu^{\pi}_{\mu}(s,a')$.
-   Then $v^{\tilde\pi}_\mu=v^{\pi}_\mu$. Hence it suffices to consider **stationary** policies.&#x20;
-
-2. **Existence and uniqueness of $v^\*$.**
-   $T$ is a γ‑contraction; by the Banach fixed‑point theorem it admits a *unique* fixed point $v^\*$. Iterating $T$ from any $v_0$ converges geometrically:
-
-   $$
-   \|T^{k}v_0-v^\*\|_\infty\le\gamma^{k}\|v_0-v^\*\|_\infty.
-   \tag{1.7}
-   $$
-
-3. **Optimality of a greedy policy.**
-   Let $\pi_g$ satisfy (1.5). Then $T_{\pi_g}v^\*=Tv^\*=v^\*$. Since $T_{\pi_g}$ is a contraction with unique fixed point $v^{\pi_g}$, we have $v^{\pi_g}=v^\*$. Consequently $v^{\pi_g}\ge v^\pi$ for all π because $v^\*$ dominates all other value functions (monotonicity of $T$).
-
-4. **Policy determinism.**
-   Equation (1.5) permits tie‑breaking; choose an action deterministically at every state. Thus an *optimal deterministic* policy exists.
-
-*Details of steps 1–4 appear in Lec 2, pp. 2–4.* 
+*(cf. Szepesvári, Lec 2, Thm. "Fundamental Theorem")*
 
 ---
 
-#### 1.4 Interpretation and implications
+## 1.3 Proof Sketch
 
-* **Why it matters.** The theorem justifies *planning* via value functions: computing $v^\*$ alone suffices—its greedy policy is optimal.
-* **Contraction view.** Because $T$ is a strict contraction, *value iteration* (Section 6) converges with predictable geometric rate; the same property ensures stable approximate methods.
-* **Determinism is enough.** The optimal control law needs no memory and no randomness. This dramatically shrinks the search space from $|A|^{|S|}$ (deterministic) versus an uncountable set of history‑dependent stochastic policies, underpinning dynamic‑programming algorithms.
-* **Foundation for error analysis.** Later sections (policy‑error bounds, approximate planning) build on (1.5): sub‑optimality is measured relative to the greedy step with respect to an approximate value function.
+1. **Restriction to memoryless policies.**  
+   For any (possibly history-dependent) policy $\pi$ and start-state distribution $\mu$, the *discounted occupancy measure*
+   $$\nu^\pi_\mu(s, a) = \sum_{t=0}^{\infty} \gamma^t \Pr_\mu^\pi\{s_t = s, a_t = a\} \tag{1.6}$$
+   satisfies $\langle \nu^\pi_\mu, r \rangle = v^\pi_\mu$.
+
+   Given $\nu^\pi_\mu$, define $\tilde{\pi}(a \mid s) = \nu^\pi_\mu(s, a) / \sum_{a'} \nu^\pi_\mu(s, a')$.
+
+   Then $v^{\tilde{\pi}}_\mu = v^\pi_\mu$. Hence it suffices to consider **stationary** policies.
+
+2. **Existence and uniqueness of $v^*$.**  
+   $T$ is a $\gamma$-contraction; by the Banach fixed-point theorem it admits a *unique* fixed point $v^*$. Iterating $T$ from any $v_0$ converges geometrically:
+   $$\|T^k v_0 - v^*\|_\infty \leq \gamma^k \|v_0 - v^*\|_\infty \tag{1.7}$$
+
+3. **Optimality of a greedy policy.**  
+   Let $\pi_g$ satisfy (1.5). Then $T_{\pi_g} v^* = T v^* = v^*$. Since $T_{\pi_g}$ is a contraction with unique fixed point $v^{\pi_g}$, we have $v^{\pi_g} = v^*$. Consequently $v^{\pi_g} \geq v^\pi$ for all $\pi$ because $v^*$ dominates all other value functions (monotonicity of $T$).
+
+4. **Policy determinism.**  
+   Equation (1.5) permits tie-breaking; choose an action deterministically at every state. Thus an *optimal deterministic* policy exists.
+
+*Details of steps 1–4 appear in Lec 2, pp. 2–4.*
 
 ---
 
-#### 1.5 Connections to upcoming sections
+## 1.4 Interpretation and Implications
 
-* The **Banach fixed‑point theorem** (Section 8) supplies the contraction result used in the proof.
-* **Policy‑error bounds** (Section 3) quantify how close a greedy policy based on an approximate value is to $\pi^\*$.
-* The **linear‑programming formulation** (Section 9) offers an alternative proof of existence/uniqueness of $v^\*$ via duality.
-* The **geometry of value functions** (Section 7) visualises the set $\{v^\pi\}$ and shows $v^\*$ occupies a dominating vertex of a polytope.
+- **Why it matters.** The theorem justifies *planning* via value functions: computing $v^*$ alone suffices—its greedy policy is optimal.
+
+- **Contraction view.** Because $T$ is a strict contraction, *value iteration* (Section 6) converges with predictable geometric rate; the same property ensures stable approximate methods.
+
+- **Determinism is enough.** The optimal control law needs no memory and no randomness. This dramatically shrinks the search space from $|A|^{|S|}$ (deterministic) versus an uncountable set of history-dependent stochastic policies, underpinning dynamic-programming algorithms.
+
+- **Foundation for error analysis.** Later sections (policy-error bounds, approximate planning) build on (1.5): sub-optimality is measured relative to the greedy step with respect to an approximate value function.
+
+---
+
+## 1.5 Connections to Upcoming Sections
+
+- The **Banach fixed-point theorem** (Section 8) supplies the contraction result used in the proof.
+
+- **Policy-error bounds** (Section 3) quantify how close a greedy policy based on an approximate value is to $\pi^*$.
+
+- The **linear-programming formulation** (Section 9) offers an alternative proof of existence/uniqueness of $v^*$ via duality.
+
+- The **geometry of value functions** (Section 7) visualizes the set $\{v^\pi\}$ and shows $v^*$ occupies a dominating vertex of a polytope.
 
 ---
 
 ### 2 Effective Horizon and the Single‑Step Bellman Update
 
 In this section we formalise the idea that, for a discounted MDP with factor $\gamma\in[0,1)$, only the first
-$H_{\gamma,\varepsilon}=\dfrac{\ln\!\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}$
+$H_{\gamma,\varepsilon}=\dfrac{\ln\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}$
 time‑steps are relevant when we care about an absolute error $\varepsilon$.
 We begin by restating the Bellman update as a contraction, prove its fixed‑point error bound, and then derive the **effective horizon**.
 
@@ -212,20 +196,20 @@ We begin by restating the Bellman update as a contraction, prove its fixed‑poi
 For any $v\in\mathbb R^{|S|}$ define
 
 $$
-(Tv)(s)=\max_{a\in A}\Bigl[r_a(s)+\gamma\,P_a(s)^{\!\top}v\Bigr],\qquad s\in S. \tag{2.1}
+(Tv)(s)=\max_{a\in A}\Bigl[r_a(s)+\gammaP_a(s)^{\top}v\Bigr],\qquad s\in S. \tag{2.1}
 $$
 
-*Lemma 2.1 (γ‑contraction).* $T$ is a $\gamma$-contraction on $(\mathbb R^{|S|},\|\cdot\|_\infty)$:
+*Lemma 2.1 (γ‑contraction).* $T$ is a $\gamma$-contraction on $(\mathbb R^{|S|},\Vert\cdot\Vert_\infty)$:
 
 $$
-\|Tv-Tu\|_\infty\le\gamma\,\|v-u\|_\infty.\tag{2.2}
+\VertTv-Tu\Vert_\infty\le\gamma\Vertv-u\Vert_\infty.\tag{2.2}
 $$
 
 *Proof.* For each state $s$ choose actions $a^\ast,b^\ast$ maximising the right– and left–hand sides respectively:
 
 $$
-(Tv)(s)-(Tu)(s)=r_{a^\ast}(s)-r_{b^\ast}(s)+\gamma P_{a^\ast}(s)^{\!\top}v-\gamma P_{b^\ast}(s)^{\!\top}u
-\le\gamma P_{a^\ast}(s)^{\!\top}(v-u)\le\gamma\|v-u\|_\infty.
+(Tv)(s)-(Tu)(s)=r_{a^\ast}(s)-r_{b^\ast}(s)+\gamma P_{a^\ast}(s)^{\top}v-\gamma P_{b^\ast}(s)^{\top}u
+\le\gamma P_{a^\ast}(s)^{\top}(v-u)\le\gamma\Vertv-u\Vert_\infty.
 $$
 
 Swap $v,u$ and take maxima to complete the inequality.
@@ -233,30 +217,30 @@ Swap $v,u$ and take maxima to complete the inequality.
 By Banach’s fixed‑point theorem (Appendix A, §8) the sequence $v_{k+1}=Tv_k$ converges **geometrically** to the unique fixed point $v^\*=Tv^\*$ proven in §1:
 
 $$
-\|v_k-v^\*\|_\infty\le\gamma^k\|v_0-v^\*\|_\infty.\tag{2.3}
+\Vertv_k-v^\*\Vert_\infty\le\gamma^k\Vertv_0-v^\*\Vert_\infty.\tag{2.3}
 $$
 
 ---
 
-#### 2.2 Discounted tail mass and the effective horizon
+#### 2.2 Discounted tail mass and the effective horizon
 
 Assume rewards are bounded: $0\le r_a(s)\le R_{\max}$ (w\.l.o.g. let $R_{\max}=1$).
 Then for **any** policy $\pi$,
 
 $$
-0\;\le\;v^\pi(s)\;\le\;\frac{1}{1-\gamma},\qquad s\in S.\tag{2.4}
+0\lev^\pi(s)\le\frac{1}{1-\gamma},\qquad s\in S.\tag{2.4}
 $$
 
 Fix $v_0\equiv 0$.  Combine (2.3) with (2.4):
 
 $$
-\|v_k-v^\*\|_\infty\;\le\;\gamma^k\frac1{1-\gamma}.\tag{2.5}
+\Vertv_k-v^\*\Vert_\infty\le\gamma^k\frac1{1-\gamma}.\tag{2.5}
 $$
 
 Set the right‑hand side to $\varepsilon$ and solve for $k$:
 
 $$
-k\;\ge\;H_{\gamma,\varepsilon}\;:=\;\frac{\ln\!\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}. \tag{2.6}
+k\geH_{\gamma,\varepsilon}:=\frac{\ln\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}. \tag{2.6}
 $$
 
 *Interpretation.* Because the **discounted tail mass**
@@ -270,10 +254,10 @@ equals the bound in (2.5), iterating for $H_{\gamma,\varepsilon}$ steps ensures 
 Algorithmically, start with $v_0=0$ and update $v_{k+1}=Tv_k$ until
 
 $$
-\|v_{k+1}-v_{k}\|_\infty\le\delta:=\frac{\varepsilon(1-\gamma)}{2\gamma}. \tag{2.7}
+\Vertv_{k+1}-v_{k}\Vert_\infty\le\delta:=\frac{\varepsilon(1-\gamma)}{2\gamma}. \tag{2.7}
 $$
 
-Because $\|v_{k+1}-v_k\|_\infty\ge(1-\gamma)\|v_{k+1}-v^\*\|_\infty$ , the criterion guarantees (2.5) with margin $\varepsilon$.  At that point a single **greedification** step (§3) yields an $\varepsilon$-optimal policy.
+Because $\Vertv_{k+1}-v_k\Vert_\infty\ge(1-\gamma)\Vertv_{k+1}-v^\*\Vert_\infty$ , the criterion guarantees (2.5) with margin $\varepsilon$.  At that point a single **greedification** step (§3) yields an $\varepsilon$-optimal policy.
 
 ---
 
@@ -282,7 +266,7 @@ Because $\|v_{k+1}-v_k\|_\infty\ge(1-\gamma)\|v_{k+1}-v^\*\|_\infty$ , the crite
 Define the finite‑horizon return
 
 $$
-v_H^\pi(s)=\mathbb E_s^\pi\!\Bigl[\sum_{t=0}^{H-1}\gamma^tr_{a_t}(s_t)\Bigr].\tag{2.8}
+v_H^\pi(s)=\mathbb E_s^\pi\Bigl[\sum_{t=0}^{H-1}\gamma^tr_{a_t}(s_t)\Bigr].\tag{2.8}
 $$
 
 *Lemma 2.2.* For every $\pi$ and $H\ge 0$,
@@ -291,7 +275,7 @@ $$
 0\le v^\pi(s)-v_H^\pi(s)\le\frac{\gamma^{H}}{1-\gamma}.\tag{2.9}
 $$
 
-Hence choosing $H=H_{\gamma,\varepsilon}$ (2.6) ensures $\|v^\pi-v_H^\pi\|_\infty\le\varepsilon$.
+Hence choosing $H=H_{\gamma,\varepsilon}$ (2.6) ensures $\Vertv^\pi-v_H^\pi\Vert_\infty\le\varepsilon$.
 Consequently, **discounted** planning to accuracy $\varepsilon$ is equivalent to **undiscounted finite‑horizon** planning with horizon $H_{\gamma,\varepsilon}$.
 
 *Proof.* Tail of geometric series identical to derivation of (2.5).
@@ -304,11 +288,11 @@ Consequently, **discounted** planning to accuracy $\varepsilon$ is equivalent t
 * **Runtime** for $\varepsilon$-optimal values (table MDP, cost $O(S^2A)$ per sweep):
 
 $$
-T_{\text{VI}}(\varepsilon)=O\!\Bigl(S^2A\;\frac{\ln(1/(\varepsilon(1-\gamma)))}{1-\gamma}\Bigr).\tag{2.10}
+T_{\text{VI}}(\varepsilon)=O\Bigl(S^2A\frac{\ln(1/(\varepsilon(1-\gamma)))}{1-\gamma}\Bigr).\tag{2.10}
 $$
 
 * The **effective horizon** $H_{\gamma,\varepsilon}$ provides a principled truncation for simulation or Monte‑Carlo rollouts, and underlies sample‑complexity bounds in model‑free RL.
-* Near $\gamma\!\uparrow\!1$ the horizon explodes as $1/(1-\gamma)$; planning (and learning) accordingly becomes harder (§11).
+* Near $\gamma\uparrow1$ the horizon explodes as $1/(1-\gamma)$; planning (and learning) accordingly becomes harder (§11).
 
 ---
 
@@ -334,7 +318,7 @@ This result is crucial for turning value iteration into an ε‑optimal *plannin
 * **Greedy operator**
 
   $$
-  \Gamma(v)(s)\;\in\;\arg\max_{a\in A}\Bigl[r_a(s)+\gamma P_a(s)^{\!\top}v\Bigr],\qquad s\in S.
+  \Gamma(v)(s)\in\arg\max_{a\in A}\Bigl[r_a(s)+\gamma P_a(s)^{\top}v\Bigr],\qquad s\in S.
   \tag{3.1}
   $$
 
@@ -343,15 +327,15 @@ This result is crucial for turning value iteration into an ε‑optimal *plannin
 * **Policy error** for a candidate policy π:
 
   $$
-  \Delta_\pi\;:=\;v^{\pi_\*}-v^{\pi}\;\in\;\mathbb R^{|S|},\qquad
-  \|\Delta_\pi\|_\infty=\max_{s\in S}\bigl[v^{\pi_\*}(s)-v^{\pi}(s)\bigr].
+  \Delta_\pi:=v^{\pi_\*}-v^{\pi}\in\mathbb R^{|S|},\qquad
+  \Vert\Delta_\pi\Vert_\infty=\max_{s\in S}\bigl[v^{\pi_\*}(s)-v^{\pi}(s)\bigr].
   \tag{3.2}
   $$
 
 * **Approximation error** of a value function v:
 
   $$
-  \varepsilon\;:=\;\|v-v^\*\|_\infty.
+  \varepsilon:=\Vertv-v^\*\Vert_\infty.
   \tag{3.3}
   $$
 
@@ -366,7 +350,7 @@ Throughout this section rewards are bounded in $[0,1]$; hence $0\le v^\*\le (1-\
 > $\pi_g=\Gamma(v)$ be greedy w\.r.t. v.  Then
 >
 > $$
-> v^{\pi_g}\;\ge\;v^\*-\frac{2\gamma}{1-\gamma}\,\|v-v^\*\|_\infty\;\mathbf 1.
+> v^{\pi_g}\gev^\*-\frac{2\gamma}{1-\gamma}\Vertv-v^\*\Vert_\infty\mathbf 1.
 > \tag{3.4}
 > $$
 
@@ -384,9 +368,9 @@ $$
    Using (3.1) and monotonicity of T and $T_{\pi_g}$ we have
 
    $$
-   v^\*=Tv^\*\;\le\;T(v+\varepsilon\mathbf1)
-          \;=\;T_{\pi_g}(v+\varepsilon\mathbf1)
-          \;=\;T_{\pi_g}v+\gamma\varepsilon\mathbf1.
+   v^\*=Tv^\*\leT(v+\varepsilon\mathbf1)
+          =T_{\pi_g}(v+\varepsilon\mathbf1)
+          =T_{\pi_g}v+\gamma\varepsilon\mathbf1.
    \tag{3.6}
    $$
 
@@ -394,7 +378,7 @@ $$
    Subtracting $T_{\pi_g}v^{\pi_g}=v^{\pi_g}$ from (3.6) yields
 
    $$
-   \delta\;\le\;\gamma P_{\pi_g}\delta+2\gamma\varepsilon\mathbf1.
+   \delta\le\gamma P_{\pi_g}\delta+2\gamma\varepsilon\mathbf1.
    \tag{3.7}
    $$
 
@@ -402,8 +386,8 @@ $$
    Premultiply (3.7) by $(I-\gamma P_{\pi_g})^{-1} =\sum_{k\ge0}\gamma^k P_{\pi_g}^k$ (which is non‑negative):
 
    $$
-   \delta\;\le\;2\gamma\varepsilon\sum_{k\ge0}\gamma^{k}P_{\pi_g}^{k}\mathbf1
-          =  \frac{2\gamma\varepsilon}{1-\gamma}\,\mathbf1.
+   \delta\le2\gamma\varepsilon\sum_{k\ge0}\gamma^{k}P_{\pi_g}^{k}\mathbf1
+          =  \frac{2\gamma\varepsilon}{1-\gamma}\mathbf1.
    \tag{3.8}
    $$
 
@@ -411,7 +395,7 @@ $$
    Equation (3.8) implies component‑wise dominance; hence
 
    $$
-   \|\delta\|_\infty\;\le\;\frac{2\gamma}{1-\gamma}\,\varepsilon,
+   \Vert\delta\Vert_\infty\le\frac{2\gamma}{1-\gamma}\varepsilon,
    $$
 
    which is exactly (3.4). ∎
@@ -420,7 +404,7 @@ $$
 
 #### 3.3 Tightness of the bound
 
-*Singh–Yee (1994)* construct a 2‑state, 2‑action deterministic MDP where equality holds in (3.4) for every v satisfying $\|v-v^\*\|_\infty=\varepsilon$ (see lecture note example, p. 3) .
+*Singh–Yee (1994)* construct a 2‑state, 2‑action deterministic MDP where equality holds in (3.4) for every v satisfying $\Vertv-v^\*\Vert_\infty=\varepsilon$ (see lecture note example, p. 3) .
 Thus the factor $2\gamma/(1-\gamma)$ is the *best possible* in the worst case.
 
 ---
@@ -432,14 +416,14 @@ Thus the factor $2\gamma/(1-\gamma)$ is the *best possible* in the worst case.
    if we iterate until
 
    $$
-   \|v_k-v^\*\|_\infty\;\le\;\frac{\varepsilon(1-\gamma)}{2\gamma},
+   \Vertv_k-v^\*\Vert_\infty\le\frac{\varepsilon(1-\gamma)}{2\gamma},
    \tag{3.9}
    $$
 
    then the greedy policy $\pi_k=\Gamma(v_k)$ is ε‑optimal:
 
    $$
-   v^{\pi_k}\;\ge\;v^\*-\varepsilon\mathbf1.
+   v^{\pi_k}\gev^\*-\varepsilon\mathbf1.
    \tag{3.10}
    $$
 
@@ -447,7 +431,7 @@ Thus the factor $2\gamma/(1-\gamma)$ is the *best possible* in the worst case.
    Using (2.6) with the tighter threshold in (3.9) gives
 
    $$
-   k\;\ge\;\left\lceil\frac{\ln\!\bigl(\tfrac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}
+   k\ge\left\lceil\frac{\ln\bigl(\tfrac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}
                            {1-\gamma}\right\rceil.
    \tag{3.11}
    $$
@@ -456,9 +440,9 @@ Thus the factor $2\gamma/(1-\gamma)$ is the *best possible* in the worst case.
    Equation (3.4) implies
 
    $$
-   d\!\bigl(\Gamma(v),\Gamma(v')\bigr)
-   :=\|v^{\Gamma(v)}-v^{\Gamma(v')}\|_\infty
-   \;\le\;\frac{2\gamma}{1-\gamma}\,\|v-v'\|_\infty,
+   d\bigl(\Gamma(v),\Gamma(v')\bigr)
+   :=\Vertv^{\Gamma(v)}-v^{\Gamma(v')}\Vert_\infty
+   \le\frac{2\gamma}{1-\gamma}\Vertv-v'\Vert_\infty,
    \tag{3.12}
    $$
 
@@ -471,11 +455,11 @@ Thus the factor $2\gamma/(1-\gamma)$ is the *best possible* in the worst case.
 For tasks where only a *relative* accuracy $0<\delta_{\mathrm{rel}}<1$ is meaningful, require
 
 $$
-\|v_k-v^\*\|_\infty\;\le\;\frac{\delta_{\mathrm{rel}}(1-\gamma)}{2\gamma}\,\|v^\*\|_\infty.
+\Vertv_k-v^\*\Vert_\infty\le\frac{\delta_{\mathrm{rel}}(1-\gamma)}{2\gamma}\Vertv^\*\Vert_\infty.
 \tag{3.13}
 $$
 
-Because $0\le v^\*\le(1-\gamma)^{-1}\mathbf1$, condition (3.13) is strictly weaker than (3.9) whenever $v^\*$ is small in magnitude (e.g. low‑reward problems). Iteration complexity becomes $O\!\bigl(\frac{\ln(1/\delta_{\mathrm{rel}})}{1-\gamma}\bigr)$.
+Because $0\le v^\*\le(1-\gamma)^{-1}\mathbf1$, condition (3.13) is strictly weaker than (3.9) whenever $v^\*$ is small in magnitude (e.g. low‑reward problems). Iteration complexity becomes $O\bigl(\frac{\ln(1/\delta_{\mathrm{rel}})}{1-\gamma}\bigr)$.
 
 ---
 
@@ -511,7 +495,7 @@ Let $(X,\lVert\cdot\rVert)$ be a normed linear space.
 A mapping $F:X\to X$ is a **$c$-contraction** if there exists $0\le c<1$ such that
 
 $$
-\lVert F(x)-F(y)\rVert\le c\,\lVert x-y\rVert,\qquad \forall x,y\in X.\tag{4.1}
+\lVert F(x)-F(y)\rVert\le c\lVert x-y\rVert,\qquad \forall x,y\in X.\tag{4.1}
 $$
 
 > **Banach Fixed‑Point Theorem.**
@@ -520,7 +504,7 @@ $$
 > (ii) for any $x_0\in X$, the Picard iterates $x_{k+1}:=F(x_k)$ satisfy
 >
 > $$
-> \lVert x_k-x^\*\rVert\le c^{\,k}\lVert x_0-x^\*\rVert,\qquad k\ge0.
+> \lVert x_k-x^\*\rVert\le c^{k}\lVert x_0-x^\*\rVert,\qquad k\ge0.
 > \tag{4.2}
 > \] :contentReference[oaicite:0]{index=0}  
 > $$
@@ -532,7 +516,7 @@ $$
 For a **fixed policy** $\pi$ the evaluation operator
 
 $$
-(T_\pi v)(s)=r_\pi(s)+\gamma P_\pi(s)^{\!\top}v,\qquad s\in S
+(T_\pi v)(s)=r_\pi(s)+\gamma P_\pi(s)^{\top}v,\qquad s\in S
 \tag{4.3}
 $$
 
@@ -540,7 +524,7 @@ is linear.  Because each row of $P_\pi$ is stochastic, for the max‑norm
 
 $$
 \lVert T_\pi u-T_\pi v\rVert_\infty
-     =\gamma\max_{s}\lvert P_\pi(s)^{\!\top}(u-v)\rvert
+     =\gamma\max_{s}\lvert P_\pi(s)^{\top}(u-v)\rvert
      \le\gamma\lVert u-v\rVert_\infty.\tag{4.4}
 $$
 
@@ -548,7 +532,7 @@ Thus $T_\pi$ is a $\gamma$-contraction on $(\mathbb R^{|S|},\lVert\cdot\rVert_\i
 Identical reasoning (with a maximisation over $a$) shows the **optimality operator**
 
 $$
-(Tv)(s)=\max_{a\in A}\!\bigl[r_a(s)+\gamma P_a(s)^{\!\top}v\bigr]\tag{4.5}
+(Tv)(s)=\max_{a\in A}\bigl[r_a(s)+\gamma P_a(s)^{\top}v\bigr]\tag{4.5}
 $$
 
 is also a $\gamma$-contraction.
@@ -560,7 +544,7 @@ is also a $\gamma$-contraction.
 *Policy evaluation.* Applying Banach to $(T_\pi,\lVert\cdot\rVert_\infty)$ yields:
 
 > **Proposition 4.1 (Unique value of a policy).**
-> For every stationary policy $\pi$ there exists a **unique** $v^\pi\in\mathbb R^{|S|}$ satisfying $T_\pi v^\pi=v^\pi$; moreover $\lVert T_\pi^{\,k}u-v^\pi\rVert_\infty\le\gamma^{k}\lVert u-v^\pi\rVert_\infty$ for any initial $u$.&#x20;
+> For every stationary policy $\pi$ there exists a **unique** $v^\pi\in\mathbb R^{|S|}$ satisfying $T_\pi v^\pi=v^\pi$; moreover $\lVert T_\pi^{k}u-v^\pi\rVert_\infty\le\gamma^{k}\lVert u-v^\pi\rVert_\infty$ for any initial $u$.&#x20;
 
 *Optimal value.*  The same argument with $T$ (Eq. 4.5) proves uniqueness of the optimal value $v^\*$.
 
@@ -578,7 +562,7 @@ $$
 Hence $v_k$ is $\varepsilon$-accurate once
 
 $$
-k\;\ge\;H_{\gamma,\varepsilon}:=\frac{\ln\!\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}\tag{4.7}
+k\geH_{\gamma,\varepsilon}:=\frac{\ln\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}\tag{4.7}
 $$
 
 —the *effective horizon* already derived in § 2.
@@ -639,14 +623,14 @@ Although our objective is the infinite‑horizon discounted return, value iterat
 For any policy $\pi$ and integer horizon $H\ge 1$ define the truncated value
 
 $$
-v_{H}^{\pi}(s)\;:=\;\mathbb E^{\pi}\!\Bigl[\sum_{t=0}^{H-1}\gamma^{t} r_{a_t}(s_t)\;\Bigm|\;s_0=s\Bigr].
+v_{H}^{\pi}(s):=\mathbb E^{\pi}\Bigl[\sum_{t=0}^{H-1}\gamma^{t} r_{a_t}(s_t)\Bigm|s_0=s\Bigr].
 \tag{5.1}
 $$
 
 Because rewards satisfy $0\le r_a(s)\le 1$, the **tail mass** beyond step $H$ is bounded:
 
 $$
-0\;\le\;v^{\pi}(s)-v_{H}^{\pi}(s)\;\le\;\frac{\gamma^{H}}{1-\gamma},\qquad s\in S.
+0\lev^{\pi}(s)-v_{H}^{\pi}(s)\le\frac{\gamma^{H}}{1-\gamma},\qquad s\in S.
 \tag{5.2}
 $$
 
@@ -660,14 +644,14 @@ $\sum_{t=H}^{\infty}\gamma^{t} \le \gamma^{H}/(1-\gamma)$.&#x20;
 Set $H=H_{\gamma,\varepsilon}$ (cf. § 2, Eq. (2.6)):
 
 $$
-H_{\gamma,\varepsilon}\;=\;\frac{\ln\!\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}.
+H_{\gamma,\varepsilon}=\frac{\ln\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}.
 \tag{5.3}
 $$
 
 Then (5.2) implies
 
 $$
-\|v^{\pi}-v_{H_{\gamma,\varepsilon}}^{\pi}\|_{\infty}\;\le\;\varepsilon.
+\Vertv^{\pi}-v_{H_{\gamma,\varepsilon}}^{\pi}\Vert_{\infty}\le\varepsilon.
 \tag{5.4}
 $$
 
@@ -680,7 +664,7 @@ Hence *any* planning or learning algorithm that is exact for horizon $H_{\gamma,
 Observe that one Bellman update prepends a **single discounted step** to the horizon‑$H$ solution:
 
 $$
-v_{H+1}^{\pi}(s)=r_{\pi}(s)+\gamma\,P_{\pi}(s)^{\!\top}v_{H}^{\pi}.
+v_{H+1}^{\pi}(s)=r_{\pi}(s)+\gammaP_{\pi}(s)^{\top}v_{H}^{\pi}.
 \tag{5.5}
 $$
 
@@ -700,14 +684,14 @@ where $v_{H}^{\max}:=\max_{\pi} v_{H}^{\pi}$.  Thus **value iteration with $k$ s
 *Stopping rule.*  Combining (5.4) with the greedy policy error bound (3.4) gives the *stop‑and‑greedy* criterion used in § 3:
 
 $$
-\|v_k-v_{k-1}\|_\infty\;\le\;\frac{\varepsilon(1-\gamma)}{2\gamma}\;\Longrightarrow\;v^{\Gamma(v_k)}\ge v^\ast-\varepsilon\mathbf1.
+\Vertv_k-v_{k-1}\Vert_\infty\le\frac{\varepsilon(1-\gamma)}{2\gamma}\Longrightarrowv^{\Gamma(v_k)}\ge v^\ast-\varepsilon\mathbf1.
 \tag{5.7}
 $$
 
 *Runtime.*  Each sweep costs $O(S^2A)$ operations; using $k=H_{\gamma,\varepsilon}$ yields
 
 $$
-T_{\text{VI}}(\varepsilon)=O\!\Bigl(S^{2}A\,\frac{\ln\!\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}\Bigr),
+T_{\text{VI}}(\varepsilon)=O\Bigl(S^{2}A\frac{\ln\bigl(1/(\varepsilon(1-\gamma))\bigr)}{1-\gamma}\Bigr),
 \tag{5.8}
 $$
 
@@ -722,7 +706,7 @@ matching Eq. (2.10).
 Define an *augmented* MDP $\tilde M_H$ whose state space is $S\times\{0,\dots,H\}$ and which deterministically transitions $(s,h)\mapsto(s',h+1)$ with zero discount ($\gamma=1$) until an absorbing layer $h=H$.  Then for any policy $\pi$:
 
 $$
-v_{H}^{\pi}(s)\;=\; \tilde v^{\pi}\bigl((s,0)\bigr),
+v_{H}^{\pi}(s)= \tilde v^{\pi}\bigl((s,0)\bigr),
 \tag{5.9}
 $$
 
@@ -750,9 +734,9 @@ Section 6 will leverage these insights to present the standard **Value‑Itera
 | **Input:** finite MDP $M=(S,A,P,r,\gamma)$; accuracy $\varepsilon>0$ |                                                                                       |
 | 1                                                                    | $v\gets 0$                   ▷ initialise pessimistically                             |
 | 2                                                                    | **repeat**                                                                            |
-| 3                                                                    |  $v'\;\gets\;Tv$             ▷ Bellman update (2.1)                                   |
-| 4                                                                    |  $\text{res}\;\gets\;\lVert v'-v\rVert_\infty$                                        |
-| 5                                                                    |  $v\;\gets\;v'$                                                                       |
+| 3                                                                    |  $v'\getsTv$             ▷ Bellman update (2.1)                                   |
+| 4                                                                    |  $\text{res}\gets\lVert v'-v\rVert_\infty$                                        |
+| 5                                                                    |  $v\getsv'$                                                                       |
 | 6                                                                    | **until** $\text{res}\le\frac{\varepsilon(1-\gamma)}{2\gamma}$  ▷ residual test (4.8) |
 | 7                                                                    | **return** $\pi_{\text{greedy}}=\Gamma(v)$     ▷ extract ε‑optimal policy             |
 
@@ -770,32 +754,32 @@ Section 6 will leverage these insights to present the standard **Value‑Itera
 > Assume $0\le r_a(s)\le 1$.  Let
 >
 > $$
-> K(\varepsilon)=\Bigl\lceil \tfrac{\ln\!\bigl(\frac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr\rceil.
+> K(\varepsilon)=\Bigl\lceil \tfrac{\ln\bigl(\frac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr\rceil.
 > \tag{6.1}
 > $$
 >
 > After at most $K(\varepsilon)$ iterations of the loop (lines 2‑6), Algorithm 1 returns a policy $\pi$ satisfying
 >
 > $$
-> v^{\pi}\;\ge\;v^\*-\,\varepsilon\mathbf1.
+> v^{\pi}\gev^\*-\varepsilon\mathbf1.
 > \tag{6.2}
 > $$
 >
 > The total arithmetic complexity is
 >
 > $$
-> T_{\text{VI}}(\varepsilon)=\tilde O\!\Bigl(S^{2}A\,\tfrac{\ln(1/\varepsilon)}{1-\gamma}\Bigr).
+> T_{\text{VI}}(\varepsilon)=\tilde O\Bigl(S^{2}A\tfrac{\ln(1/\varepsilon)}{1-\gamma}\Bigr).
 > \tag{6.3}
 > $$
 
 *Proof.* 
 
-1. **Value error.** With $v_0\!=\!0$, inequality (2.5) gives
-   $\|v_k-v^\*\|_\infty\le\gamma^k/(1-\gamma)$.
-2. **Residual bound.** Residual $\text{res}_k=\|v_{k}-v_{k-1}\|_\infty$ satisfies
-   $\text{res}_k\ge(1-\gamma)\|v_k-v^\*\|_\infty$ .
+1. **Value error.** With $v_0=0$, inequality (2.5) gives
+   $\Vertv_k-v^\*\Vert_\infty\le\gamma^k/(1-\gamma)$.
+2. **Residual bound.** Residual $\text{res}_k=\Vertv_{k}-v_{k-1}\Vert_\infty$ satisfies
+   $\text{res}_k\ge(1-\gamma)\Vertv_k-v^\*\Vert_\infty$ .
 3. **Stop criterion.** If $\text{res}_k\le\varepsilon(1-\gamma)/(2\gamma)$ then
-   $\|v_k-v^\*\|_\infty\le \varepsilon/(2\gamma)$.
+   $\Vertv_k-v^\*\Vert_\infty\le \varepsilon/(2\gamma)$.
 4. **Policy error.** By the greedy bound (3.4) we obtain (6.2).
 5. **Iterations.** Setting $\gamma^{k}/(1-\gamma)=\varepsilon/(2\gamma)$ yields (6.1).
 6. **Runtime.** Each sweep costs $O(S^{2}A)$; multiply by $K(\varepsilon)$. ∎
@@ -806,10 +790,10 @@ Section 6 will leverage these insights to present the standard **Value‑Itera
 
 Two equivalent tests are widely used:
 
-* **Residual test** (line 6):                      $\|v'-v\|_\infty\le\delta$ with $\delta=\frac{\varepsilon(1-\gamma)}{2\gamma}$.
+* **Residual test** (line 6):                      $\Vertv'-v\Vert_\infty\le\delta$ with $\delta=\frac{\varepsilon(1-\gamma)}{2\gamma}$.
 * **Bellman error test** (uses current value only):
-  stop when $\|Tv-v\|_\infty\le\varepsilon(1-\gamma)/(2)$.
-  (Because $\|Tv-v\|_\infty\le\text{res}\le \|Tv-v\|_\infty/(1-\gamma)$ .)
+  stop when $\VertTv-v\Vert_\infty\le\varepsilon(1-\gamma)/(2)$.
+  (Because $\VertTv-v\Vert_\infty\le\text{res}\le \VertTv-v\Vert_\infty/(1-\gamma)$ .)
 
 The first is cheaper; the second avoids an extra sweep.
 
@@ -827,7 +811,7 @@ Algorithm 1 stores only two value vectors ($v$ and $v'$) and a policy vector fo
 | ------------------------------ | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | **Gauss–Seidel**               | update states sequentially using freshest values | same bound, often lower constant                                                                                        |
 | **Asynchronous VI**            | update subset of states per sweep                | still $\gamma$-contraction; need longer wall‑time but useful when $P$ sparse                                            |
-| **Successive Over‑Relaxation** | $v\leftarrow v+\omega(Tv-v)$, $0<\omega<1$       | effective $\gamma'\!=\!(1-\omega)+\omega\gamma$ ⇒ optimised $\omega$ speeds practical convergence when $\gamma\approx1$ |
+| **Successive Over‑Relaxation** | $v\leftarrow v+\omega(Tv-v)$, $0<\omega<1$       | effective $\gamma'=(1-\omega)+\omega\gamma$ ⇒ optimised $\omega$ speeds practical convergence when $\gamma\approx1$ |
 
 No variant can asymptotically beat the geometric rate $\gamma^{k}$ implied by Banach’s theorem (§4).
 
@@ -854,14 +838,14 @@ The key reference is Dadashi et al. (2019), who prove that this set is a (
 Recall the mapping
 
 $$
-f_V:\;\pi \;\mapsto\; V^{\pi}\;=\;(I-\gamma P_{\pi})^{-1}r_{\pi}\quad\text{from Definition 1}.  
+f_V:\pi \mapsto V^{\pi}=(I-\gamma P_{\pi})^{-1}r_{\pi}\quad\text{from Definition 1}.  
 $$
 
 * **Domain.** The policy space $\mathcal{P} \doteq \bigl(\Delta(A)\bigr)^{|S|}$ is the Cartesian product of |S| simplices; it is a compact, convex polytope of dimension $d_{\mathcal P}=|S|(|A|-1)$.
 * **Image.** We denote by
 
 $$
-\mathcal V \;=\;f_V(\mathcal P)=\{V^{\pi}\mid \pi\in\mathcal P\}\subset\mathbb R^{|S|}
+\mathcal V =f_V(\mathcal P)=\{V^{\pi}\mid \pi\in\mathcal P\}\subset\mathbb R^{|S|}
 $$
 
 the **value‑function polytope**.
@@ -888,7 +872,7 @@ Fix a *base policy* $\pi$ and a *single state* $s$.
 Let
 
 $$
-\mathcal P_{\pi}^{(s)}=\{\pi' \in \mathcal P : \pi'( \cdot | s')=\pi(\cdot|s')\;\forall s'\neq s\}
+\mathcal P_{\pi}^{(s)}=\{\pi' \in \mathcal P : \pi'( \cdot | s')=\pi(\cdot|s')\forall s'\neq s\}
 $$
 
 be the set of policies that may differ from $\pi$ **only in state $s$**.
@@ -921,7 +905,7 @@ $$
 
 For $S_0\subseteq S$ let $\mathcal P_{\pi}^{(S_0)}$ be the set of policies that match π outside $S_0$. Reusing Lemma 3 in Dadashi et al.:
 
-> **Theorem 7.4.** $f_V\!\bigl(\mathcal P_{\pi}^{(S_0)}\bigr)$ is a polytope of dimension ≤|S₀| obtained by the Cartesian product of |S₀| monotone line segments (one per free state).&#x20;
+> **Theorem 7.4.** $f_V\bigl(\mathcal P_{\pi}^{(S_0)}\bigr)$ is a polytope of dimension ≤|S₀| obtained by the Cartesian product of |S₀| monotone line segments (one per free state).&#x20;
 
 Hence $\mathcal V$ is built recursively from 1‑D fibres.
 
@@ -950,7 +934,7 @@ The effective horizon (§2) bounds how far along each line segment these project
 #### 7.8 Connections to earlier sections
 
 * Sections 2–4 analysed convergence via contraction; Section 7 provides a **geometric counterpart**: each Bellman update moves to an extreme point of every fibre simultaneously.
-* The policy‑error bound (§3) can be visualised as a *tubular neighbourhood* of radius $\frac{2\gamma}{1-\gamma}\|V-V^\*\|_\infty$ around the optimal vertex.
+* The policy‑error bound (§3) can be visualised as a *tubular neighbourhood* of radius $\frac{2\gamma}{1-\gamma}\VertV-V^\*\Vert_\infty$ around the optimal vertex.
 * Linear‑programming view (§9) corresponds to optimising a linear functional over $\mathcal V$; strong duality holds because $\mathcal V$ is (piece‑wise) polyhedral.
 
 ---
@@ -984,10 +968,10 @@ Szepesvári, C. *RL Theory – Lectures 2 & 3.* 2020.
 #### 8.1 Classical statement
 
 > **Theorem 8.1 (Banach, 1922).**
-> Let $(X,d)$ be a **complete metric space** and $F:X\!\to\!X$ a **$c$-contraction**, i.e.
+> Let $(X,d)$ be a **complete metric space** and $F:X\toX$ a **$c$-contraction**, i.e.
 >
 > $$
-> d\bigl(F(x),F(y)\bigr)\;\le\;c\,d(x,y),\qquad\forall\,x,y\in X,\quad 0<c<1. \tag{8.1}
+> d\bigl(F(x),F(y)\bigr)\lecd(x,y),\qquad\forallx,y\in X,\quad 0<c<1. \tag{8.1}
 > $$
 >
 > Then
@@ -996,7 +980,7 @@ Szepesvári, C. *RL Theory – Lectures 2 & 3.* 2020.
 > 2. For every initial $x_0\in X$ the Picard iterates $x_{k+1}:=F(x_k)$ converge **geometrically**:
 >
 >    $$
->    d(x_k,x^{\*})\;\le\;c^{\,k}\,d(x_0,x^{\*}). \tag{8.2}
+>    d(x_k,x^{\*})\lec^{k}d(x_0,x^{\*}). \tag{8.2}
 >    $$
 
 A standard proof proceeds by showing the Picard sequence is Cauchy (using (8.1)) and invoking completeness of $X$ to ensure convergence; uniqueness follows from (8.1) with $x,y=x^{\*}$.  Detailed steps appear in Appendix A.1 of Szepesvári’s notes .
@@ -1008,11 +992,11 @@ A standard proof proceeds by showing the Picard sequence is Cauchy (using (8.1))
 Set
 
 $$
-X=\bigl(\mathbb R^{|S|},\|\cdot\|_{\infty}\bigr),\qquad 
+X=\bigl(\mathbb R^{|S|},\Vert\cdot\Vert_{\infty}\bigr),\qquad 
 F=T\quad\text{or}\quad F=T_\pi .
 $$
 
-*Completeness* of $(\mathbb R^{|S|},\|\cdot\|_\infty)$ is immediate;
+*Completeness* of $(\mathbb R^{|S|},\Vert\cdot\Vert_\infty)$ is immediate;
 *contraction* (8.1) holds with $c=\gamma$ for both $T$ and every $T_\pi$ (Lemma “γ‑contraction of Bellman operators” in Lec 2, p. 4) .
 Therefore:
 
@@ -1023,7 +1007,7 @@ Therefore:
 * **Geometric error decay** (cf. Eq. (4.6)):
 
   $$
-  \|T^{k}v_0-v^{\*}\|_\infty\le\gamma^{k}\|v_0-v^{\*}\|_\infty,\tag{8.3}
+  \VertT^{k}v_0-v^{\*}\Vert_\infty\le\gamma^{k}\Vertv_0-v^{\*}\Vert_\infty,\tag{8.3}
   $$
 
   and analogously for $T_\pi$.
@@ -1038,12 +1022,12 @@ Therefore:
   For $F=T$,
 
   $$
-  \|v_{k+1}-v_k\|_\infty \;\ge\; (1-\gamma)\|v_{k+1}-v^{\*}\|_\infty, \tag{8.4}
+  \Vertv_{k+1}-v_k\Vert_\infty \ge (1-\gamma)\Vertv_{k+1}-v^{\*}\Vert_\infty, \tag{8.4}
   $$
 
   yielding the practical stopping rule (4.8).
 * **Lipschitz composition.**
-  If $G$ is $L$-Lipschitz, $G\!\circ\!F$ is $cL$-Lipschitz; e.g. the greedy‑evaluation mapping $v\mapsto v^{\Gamma(v)}$ has constant $2\gamma/(1-\gamma)$ (3.12).
+  If $G$ is $L$-Lipschitz, $G\circF$ is $cL$-Lipschitz; e.g. the greedy‑evaluation mapping $v\mapsto v^{\Gamma(v)}$ has constant $2\gamma/(1-\gamma)$ (3.12).
 
 ---
 
@@ -1052,7 +1036,7 @@ Therefore:
 1. **Non‑expansive operators.**
    Banach’s guarantee fails when $c=1$; e.g. asynchronous value iteration relies on partial contractions but still converges due to monotonicity (Bertsekas 1994).
 2. **Weighted sup‑norms.**
-   If certain states matter less, choose weights $w(s)$ and norm $\|x\|_{w,\infty}=\max_{s}|x(s)|/w(s)$; $T$ remains a $cw$-contraction with appropriately scaled $c$.
+   If certain states matter less, choose weights $w(s)$ and norm $\Vertx\Vert_{w,\infty}=\max_{s}|x(s)|/w(s)$; $T$ remains a $cw$-contraction with appropriately scaled $c$.
 3. **Stochastic approximation.**
    In temporal‑difference learning the *expected* update is a contraction; stochastic iterates track the fixed point under diminishing step sizes, yielding root‑mean‑square‑error bounds.
 4. **Banach vs. Blackwell.**
@@ -1089,14 +1073,14 @@ The **primal LP** uses the value vector $v\in\mathbb R^{|S|}$ as decision variab
 $$
 \begin{aligned}
 \text{minimise} & \quad d_0^\top v \\[2pt]
-\text{subject to} & \quad v \;\;\ge\;\; T v. \tag{9.1}
+\text{subject to} & \quad v \ge T v. \tag{9.1}
 \end{aligned}
 $$
 
 *Interpretation.* The constraints $v\ge Tv$ enforce *Bellman dominance*: every feasible $v$ lies **above** the maximal one‑step look‑ahead.  Among all such “upper envelopes”, the objective picks the smallest in the direction of $d_0$.  Because the feasible region is a closed, bounded polyhedron, linear‑programming theory guarantees an optimal basic feasible solution.  Proposition 1 below shows that this solution is exactly $v^\*$.
 
 > **Proposition 9.1 (Optimal value solves the primal LP).**
-> If $d_0(s)>0\;\forall s$, the unique optimal solution of (9.1) is $v^\*=Tv^\*$.
+> If $d_0(s)>0\forall s$, the unique optimal solution of (9.1) is $v^\*=Tv^\*$.
 
 *Proof.*  (i) Feasibility: $v^\*=Tv^\*$ satisfies the constraint, so $v^\*$ is in the feasible region.
 (ii) Minimality: any feasible $v$ dominates $Tv$ component‑wise; by monotonicity $v\ge T^{k}v$ for every $k$.  Letting $k\to\infty$ (Banach) gives $v\ge v^\*$.  Since $d_0$ is strictly positive, $d_0^\top v>d_0^\top v^\*$ unless $v=v^\*$.∎&#x20;
@@ -1112,7 +1096,7 @@ Define an *occupancy measure* $d\in\mathbb R^{|S||A|}$ with components $d(s,a)$ 
 $$
 \begin{aligned}
 \text{maximise} & \quad d^\top r \\[2pt]
-\text{subject to} & \quad (I-\gamma P^\top)d \;=\;(1-\gamma)d_0, \\[2pt]
+\text{subject to} & \quad (I-\gamma P^\top)d =(1-\gamma)d_0, \\[2pt]
                   & \quad d\ge 0, \tag{9.2}
 \end{aligned}
 $$
@@ -1160,7 +1144,7 @@ The LP view embeds the value‑function **polytope** inside $\mathbb R^{|S|}$ as
 
 #### 9.6 Complexity remarks
 
-* Size: primal has $|S|$ vars and $|S|\,|A|$ constraints; dual has $|S|\,|A|$ vars and $|S|$ equality constraints.
+* Size: primal has $|S|$ vars and $|S||A|$ constraints; dual has $|S||A|$ vars and $|S|$ equality constraints.
 * Generic interior‑point solvers run in $O\bigl((|S||A|)^{3}\bigr)$ time⁠—comparable to Gaussian elimination on $(I-\gamma P_\pi)$ but usually more costly than policy iteration’s $O(|S|^3)$ per sweep when $|A|$ is moderate.
 * **Approximate LP (ALP)** methods truncate constraints to obtain ε‑optimal policies with polynomial sampling complexity; see de Farias & Van Roy (2003) for bounds.&#x20;
 * Sparse or factored MDPs admit structured LPs amenable to decomposition.
@@ -1201,11 +1185,11 @@ Lines 2–3 are standard value iteration; line 3b implements the **residual 
 #### 10.2 Correctness guarantee
 
 > **Theorem 10.1 (ε‑Optimality).**
-> Let $k^\* =\Bigl\lceil \dfrac{\ln\!\bigl(\tfrac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr\rceil$.
+> Let $k^\* =\Bigl\lceil \dfrac{\ln\bigl(\tfrac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr\rceil$.
 > After at most $k^\*$ sweeps Algorithm 2 outputs a deterministic stationary policy $\pi$ such that
 >
 > $$
-> v^{\pi}\;\ge\;v^\ast-\varepsilon\,\mathbf 1.
+> v^{\pi}\gev^\ast-\varepsilon\mathbf 1.
 > \tag{10.1}
 > $$
 
@@ -1223,13 +1207,13 @@ Lines 2–3 are standard value iteration; line 3b implements the **residual 
 Each synchronous sweep computes all $S A$ Q‑values and |S| maximisations, costing
 
 $$
-\Theta\!\bigl(S^2A\bigr)
+\Theta\bigl(S^2A\bigr)
 $$
 
 table operations (matrix‑vector product). Hence
 
 $$
-T_{\text{VI‑ε}} = \Theta\!\Bigl(S^2A\;\frac{\ln\!\bigl(\tfrac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr).
+T_{\text{VI‑ε}} = \Theta\Bigl(S^2A\frac{\ln\bigl(\tfrac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr).
 \tag{10.2}
 $$
 
@@ -1240,9 +1224,9 @@ Up to the harmless log‑factor $\ln\frac1{1-\gamma}$, this matches the *lower b
 #### 10.4 δ–ε trade‑offs and effective horizon revisited
 
 * Absolute accuracy ε translates into
-  $k^\*=H_{\gamma,\varepsilon}=\Theta\!\bigl(\frac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ (cf. Eq. 2.6).
-* **Relative** error $0<\delta_{\text{rel}}<1$ is achieved by replacing ε with $\delta_{\text{rel}}(1-\gamma)$ (because $\|v^\*\|_\infty\le(1-\gamma)^{-1}$), leading to
-  $k=O\!\bigl(\frac{\ln(1/\delta_{\text{rel}})}{1-\gamma}\bigr)$.
+  $k^\*=H_{\gamma,\varepsilon}=\Theta\bigl(\frac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ (cf. Eq. 2.6).
+* **Relative** error $0<\delta_{\text{rel}}<1$ is achieved by replacing ε with $\delta_{\text{rel}}(1-\gamma)$ (because $\Vertv^\*\Vert_\infty\le(1-\gamma)^{-1}$), leading to
+  $k=O\bigl(\frac{\ln(1/\delta_{\text{rel}})}{1-\gamma}\bigr)$.
 
 The linear $1/(1-\gamma)$ dependence reflects the **effective planning horizon**: near‑undiscounted tasks ($\gamma\to1$) are intrinsically hard unless stronger structure is available.
 
@@ -1254,7 +1238,7 @@ In practice one rarely knows γ exactly, and residuals can oscillate. Two robust
 
 | Criterion         | Condition                                                                                | Guarantees                                   |
 | ----------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------- |
-| **Bellman error** | stop when $\|Tv_k-v_k\|_\infty \le \tfrac{\varepsilon(1-\gamma)}{2}$                     | implies ε‑optimality (uses extra sweep)      |
+| **Bellman error** | stop when $\VertTv_k-v_k\Vert_\infty \le \tfrac{\varepsilon(1-\gamma)}{2}$                     | implies ε‑optimality (uses extra sweep)      |
 | **Span seminorm** | maintain upper & lower envelopes and stop when $\text{span}_\infty(v_k) \le \varepsilon$ | policy‑independent bound; useful for large γ |
 
 See Lec 3, pp. 2–3 for derivations .
@@ -1268,7 +1252,7 @@ See Lec 3, pp. 2–3 for derivations .
 * **Anytime property:** $v_k$ itself is an upper bound on $v^\*$.
 * **Provably near‑optimal runtime:** within log‑factor of table‑input lower bound.
 
-However, near‑undiscounted domains ($\gamma\!\approx\!1$) or very low ε may favour *policy iteration* (quadratic local rate) or LP‑based methods (one‑shot solve); §11 compares these in detail.
+However, near‑undiscounted domains ($\gamma\approx1$) or very low ε may favour *policy iteration* (quadratic local rate) or LP‑based methods (one‑shot solve); §11 compares these in detail.
 
 ---
 
@@ -1277,8 +1261,8 @@ However, near‑undiscounted domains ($\gamma\!\approx\!1$) or very low ε may f
 Value iteration, coupled with a single greedy step, converts *value* convergence into *policy* optimality with a clear ε‑runtime:
 
 $$
-\boxed{\text{Sweeps} = \Theta\!\Bigl(\frac{\ln(1/\varepsilon)}{1-\gamma}\Bigr)},\qquad
-\boxed{\text{Work} = \Theta\!\Bigl(S^2A\frac{\ln(1/\varepsilon)}{1-\gamma}\Bigr)}.
+\boxed{\text{Sweeps} = \Theta\Bigl(\frac{\ln(1/\varepsilon)}{1-\gamma}\Bigr)},\qquad
+\boxed{\text{Work} = \Theta\Bigl(S^2A\frac{\ln(1/\varepsilon)}{1-\gamma}\Bigr)}.
 $$
 
 These bounds are tight up to logarithmic terms and form the benchmark against which all other *exact‑model* planning algorithms are measured.
@@ -1325,8 +1309,8 @@ $$
 From §10 (Theorem 10.1) the number of sweeps required is
 
 $$
-k^\*(\varepsilon,\gamma)=\Bigl\lceil \tfrac{\ln\!\bigl(\frac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr\rceil
- = Θ\!\Bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\Bigr).
+k^\*(\varepsilon,\gamma)=\Bigl\lceil \tfrac{\ln\bigl(\frac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr\rceil
+ = Θ\Bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\Bigr).
 \tag{11.2}
 $$
 
@@ -1338,15 +1322,15 @@ Multiply (11.1) × (11.2):
 
 $$
 T_{\text{VI}}(\varepsilon)
-   = Θ\!\Bigl(
-        S^2A \;
-        \tfrac{\ln\!\bigl(1/\varepsilon\bigr)}{1-\gamma}
+   = Θ\Bigl(
+        S^2A 
+        \tfrac{\ln\bigl(1/\varepsilon\bigr)}{1-\gamma}
       \Bigr)
       \quad\text{(dense model).}
 \tag{11.3}
 $$
 
-The $\tilde{O}$ notation often used suppresses a secondary $\ln\!\frac1{1-\gamma}$ that enters via the ceiling in (11.2).
+The $\tilde{O}$ notation often used suppresses a secondary $\ln\frac1{1-\gamma}$ that enters via the ceiling in (11.2).
 
 ---
 
@@ -1369,7 +1353,7 @@ Combined with (11.3), value iteration is optimal **up to a logarithmic factor** 
 
 | Algorithm                | Per‑iteration cost              | Iterations for ε‑policy                              | Overall runtime       | Remarks                  |                      |                                                            |
 | ------------------------ | ------------------------------- | ---------------------------------------------------- | --------------------- | ------------------------ | -------------------- | ---------------------------------------------------------- |
-| **Value Iteration**      | $Θ(S^2A)$                       | $Θ\!\bigl(\frac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ | Eq. (11.3)            | Geometric rate           |                      |                                                            |
+| **Value Iteration**      | $Θ(S^2A)$                       | $Θ\bigl(\frac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ | Eq. (11.3)            | Geometric rate           |                      |                                                            |
 | **Policy Iteration**     | Solve $A_\pi v=r_\pi$: $Θ(S^3)$ | ≤                                                    | S                     | sweeps worst‑case        | $Θ(S^4)$ upper bound | Often faster in practice; sub‑cubic linear solves possible |
 | **Modified PI (Howard)** | $Θ(S^3)$                        | (O(                                                  | S                     | ^2)) bounds              | $Θ(S^5)$             | Strong empirical speedups                                  |
 | **Primal LP (IPM)**      | $Θ\bigl((S A)^{3}\bigr)$        | 1                                                    | Competitive only when | A                        |  ≪ S                 |                                                            |
@@ -1412,7 +1396,7 @@ Working memory of VI is minimal: two value vectors + one residual, all $O(S)$.
 Value iteration achieves
 
 $$
-T_{\text{VI}}(\varepsilon)=Θ\!\Bigl(S^{2}A\frac{\ln(1/\varepsilon)}{1-\gamma}\Bigr),
+T_{\text{VI}}(\varepsilon)=Θ\Bigl(S^{2}A\frac{\ln(1/\varepsilon)}{1-\gamma}\Bigr),
 $$
 
 which is *information‑theoretically minimal* for explicit, dense MDPs up to the standard $\ln(1/\varepsilon)$ factor and matching the Chen–Wang lower bound in its dependence on $|S|,|A|$.  Memory footprint and parallelism further cement VI as the baseline against which more sophisticated planners (policy iteration, LP, or specialised structure‑exploiting methods) must be judged.
@@ -1443,7 +1427,7 @@ Complexity claims depend **crucially** on *how $P$ is presented* and *how the po
 
 *Input size* is Θ$(S^{2}A)$ numbers.  All three problems above are in deterministic polynomial time:
 
-* **Upper bound.** Run Value Iteration for $k^\*(\varepsilon)=Θ(\frac{\ln(1/\varepsilon)}{1-\gamma})$ sweeps (§ 11) and greedify—time $Θ(S^{2}A\,k^\*)$.
+* **Upper bound.** Run Value Iteration for $k^\*(\varepsilon)=Θ(\frac{\ln(1/\varepsilon)}{1-\gamma})$ sweeps (§ 11) and greedify—time $Θ(S^{2}Ak^\*)$.
 * **Strongly polynomial alternative.** Ye (2011) proved that **policy iteration with Howard pivots is strongly polynomial when γ is fixed**, i.e. the number of arithmetic operations is bounded by poly$(S,A)$ independent of numerical magnitudes.&#x20;
 
 Hence **PLAN‑FIND ∈ P** for table MDPs.  Deciding VALUATION/PLAN‑EXIST reduces to solving a single LP (Section 9) and is also in P.
@@ -1534,7 +1518,7 @@ All norms are max‑norms; rewards are scaled to \[0,1].
 #### 13.2 Value error ⇄ residual
 
 $$
-(1-\gamma)\,e_v \;\le\; b_k \;\le\; r_k \;\le\; \frac{1}{1-\gamma}\,b_k.\tag{13.1}
+(1-\gamma)e_v \le b_k \le r_k \le \frac{1}{1-\gamma}b_k.\tag{13.1}
 $$
 
 *Proof.* Triangle inequality plus $Tv_{k+1}=v_{k+1}$.  (Szepesvári, Lec 3, p. 2)
@@ -1544,7 +1528,7 @@ $$
 #### 13.3 Policy error ⇄ value error (greedy bound)
 
 $$
-e_\pi \;\le\; \frac{2\gamma}{1-\gamma}\,e_v.\tag{13.2}
+e_\pi \le \frac{2\gamma}{1-\gamma}e_v.\tag{13.2}
 $$
 
 Equality can occur (Singh‑Yee 1994 two‑state example).
@@ -1556,7 +1540,7 @@ Equality can occur (Singh‑Yee 1994 two‑state example).
 Desired policy error $\varepsilon$ ⇒ pick residual tolerance
 
 $$
-r_\text{stop}\;=\;\frac{\varepsilon(1-\gamma)}{2\gamma}.\tag{13.3}
+r_\text{stop}=\frac{\varepsilon(1-\gamma)}{2\gamma}.\tag{13.3}
 $$
 
 Then
@@ -1570,7 +1554,7 @@ Starting from $v_0=0$:
 
 $$
 e_v(k)=\frac{\gamma^k}{1-\gamma},\quad
-k(\varepsilon)=\Bigl\lceil\frac{\ln\!\bigl(\frac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr\rceil.
+k(\varepsilon)=\Bigl\lceil\frac{\ln\bigl(\frac{2\gamma}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\Bigr\rceil.
 \tag{13.4}
 $$
 
@@ -1583,9 +1567,9 @@ Hence **linear** $1/(1-\gamma)$ dependence and **logarithmic** $ \ln(1/\varepsil
 If user specifies relative tolerance $0<\delta_{\text{rel}}<1$:
 
 $$
-e_v\le \frac{\delta_{\text{rel}}(1-\gamma)}{2\gamma}\,\lVert v^\*\rVert_\infty
-\;\Longrightarrow\;
-k=Θ\!\Bigl(\frac{\ln(1/\delta_{\text{rel}})}{1-\gamma}\Bigr).\tag{13.5}
+e_v\le \frac{\delta_{\text{rel}}(1-\gamma)}{2\gamma}\lVert v^\*\rVert_\infty
+\Longrightarrow
+k=Θ\Bigl(\frac{\ln(1/\delta_{\text{rel}})}{1-\gamma}\Bigr).\tag{13.5}
 $$
 
 Because $\lVert v^\*\rVert_\infty \le (1-\gamma)^{-1}$, absolute and relative targets coincide up to a constant factor when $v^\*$ is maximal.
@@ -1614,7 +1598,7 @@ Then (Bertsekas & Tsitsiklis, 1996)
 
 $$
 \lVert\tilde v_k - v^\*\rVert_\infty
-      \;\le\; \gamma^{k}\lVert \tilde v_0 - v^\*\rVert_\infty
+      \le \gamma^{k}\lVert \tilde v_0 - v^\*\rVert_\infty
              +\frac{\delta}{1-\gamma}.\tag{13.8}
 $$
 
@@ -1626,11 +1610,11 @@ Hence *bias floor* $≈\delta/(1-\gamma)$; choose δ ≈ ε(1‑γ) to keep 
 
 | Quantity controlled          | Dependence on target ε                                | Tight?                    | Citation   |
 | ---------------------------- | ----------------------------------------------------- | ------------------------- | ---------- |
-| Sweeps $k(\varepsilon)$      | $Θ\!\bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ | ✓ (two‑state lower bound) | Eq. (13.4) |
+| Sweeps $k(\varepsilon)$      | $Θ\bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ | ✓ (two‑state lower bound) | Eq. (13.4) |
 | Policy error vs. value error | factor $2\gamma/(1-\gamma)$                           | ✓ (Singh‑Yee)             | Eq. (13.2) |
 | Residual vs. value error     | factor $1/(1-\gamma)$                                 | ✓                         | Eq. (13.1) |
 | Backup noise δ → value bias  | $\delta/(1-\gamma)$                                   | ✓                         | Eq. (13.8) |
-| Finite‑horizon H(ε)          | $Θ\!\bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ | ✓                         | Eq. (13.6) |
+| Finite‑horizon H(ε)          | $Θ\bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ | ✓                         | Eq. (13.6) |
 
 ---
 
@@ -1654,16 +1638,16 @@ We close the theory roadmap by **pinning down how fast value iteration *can* and
 From Banach (§ 4) every Bellman sweep contracts the error by γ:
 
 $$
-\lVert v_k-v^\*\rVert_\infty \;\le\; \gamma^{k}\,\lVert v_0-v^\*\rVert_\infty.\tag{14.1}
+\lVert v_k-v^\*\rVert_\infty \le \gamma^{k}\lVert v_0-v^\*\rVert_\infty.\tag{14.1}
 $$
 
 With rewards in \[0,1] and $v_0=0$:
 
 $$
-\lVert v_k-v^\*\rVert_\infty \;\le\; \frac{\gamma^{k}}{1-\gamma},\tag{14.2}
+\lVert v_k-v^\*\rVert_\infty \le \frac{\gamma^{k}}{1-\gamma},\tag{14.2}
 $$
 
-yielding the effective‑horizon expression $k=Θ\!\bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ (§ 2).
+yielding the effective‑horizon expression $k=Θ\bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$ (§ 2).
 **No algorithm that performs *pure* Bellman sweeps can beat the γ‑factor** – it is intrinsic to the operator.
 
 ---
@@ -1688,7 +1672,7 @@ Starting from $v_0=0$, value iteration improves only the *currently sub‑optima
 Combining the tight lower example with (14.2) gives a *matching* worst‑case sweep bound:
 
 $$
-\boxed{k_{\min}(\varepsilon)\;=\;\left\lceil\frac{\ln\!\bigl(\tfrac{1}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\right\rceil.}\tag{14.3}
+\boxed{k_{\min}(\varepsilon)=\left\lceil\frac{\ln\bigl(\tfrac{1}{\varepsilon(1-\gamma)}\bigr)}{1-\gamma}\right\rceil.}\tag{14.3}
 $$
 
 Any algorithm restricted to synchronous Bellman updates and monotone initialisation needs at least $k_{\min}(\varepsilon)$ sweeps to reach ε‑value accuracy.
@@ -1719,7 +1703,7 @@ Thus γ‑geometric decay is the *best attainable uniform guarantee* for general
 | --------------------------------- | ----------------------------------------- | --------- | ------------------------------------------------ |
 | Asynchronous single‑state backups | γ‑geometric (Bertsekas & Tsitsiklis)      | Not tight | State‑ordering‑dependent speed‑ups un‑quantified |
 | Stochastic backups (TD(0))        | RMSE $≤\frac{\sigma}{\sqrt{(1-\gamma)N}}$ | Loose     | Sharper constants, non‑asymptotic lower bounds   |
-| Average‑reward VI                 | Rate $γ\!\to\!1$ ⇒ sub‑linear             | Gap       | Tight deterministic example missing              |
+| Average‑reward VI                 | Rate $γ\to1$ ⇒ sub‑linear             | Gap       | Tight deterministic example missing              |
 
 ---
 
@@ -1744,7 +1728,7 @@ Szepesvári, C. **RL Theory – Lecture 3** — Bound derivations and tightn
 Value iteration remains the **canonical baseline** for exact planning in finite, discounted Markov decision processes:
 
 * **Fixed‑point bedrock.** Banach’s contraction theorem yields a uniquely optimal value $v^{\*}$ and a **γ‑geometric** error decay.
-* **Effective horizon.** All analytic and computational quantities scale with $H_{\gamma,\varepsilon}=Θ\!\bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$; this single expression unifies convergence proofs (§2), finite‑horizon truncations (§5) and runtime bounds (§11).
+* **Effective horizon.** All analytic and computational quantities scale with $H_{\gamma,\varepsilon}=Θ\bigl(\tfrac{\ln(1/\varepsilon)}{1-\gamma}\bigr)$; this single expression unifies convergence proofs (§2), finite‑horizon truncations (§5) and runtime bounds (§11).
 * **Greedy bridge.** The tight policy‑error bound ($ \frac{2\gamma}{1-\gamma} e_v$) turns value accuracy into policy optimality, enabling the “stop‑and‑greedy’’ algorithm (§10).
 * **Nearly‑optimal complexity.** For explicit (table) MDPs value iteration’s $Θ(S^{2}A)$ per‑sweep cost is **information‑theoretically minimal** (Chen–Wang lower bound), and the total work is optimal up to logarithmic factors.
 * **Geometry matters.** Dadashi et al.’s polytope view (§7) shows that Bellman updates traverse monotone line segments inside a piece‑wise‑linear value landscape—illuminating why deterministic policies suffice and how asynchronous or partial updates behave.

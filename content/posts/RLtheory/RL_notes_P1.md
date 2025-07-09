@@ -5,6 +5,7 @@ summary: "MDP Foundations and Optimality"
 lastmod: "2025-07-06"
 category: "Notes"
 series: ["RL Theory"]
+legacy: ["legacy"]
 author: "Bryan Chan"
 hero: /assets/images/hero3.png
 image: /assets/images/card3.png

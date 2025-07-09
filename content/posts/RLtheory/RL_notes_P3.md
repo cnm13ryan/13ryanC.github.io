@@ -4,6 +4,7 @@ title: "(Part 3) Online vs Local Planning in Sequential Decision‑Making"
 summary: "Dissecting two practical faces of planning in RL‑style control. Traeat as advanced planning heuristics; optional deep dive"
 category: "Tutorial"
 series: ["RL Theory"]
+legacy: ["legacy"]
 author: "Bryan Chan"
 hero: /assets/images/hero_online_local.png
 image: /assets/images/card_online_local.png
