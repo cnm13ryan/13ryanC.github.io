@@ -642,6 +642,32 @@ The **discount factor** $\gamma$ serves two purposes:
 
 2.  **Behavioral Control**: It encodes a preference for immediate rewards over future rewards. A $\gamma$ close to 0 leads to myopic behavior, while a $\gamma$ close to 1 leads to far-sighted behavior.
 
+> **Remark: On the Discount Factor and the Effective Horizon**
+> The discount factor $\gamma$  makes future rewards matter less than present ones. If we truncate the return sum after $H$ terms, the error (the "tail" of the sum) is bounded. Assuming rewards are bounded by $R_{max}$, the magnitude of this truncated part is:
+>
+> $$
+> \left\lvert \sum_{k=H}^{\infty} \gamma^k R_{t+k+1} \right\rvert \le \sum_{k=H}^{\infty} \gamma^k R_{max} = \gamma^H \sum_{j=0}^{\infty} \gamma^j R_{max} = \frac{\gamma^H R_{max}}{1 - \gamma}
+> $$
+>
+> We can determine the number of steps $H$ required for this error to be smaller than some tolerance $\varepsilon$. For simplicity, if we assume $R_{max}=1$, we solve for the $H$ that satisfies $\dfrac{\gamma^H}{1 - \gamma} \le \epsilon$:
+>
+> $$H \geq H_{\gamma, \epsilon}^\ast = \dfrac{\ln\left(\dfrac{1}{\epsilon(1 - \gamma)}\right)}{\ln(1 / \gamma)}
+> $$
+>
+> For any $H$ satisfying this, the optimal action sequence is unlikely to change by considering horizons longer than $H$. This critical value of $H$ is called the **effective horizon**.
+>
+> Oftentimes, for simplicity, $H_{\gamma , \epsilon}^\ast$ is replaced with the following upper bound (often also called the effective horizon):
+>
+> $$
+> H_{\gamma ,\epsilon} := \dfrac{\ln\left(\dfrac{1}{\epsilon(1 - \gamma)}\right)}{1 - \gamma}
+> $$
+>
+> The relative difference between these two quantities is small when $\gamma$ is close to 1, which is the regime of primary interest (i.e., far-sighted agents).
+>
+> The discounted setting can sometimes feel arbitrary. Where does $\gamma$ come from? One view is that we first choose an effective horizon $H$ that feels appropriate for the problem, and then work backward to find a $\gamma$ that produces this horizon. A more honest admission is that the discounted objective may not perfectly capture every decision problem. Other objectives exist, such as finite-horizon (discounted or not), total reward (undiscounted infinite-horizon), or average reward. Each has pros and cons. We stick to the discounted objective for now for pedagogical reasons: the underlying mathematics is particularly simple and elegant, and many of the results transfer to other settings with minor modifications.
+
+
+
 The ultimate goal of the agent is to select a policy that maximizes the expected discounted return.
 
 **The Reinforcement Learning Objective**
