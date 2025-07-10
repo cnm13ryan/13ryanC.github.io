@@ -262,6 +262,8 @@ An alternative, and often more common, set of axioms for a $\lambda$-system is:
 
 A crucial insight is that a collection of sets that is both a $\pi$-system and a $\lambda$-system is also a $\sigma$-algebra.
 
+The two sets of axioms presented for a $\lambda$-system are equivalent.
+
 With these definitions, we can now state the theorem. The Dynkin $\pi-\lambda$ Theorem provides a powerful tool for showing that a collection of sets is a $\sigma$-algebra. It is particularly useful in probability theory for proving that two measures are identical if they agree on a simpler class of sets.
 
 **Theorem 1.3.3 (Dynkin's $\pi-\lambda$ Theorem)**
@@ -757,25 +759,51 @@ J(\pi) = \mathbb E_\mu^\pi \left[ \sum_{t=0}^{\infty} \gamma^t R_{t+1} \right] =
 $$
 
 **Proof Sketch:**
-The proof relies on a direct application of the Tonelli-Fubini theorem.
-
-$$
-J(\pi) = \mathbb E_\mu^\pi \left[ \sum_{t=0}^{\infty} \gamma^t r(S_t, A_t) \right] = \sum_{t=0}^{\infty} \gamma^t \mathbb E_\mu^\pi [r(S_t, A_t)]
-$$
-
+The proof relies on a direct application of the Tonelli-Fubini theorem, which allows the exchange of expectation and summation.
+$$J(\pi) = \mathbb E_\mu^\pi \left[ \sum_{t=0}^{\infty} \gamma^t r(S_t, A_t) \right] = \sum_{t=0}^{\infty} \gamma^t \mathbb E_\mu^\pi [r(S_t, A_t)]$$
 By definition of expectation and the state-action occupancy measure, this is precisely $\int_{S \times A} r(s,a) d\rho_\mu^\pi(s,a)$.
 
-This formulation is powerful because the set of all valid state-action occupancy measures forms a convex set defined by a linear constraint. 
+> **Remark: The Discrete Case**
+> In the common scenario of finite state and action spaces, the state-action occupancy measure $\rho_\mu^\pi$ can be viewed as a simple table or vector, where for each pair $(s,a)$, the value is:
+> $$
+> \rho_{\mu}^{\pi}(s,a) = \sum_{t = 0}^{\infty} \gamma^{t} \mathbb P_{\mu}^{\pi}(S_{t} = s,A_{t} = a)
+> $$
+> In this setting, the integral for the objective function $J(\pi)$ simplifies to a sum, which can be interpreted as an inner product between the occupancy measure and the reward vector:
+> $$
+> J(\pi) = \sum_{s \in S, a \in A} \rho_{\mu}^{\pi}(s,a) r(s,a) := \langle \rho_{\mu}^{\pi},r\rangle
+> $$
+> This shows that maximizing the expected return is equivalent to choosing a policy that "stirs" the occupancy measure to maximally align with the reward function. A better alignment results in a higher value for the policy.
 
-Any such measure $\rho$ induced by a policy must satisfy a "Bellman flow" equation: the total flow into a set of states $B$ must equal the initial flow plus the discounted flow from all other states.
 
-**Bellman Flow Constraint:** 
+A key step in proving the sufficiency of memoryless policies for optimal control is the following result:
 
+**Theorem 2.2.3 (Equivalent Memoryless Policy)**
+
+For any (potentially history-dependent) policy $\pi$ and a start state distribution $\mu \in \mathcal{M}_1(S)$, there exists a memoryless policy $\pi'$ such that their state-action occupancy measures are identical:
+
+$$
+\rho_{\mu}^{\pi'} = \rho_{\mu}^{\pi}
+$$
+
+This implies they achieve the exact same total return, $J(\pi') = J(\pi)$.
+
+**Proof Hint:**
+First, define the state occupancy measure $\tilde \rho_{\mu}^{\pi}(s) := \sum_{a \in A} \rho_{\mu}^{\pi}(s,a)$. 
+
+Then, show that the theorem holds for the stationary policy $\pi'$ defined as follows:
+
+$$
+\pi^{\prime}(a \mid s) = \left\lbrace \begin{array}{ll} \dfrac{\rho_{\mu}^{\pi}(s,a)}{\tilde \rho_{\mu}^{\pi}(s)} & \mathrm{if~} \tilde \rho_{\mu}^{\pi}(s) > 0 \newline \text{arbitrary distribution} & \mathrm{otherwise}. \end{array} \right\rbrace
+$$
+
+Note that it is crucial that the memoryless policy obtained depends on the start state distribution. 
+There exist non-memoryless policies whose value function cannot be reproduced by a *single* memoryless policy across *all* possible start states simultaneously.
+
+This formulation is powerful because the set of all valid state-action occupancy measures forms a convex set defined by a linear constraint. Any such measure $\rho$ induced by a policy must satisfy a "Bellman flow" equation: the total flow into a set of states $B$ must equal the initial flow plus the discounted flow from all other states.
+
+**Bellman Flow Constraint:**
 For any state-action measure $\rho$ to be valid (i.e., induced by some policy $\pi$), it must satisfy:
-$$
-\int_A \rho(B, da) = \mu(B) + \gamma \int_{S \times A} p(B|s,a) d\rho(s,a) \quad \text{for all } B \in \mathcal{B}(S)
-$$
-
+$$\int_A \rho(B, da) = \mu(B) + \gamma \int_{S \times A} p(B|s,a) d\rho(s,a) \quad \text{for all } B \in \mathcal{B}(S)$$
 The reinforcement learning problem can thus be reframed as a linear program:
 $$\max_{\rho} \int_{S \times A} r(s,a) d\rho(s,a)$$
 subject to the Bellman flow constraint.
@@ -787,41 +815,152 @@ subject to the Bellman flow constraint.
 
 ### 2.2.5 The Process Measure and Markov Properties
 
-Given an initial distribution $\mu$ on $S$ and a policy $\pi$, we can define the state-to-state dynamics kernel $p^\pi(ds'|s) := \int_A p(ds'|s, a) \pi(da|s)$.
+In the study of reinforcement learning and decision-making, we need a solid mathematical framework to describe the entire ongoing interaction between an agent and its environment. This section explains how we can create a single, unique probability rule that governs the whole sequence of states and actions over time.
 
-Given an initial state distribution $\mu$ and a policy $\pi$, the **Ionescu-Tulcea Extension Theorem (1.7.3)** provides the mechanism to construct a single, unique probability measure for the entire stochastic process. 
+**The Goal: A Unified Probability Rule for an Entire Timeline**
 
-This measure, denoted $\mathbb{P}_\mu^\pi$, is defined over the canonical path space of infinite trajectories $H = (S \times A)^{\mathbb{N}}$.
-
-The construction is governed by three fundamental conditions that define the process structure:
-
-1.  **Initialization**: The process starts according to the initial distribution $\mu$. The probability that the initial state $S_0$ falls within a measurable set $B \subseteq S$ is precisely $\mathbb{P}_\mu^\pi(S_0 \in B) = \mu(B)$.
-
-2.  **Recursive Evolution**: The evolution from state to state is determined by a policy-conditioned transition kernel, $p^\pi$. This kernel is formed by integrating the environment's dynamics against the policy's action choices:
-    $$p^\pi(ds'|s) := \int_A p(ds'|s, a) \pi(da|s)$$
-    The probability of the next state, $S_{t+1}$, depends only on the current state, $S_t$, according to this kernel.
+Imagine an agent (like a robot or a game character) operating in an environment. At every moment, it's in a certain **state** ($S_t$), it takes an **action** ($A_t$), and the environment responds by moving it to a **new state** ($S_{t+1}$). This creates an endless timeline of events: $S_0, A_0, S_1, A_1, S_2, \dots$.
  
-3.  **Unique Extension**: The theorem guarantees that $\mathbb{P}_\mu^\pi$ is the **unique measure** on the infinite path space that is consistent with the initial distribution $\mu$ and the recursive kernel $p^\pi$ for all time steps.
+We need a way to answer questions like, "What is the probability of *this specific sequence* of events happening?" To do this, we need a single, overarching probability rule, which we call the **Process Measure**. This measure, denoted $\mathbb{P}_\mu^\pi$, is the master rulebook that assigns a probability to any possible trajectory the agent could experience.
+ 
 
-The probability of a specific finite history (a cylinder set) $H_t = (s_0, a_0, \dots, s_{t-1}, a_{t-1}, s_t)$ is given by integrating over the sequence of kernels:
+1.  **Initial Distribution ($\mu$)**: This is the rule that determines the starting point. It tells us the probability of the agent beginning in any particular state. For example, it might state there's a 100% chance of starting at 'Position A' or a 50/50 chance of starting at 'Position A' or 'Position B'.
+2.  **Policy ($\pi$)**: This is the agent's strategy or "brain." Given its current state, the policy tells us the probability of choosing any possible action. For example, if in state 'Crossroads', the policy might be "go left 70% of the time, go right 30% of the time."
+3.  **Environment Dynamics ($p$)**: These are the "laws of physics" for the environment. This rule tells us the probability of transitioning to a new state, given the agent's current state and the action it just took. For instance, if the agent is in state 'Icy Patch' and takes the action 'Step Forward', the dynamics might be "90% chance of moving to 'Safe Ground', 10% chance of transitioning to 'Fallen Down'."
+ 
+The challenge is to combine these three separate rules into one single measure, $\mathbb{P}_\mu^\pi$, that consistently describes the whole process. The mathematical tool that allows us to do this is the **Ionescu-Tulcea Extension Theorem**.
+ 
+---
+
+### Constructing the Process Measure (Theorem 2.2.3)
+
+The Ionescu-Tulcea theorem guarantees that if we can define the probability of each step in the sequence based only on the history so far, then there is one and only one probability measure for the entire infinite sequence. Our construction relies on three specific conditions that define the structure of this agent-environment interaction.
+ 
+1.  **Initialization**: The probability that the process starts in a particular region of states, $B$, is given directly by our initial distribution, $\mu$.
+    $$
+    \mathbb{P}_\mu^\pi(S_0 \in B) = \mu(B)
+    $$
+    In simple terms: The chance of starting somewhere is whatever the starting rule says it is.
+ 
+2.  **Action Selection**: The probability of choosing an action from a set of possible actions, $C$, depends *only* on the current state, $S_t$. It doesn't matter how we got to $S_t$. The decision is made solely based on the agent's policy, $\pi$.
+    $$
+    \mathbb P_\mu^\pi(A_t \in C \mid S_0, A_0, \dots, S_t) = \pi(C \mid S_t)
+    $$
+    The probability of action $A_t$ being in the set $C$, given the entire history up to state $S_t$, is simply the probability dictated by the policy $\pi$ at state $S_t$.
+
+3.  **State Transition**: The probability of the next state, $S_{t+1}$, falling into a region $B$ depends *only* on the current state $S_t$ and the current action $A_t$. The past history before this point is irrelevant. This is determined by the environment's dynamics, $p$.
+    $$
+    \mathbb P_\mu^\pi(S_{t+1} \in B \mid S_0, A_0, \dots, S_t, A_t) = p(B \mid S_t, A_t)
+    $$
+    The probability of the next state $S_{t+1}$ being in $B$, given the whole history up to the action $A_t$, is simply the probability given by the environment's rules $p$ for the outcome of action $A_t$ in state $S_t$.
+ 
+
+Note: The term ($\mathbb P_\mu^\pi$-a.s.) stands for "almost surely." It's a technical requirement in probability theory that means the statement holds true except for a set of outcomes that have a total probability of zero. For all practical purposes, you can read it as "this is always true."
+ 
+The Ionescu-Tulcea theorem takes these step-by-step rules and "extends" them to uniquely define the single process measure, $\mathbb{P}_\mu^\pi$, over the space of all possible infinite trajectories.
+ 
+---
+
+### The Resulting Markov Property
+
+A direct and crucial consequence of building our process measure this way is that the resulting system has the **Markov Property**.
+ 
+
+The Markov Property states that **the future is independent of the past, given the present**.
+
+In our context, the "history" up to time $t$ is the sequence of all states and actions seen so far, $(S_0, A_0, \dots, S_t)$. This history is formally called the **natural filtration** and is denoted $\mathcal{F}_t$. The "present" is just the current state, $S_t$.
+
+The Markov Property means that to predict what happens next (the probability of $S_{t+1}$), you only need to know the current state $S_t$. You gain no extra predictive power from knowing the full history of how the agent arrived at $S_t$.
+ 
+Mathematically, this is expressed as:
 
 $$
-\mathbb P_\mu^\pi (S_0 \in ds_0, \dots, S_t \in ds_t) = \mu(ds_0) \left( \prod_{k=0}^{t-1} \pi(da_k|s_k) p(ds_{k+1}|s_k, a_k) \right)
+\mathbb P_\mu^\pi(S_{t+1} \in B \mid \mathcal F_t) = \mathbb P_\mu^\pi(S_{t+1} \in B \mid S_t)
 $$
 
-This explicit construction for cylinder sets forms the basis that the Ionescu-Tulcea theorem extends to the entire infinite-horizon $\sigma$-algebra $\mathcal{F}$.
+This equation says: "The probability of the next state landing in region $B$, given the *entire history* $\mathcal{F}_t$, is exactly the same as the probability given *only the current state* $S_t$."
+ 
+---
 
+### A Simplified View: The Policy-Conditioned Kernel
 
+To make things neater, we can combine the agent's decision-making and the environment's response into a single new function, $p^\pi$. This is called the **policy-conditioned transition kernel**.
 
-The resulting stochastic process $(S_0, A_0, S_1, A_1, \dots)$ on the probability space $(H, \mathcal F, \mathbb P_\mu^\pi)$ has the **Markov Property** as a direct consequence of its construction. 
+$$p^\pi(ds'|s) := \int_A p(ds'|s, a) \pi(da|s)$$
 
-The history of the process up to time $t$ is captured by the **natural filtration**, $\mathcal F_t = \sigma(S_0, A_0, \dots, S_t)$. 
+Let's break this down:
+* This formula calculates the overall probability of moving from a state $s$ to a next state $s'$.
+* It does this by considering every possible action $a$ the agent could take.
+* For each action $a$, it multiplies the probability of choosing that action ($\pi(da|s)$) by the probability of that action leading to state $s'$ ($p(ds'|s, a)$).
+* The integral sign $\int_A$ simply sums up these possibilities over all actions.
 
-The Markov property then formally states that the future is independent of the past given the present:
+With this tool, the Markov property becomes even cleaner to write:
+$$\mathbb P_\mu^\pi(S_{t+1} \in B \mid \mathcal F_t) = p^\pi(B|S_t)$$
+This says the probability of transitioning into a set of states $B$ from our current state $S_t$ is given directly by our combined agent-environment rule, $p^\pi$.
+
+Finally, using this framework, the probability density for any specific finite sequence of events (like $s_0, a_0, s_1, a_1, \dots, s_t$) can be calculated by simply multiplying the probabilities of each step in the chain:
+
 $$
-\mathbb P_\mu^\pi(S_{t+1} \in B \mid \mathcal F_t) = \mathbb P_\mu^\pi(S_{t+1} \in B \mid S_t) = p^\pi(B|S_t) \quad (\mathbb P_\mu^\pi\text{-a.s.})
+\mathbb{P}_\mu^\pi(\text{history}) = 
+  \underset{\text{Prob. of start}}{\mu(ds_0)}
+  \cdot
+  \underset{\text{Prob. of 1st action}}{\pi(da_0 \mid s_0)}
+  \cdot
+  \underset{\text{Prob. of 1st transition}}{p(ds_1 \mid s_0, a_0)}
+  \cdot
+  \underset{\text{Prob. of 2nd action}}{\pi(da_1 \mid s_1)}
+  \cdot
+  \dots
+$$
+
+This shows how the entire probability measure is built from the ground up from our three core ingredients.
+
+---
+
+Given an initial distribution $\mu$ on the state space $S$ and a policy $\pi$, we can now formally establish the existence of a unique probability measure governing the entire evolution of the agent-environment interaction. This is a direct and critical application of the Ionescu-Tulcea Extension Theorem presented earlier.
+
+**Theorem 2.2.3 (Existence of the Process Measure)**
+
+1.  **Initialization**: The probability of the initial state $S_0$ being in $B$ is determined by $\mu$.
+$$
+\mathbb{P}_\mu^\pi(S_0 \in B) = \mu(B)
+$$
+
+2.  **Action Selection**: The conditional probability of selecting action $A_t$ from $C$, given the history up to time $t$, is determined solely by the policy $\pi$ applied to the current state $S_t$.
+$$
+\mathbb P_\mu^\pi(A_t \in C \mid S_0, A_0, \dots, S_t) = \pi(C \mid S_t) \quad (\mathbb P_\mu^\pi\text{-a.s.})
+$$
+
+3.  **State Transition**: The conditional probability of the next state $S_{t+1}$ being in $B$, given the history up to time $t$ and the action $A_t$, is determined by the MDP's state transition kernel $p$.
+$$
+\mathbb P_\mu^\pi(S_{t+1} \in B \mid S_0, A_0, \dots, S_t, A_t) = p(B \mid S_t, A_t) \quad (\mathbb P_\mu^\pi\text{-a.s.})
+$$
+
+**Justification via Ionescu-Tulcea (Theorem 1.7.3):**
+
+This measure is constructed by defining a sequence of kernels on the growing product spaces. We start with the initial measure \$\mu\$ on \$S\$. Then we define a sequence of kernels:
+
+$\kappa_1(da_0 \mid s_0) = \pi(da_0 \mid s_0)$ followed by $\kappa_2(ds_1 \mid s_0, a_0) = p(ds_1 \mid s_0, a_0)$ followed by $\kappa_3(da_1 \mid s_0, a_0, s_1) = \pi(da_1 \mid s_1)$ and so on. 
+
+The Ionescu–Tulcea theorem guarantees that this sequence of consistent one-step-ahead conditional distributions uniquely defines the measure $\mathbb{P}_{\mu}^{\pi}$ over the infinite-horizon path space. 
+
+The uniqueness of this measure ensures that any two constructions satisfying these conditions will produce identical joint distributions for the sequence of states and actions.
+
+
+The probability density for a specific finite history (a cylinder set) $H_t = (s_0, a_0, \dots, s_{t-1}, a_{t-1}, s_t)$ is given by the product of the individual kernel densities:
+
+$$
+\mathbb P_\mu^\pi (S_0 \in ds_0, A_0 \in da_0, \dots, S_t \in ds_t) = \mu(ds_0) \prod_{k=0}^{t-1} \left( \pi(da_k|s_k) p(ds_{k+1}|s_k, a_k) \right)
 $$
  
+The resulting stochastic process $(S_0, A_0, S_1, A_1, \ldots)$ on the probability space $(H, F, \mathbb P_{\mu}^{\pi})$ has the **Markov Property** as a direct consequence of its construction.
+
+The history of the process up to time $t$ is captured by the **natural filtration**, $F_t = \sigma(S_0, A_0, \ldots, S_t)$. The Markov property then formally states that the future is independent of the past, given the present:
+
+$$
+\mathbb P_\mu^\pi(S_{t+1} \in B \mid \mathcal F_t) = \mathbb P_\mu^\pi(S_{t+1} \in B \mid S_t) = \int_A \pi(da|S_t) p(B|S_t, a) \quad (\mathbb P_\mu^\pi\text{-a.s.})
+$$
+
 ---
 
 A random variable $\tau: \Omega \to \mathbb{N} \cup \{\infty\}$ is a **stopping time** with respect to the filtration $(\mathcal{F}_t)$ if the event $\{\tau = t\} \in \mathcal{F}_t$ for all $t \in \mathbb{N}$. 
@@ -847,10 +986,13 @@ This property states that the process probabilistically "restarts" from the stat
 > A kernel has the **Feller property** if its corresponding Markov operator (Definition 1.6.3) maps the space of bounded, *continuous* functions to itself. That is, if $g$ is a bounded and continuous function, then the function $(Pg)(x) = \int g(y) \kappa(x, dy)$ is also bounded and continuous in $x$.
 >
 > **Proof Sketch: Why Feller implies Strong Markov**
-> 1.  **Approximation**: The core idea is to approximate a stopping time $\tau$ from above by a sequence of discrete-valued stopping times, $\tau_n = \lceil 2^n \tau \rceil / 2^n$. The event $\{\tau = t\}$ is $\mathcal F_t$-measurable, but for a general stopping time, the conditional expectation $\mathbb E [g(S_{\tau+1}) \mid \mathcal F_\tau]$ is tricky.
-> 2.  **Simple Case**: For a fixed time $t$, the simple Markov property holds: $\mathbb E [g(S_{t+1}) \mid \mathcal F_t] = (Pg)(S_t)$.
-> 3.  **Martingale Connection**: One can construct a martingale related to the process. For a Feller process, the function $v(s) = (Pg)(s)$ is continuous. The process $M_t = v(S_t) - \sum_{k=0}^{t-1} (Pv)(S_k)$ is related to a martingale. Doob's Optional Stopping Theorem states that under certain conditions, the expectation of a martingale is conserved at stopping times.
-> 4.  **Continuity is Key**: When we take the limit as $\tau_n \to \tau$, the continuity of $g$ and, crucially, the continuity of $Pg$ (guaranteed by the Feller property) ensure that the expectation converges correctly: $\mathbb E [g(S_{\tau_n}) \mid \mathcal F_{\tau_n}] \to \mathbb{E}[g(S_\tau) | \mathcal F_\tau]$. Without Feller continuity, $S_{\tau_n} \to S_\tau$ would not imply $(Pg)(S_{\tau_n}) \to (Pg)(S_\tau)$, and the proof would fail. The specific path taken to arrive at $S_\tau$ would provide extra information, breaking the "restart" property. Feller continuity ensures that the future evolution depends smoothly on the present state $S_\tau$, regardless of the history of how that state was reached.
+> The simple Markov property, $\mathbb E [g(S_{t+1}) \mid \mathcal F_t] = (Pg)(S_t)$, holds for any fixed (deterministic) time $t$. The challenge is to show this relationship holds for a random stopping time $\tau$.
+>
+> 1.  **Approximation**: The proof hinges on approximating the continuous function $g$ and the stopping time $\tau$. First, for any bounded, measurable function $g$, the Strong Markov Property holds. However, the proof is more intuitive for continuous $g$. The core idea is to approximate the stopping time $\tau$ by a sequence of discrete-valued stopping times (e.g., $\tau_n = \lceil 2^n \tau \rceil / 2^n$). For each discrete $\tau_n$, the Strong Markov property can be shown to hold by piecing together the simple Markov property at each possible discrete time step.
+>
+> 2.  **The Role of Continuity (Feller Property)**: The crucial step is taking the limit as $n \to \infty$, so $\tau_n \to \tau$. We need to show that $\mathbb E [g(S_{\tau_n+1}) \mid \mathcal F_{\tau_n}] \to \mathbb E [g(S_{\tau+1}) \mid \mathcal F_\tau]$ and that the right-hand side, $(Pg)(S_{\tau_n})$, also converges to the correct limit, $(Pg)(S_\tau)$.
+>
+> 3.  **Convergence**: As $n \to \infty$, we have $S_{\tau_n} \to S_\tau$ almost surely. The **Feller property** guarantees that the operator $P$ maps continuous functions to continuous functions, meaning $Pg$ is continuous. This continuity is precisely what's needed to ensure that $S_{\tau_n} \to S_\tau$ implies $(Pg)(S_{\tau_n}) \to (Pg)(S_\tau)$. Without the Feller property, the mapping $s \mapsto (Pg)(s)$ could be discontinuous. In that case, knowing the specific path leading to $S_\tau$ (i.e., the history in $\mathcal F_\tau$) could provide information about which side of a discontinuity the process is on, thus breaking the property that the process "restarts" based only on the current state $S_\tau$.
 
 > For the policy-conditioned process to be Feller, certain regularity assumptions must be placed on the MDP's primitive components. For instance, the property holds if the environment kernel $p(ds'|s,a)$ and the policy kernel $\pi(da|s)$ are both weakly continuous in their respective arguments.
 > This continuity is what bridges the gap between fixed and random times. For a fixed time `t`, the Markov property is a direct consequence of the process's construction. For a random stopping time `τ`, we must be sure that the history leading up to the stop does not provide extra information. If the kernel were not Feller, the transition probabilities could be discontinuous in the state. An agent could then exploit this discontinuity; the specific path taken to arrive at state $S_\tau$ would inform it about a likely "jump" in transition dynamics, breaking the "restart" property. Feller continuity ensures that the future evolution depends smoothly on the present state $S_\tau$, regardless of the history of how that state was reached.
