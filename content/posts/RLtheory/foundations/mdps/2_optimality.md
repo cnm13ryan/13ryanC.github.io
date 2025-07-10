@@ -106,23 +106,10 @@ A foundational result in dynamic programming is that for any discounted MDP defi
 
 ### 1.2.0 The Linear Algebra Perspective: Classifying the Operators
 
-Before analyzing the specific properties of the Bellman operators, it is instructive to classify them using the rigorous framework of linear algebra. This formalism provides the precise language to understand their fundamental structure.
+> **Linear‑algebra backdrop.** All basic notions—vector spaces, bases, linear maps, kernel, image, and the rank–nullity theorem—are summarised once‑and‑for‑all in the *Formalism* document (§1.2.6 “Finite‑Dimensional Vector‑Space Primer”). Here we simply *use* those facts to analyse the Bellman and Markov operators. 
 
-**The Vector Space of Functions ($B(S)$)**
-
-The primary arena for our analysis is the space $B(S)$ of all bounded, measurable functions from the state space $S$ to $\mathbb{R}$. As established in the formalism **(see, e.g., Definition 1.5.1 and 1.6.3)**, this is a **vector space** over the field of real numbers ($\mathbb{R}$).
-* **Vectors**: The functions $v \in B(S)$ themselves.
-* **Vector Addition**: $(v_1 + v_2)(s) := v_1(s) + v_2(s)$.
-* **Scalar Multiplication**: $(c \cdot v)(s) := c \cdot v(s)$.
-
-**Linear Transformations (Operators)**
-
-A function $L: V \to W$ between two vector spaces is a **linear transformation** if it preserves vector addition and scalar multiplication. For any vectors $u, v \in V$ and scalar $c \in F$:
-1.  $L(u+v) = L(u) + L(v)$ (Additivity)
-2.  $L(cv) = cL(v)$ (Homogeneity)
-
-* **Application: The Markov Operator is Linear**
-    The underlying **Markov Operator** ($P$) from the formalism **(Definition 1.6.3)**, where $(Pg)(x) := \int g(y) \kappa(x, dy)$, is a true **linear operator**. This follows directly from the linearity of the integral.
+* **Application: The Markov Operator is Linear.**
+* Definition 1.6.3 in *Formalism* shows that $(Pg)(x)=\int g(y)\kappa(x,dy)$ is linear because integration is linear; kernel, image, and rank arguments invoked later rely directly on the facts in §1.2.6.
 
 **Affine and Non-Linear Operators**
 
@@ -133,7 +120,7 @@ Not all operators are linear. The Bellman operators fall into two other importan
         The operator $T^\pi v = r_\pi + \gamma P_\pi v$ (in its finite-space form) or its integral equivalent consists of a linear part ($\gamma P_\pi v$) and a fixed translation ($r_\pi$). The presence of the non-zero reward function makes it **affine**, not linear.
 
 * **Non-Linear Operator**: An operator that does not satisfy the additivity and homogeneity axioms is non-linear.
-    * **Application: The Bellman Optimality Operator ($T^*$) is Non-Linear.**
+    * **Application: The Bellman Optimality Operator ($T^\ast$) is Non-Linear.**
         The operator $(T^\ast v)(s) := \sup_{a \in A} \{...\}$ contains a supremum (`sup`). This operation is **non-linear**, as $\sup(f+g)$ is not generally equal to $\sup(f) + \sup(g)$.
 
 This classification is crucial: the analysis of the *linear* Markov operator is distinct from the analysis of the *affine* expectation operator and the *non-linear* optimality operator, whose properties must be established using different tools, such as the Contraction Mapping Theorem.
@@ -223,6 +210,38 @@ $$
 $$
 
 This form makes the subsequent analysis of contraction properties more direct. 
+
+#### 1.2.4 Spectral Decomposition: Jordan and Rational Canonical Forms
+
+For certain analyses—e.g. *non‑diagonalizable* transition matrices, transient
+mixing rates, or perturbation bounds—we need structural information beyond
+eigenvalues alone.
+
+> **Jordan Canonical Form (Hoffman–Kunze §7.5).**  
+> Over an algebraically‑closed field $F$ (e.g. $\mathbb C$) every square
+> matrix $A$ is similar to a block‑diagonal matrix  
+> $J=\operatorname{diag}\bigl(J_{k_1}(\lambda_1),\dots,J_{k_m}(\lambda_m)\bigr)$
+> where each block $J_{k}(\lambda)$ has $\lambda$ on the diagonal and ones
+> on the super‑diagonal.  Generalized eigenvectors extend an ordinary
+> eigen‑basis to a full basis of chains.  
+> *Consequence.*  The $t$-step transition matrix satisfies  
+> $A^{t}=PJP^{-1}= \sum_{j=0}^{k_{\max}-1} t^{j}N_j$,  
+> where the $N_j$ are matrices depending only on $A$.  Thus
+> $\Vert A^{t} - A_\infty \Vert_\infty$= $\tilde O(t^{k_{\max}-1}\rho^{t})$ whenever the
+> spectral radius $\rho<1$.  This sharpens geometric convergence bounds.  
+> (Used in §1.3.3 below.)
+
+> **Rational Canonical (Frobenius) Form (Hoffman–Kunze §7.6).**  
+> When the field is *not* algebraically closed—e.g. $\mathbb Q$ in exact
+> arithmetic—the same invariants are captured by companion blocks derived from
+> the invariant factors of $F[x]$-module $V$.  This guarantees that all
+> power‑series arguments (resolvents, Green’s functions) remain valid without
+> extending the field.
+
+In practice: for a stochastic matrix $P_\pi$ whose minimal polynomial has a
+repeated root $\lambda=1$, the leading Jordan block size quantifies *how many
+moments* of the initial distribution influence asymptotic bias—important in
+finite‑horizon regret bounds.
 
 As stated in the **Banach Fixed-Point Theorem**, these operators are $\gamma$-contractions under the maximum norm, $\Vert \cdot \Vert_\infty$:
 
@@ -325,6 +344,29 @@ The convergence is geometric, with the error bound:
 $$
 \Vert v_k - v^\ast \Vert_\infty \le \frac{\gamma^k}{1-\gamma} \Vert v_1 - v_0 \Vert_\infty
 $$
+
+
+##### 1.3.3 Spectral‑Gap Refinement via Jordan Blocks
+
+When $P_\pi$ is *diagonalizable*, the error decays exactly as $\rho(P_\pi)^k$. If not, the Jordan analysis of §1.2.4 yields the sharper bound  
+
+$$
+  \Vert P_\pi^{k} - \Pi \Vert_\infty \le Ck^{q-1}\rho^{k},
+$$
+
+where $q$ is the size of the largest Jordan block associated with the eigenvalue of maximal magnitude $\rho$.  This polynomial prefactor is often negligible in discounted RL because $k\asymp(1-\gamma)^{-1}$. See Hoffman–Kunze §7.5 for proof details.
+
+##### 1.3.4 Bilinear Forms and Variance Bounds
+
+Define the **Dirichlet form**
+$\mathcal E_P(f)=\tfrac12\langle f,(I-P)f\rangle_\mu$ on
+$\bigl(L^2(S,\mu),\langle\cdot,\cdot\rangle_\mu\bigr)$.
+It is the quadratic form associated with the symmetric bilinear form
+$B(f,g)=\langle f,(I-P)g\rangle_\mu$.  By Hoffman–Kunze §11.3 the rank of the
+matrix representation of $B$ equals the dimension of the orthogonal
+complement of constant functions—interpreted as the number of “mixing
+directions.”  This underpins variance estimates for Monte‑Carlo value
+estimates (see forthcoming §2.4).
 
 ---
 
@@ -456,5 +498,18 @@ However, the Bellman expectation operator $T^{\pi^\ast}$ is also a $\gamma$-cont
 
 By uniqueness of the fixed point, we must have $v_{\pi^\ast} = v^\ast$. This proves the policy $\pi^\ast$ is optimal.
 
+---
 
+## Appendix A Linear‑Algebra Toolbox (Hoffman & Kunze Cheat‑Sheet)
+
+| Concept | Formal statement | Typical use in RL |
+|---------|------------------|-------------------|
+| **Minimal vs. characteristic polynomial** | Unique monic polynomial of least degree annihilating $T$; divides the characteristic polynomial (H&K §6.3). | Detects when power‑series (e.g. Neumann) expansions terminate exactly. |
+| **Jordan canonical form** | Similarity $A=PJP^{-1}$ where $J$ is block‑diagonal in Jordan blocks (H&K §7.5). | Transient dynamics, sensitivity analysis. |
+| **Rational canonical form** | Block companion matrix determined by invariant factors (H&K §7.6). | Exact arithmetic over $\mathbb Q$. |
+| **Spectral theorem** | Normal $T$ ⇒ orthonormal eigenbasis (H&K §9.4). | Analysis on $L^2$ with reversible chains. |
+| **Sylvester’s law of inertia** | Signature of a quadratic form is invariant (H&K §12.2). | Proving norm equivalence & stability. |
+| **Dual space $V^\*$** | $V^\*= \operatorname{Hom}_F(V,F)$ (H&K Ch. 13). | Interprets signed measures as elements dual to bounded functions. |
+
+(For a quick reference, keep this table next to §1.2 when reading proofs.) 
 
