@@ -20,9 +20,42 @@ This section builds upon the measure-theoretic definition of an MDP to establish
 
 The objective in a discounted, infinite-horizon MDP is to find a policy that maximizes the expected discounted return from any starting state. This concept is formalized through optimal value functions.
 
+#### 1.1.0 Objective, Notation, and Approximate Optimality
+
+The primary goal in a discounted, infinite-horizon MDP is to find a policy that maximizes the expected discounted return. Let's establish the notation for this objective.
+
+We use $\mathbb{E}_s^\pi$ to denote the expectation when starting in state $s$ and following policy $\pi$. The total discounted return, $R$, is the sum of discounted rewards over an infinite horizon:
+
+$$R = \sum_{t = 0}^{\infty}\gamma^{t}r_{t}$$
+
+where $r_t$ is the reward received at timestep $t$.
+
+The **state-value function** for a policy $\pi$, denoted $v_\pi: S \to \mathbb{R}$, is the expected return from starting in state $s$ and subsequently following policy $\pi$:
+
+$$v_\pi(s) = \mathbb{E}_s^{\pi}[R]$$
+
+An **optimal policy**, $\pi^\ast$, is a policy that achieves the maximum possible value in every state. This maximum value is captured by the **optimal state-value function**, $v^\ast: S \to \mathbb{R}$, defined as:
+
+$$
+v^\ast (s) = \sup_{\pi} v_\pi(s), \quad \forall s \in S
+$$
+
+By definition, $v_\pi(s) \le v^\ast (s)$ for all states $s$ and any policy $\pi$. We use the shorthand $v_\pi \le v^\ast$ to express this relationship for all states. In general, for two functions $f, g$ on the same domain, $f \le g$ implies $f(z) \le g(z)$ for all elements $z$ in the domain.
+
+In practice, finding a perfectly optimal policy may not be necessary or feasible. Instead, we often seek an **$\epsilon$-optimal policy**.
+
+**Definition: $\epsilon$-Optimal Policy**
+
+Let $\epsilon > 0$. A policy $\pi$ is said to be **$\epsilon$-optimal** if its value function is within $\epsilon$ of the optimal value function for all states. Using vector notation where $\mathbf{1}$ is a vector of ones, this is expressed as:
+
+$$v_\pi \ge v^\ast - \epsilon \mathbf{1}$$
+
+Finding an $\epsilon$-optimal policy is often a more tractable goal in reinforcement learning.
+
+
 **Definition 1.1.1 (Optimal Value Functions)**
 
-The **optimal state-value function**, denoted $v^*: S \to \mathbb{R}$, yields the highest possible expected return achievable from any state $s \in S$. It is defined as the supremum over all possible policies $\pi \in \Pi$:
+The **optimal state-value function**, denoted $v^\ast: S \to \mathbb{R}$, yields the highest possible expected return achievable from any state $s \in S$. It is defined as the supremum over all possible policies $\pi \in \Pi$:
 
 $$
 v^\ast (s) := \sup_{\pi \in \Pi} v_\pi(s)
@@ -69,13 +102,13 @@ A foundational result in dynamic programming is that for any discounted MDP defi
 
 ---
 
-### 1.2. Bellman Operators: $T^\pi, T^*$
+### 1.2. Bellman Operators: $T^\pi, T^\ast$
 
 The recursive structure of the Bellman equations allows us to define operators that map the space of value functions onto itself. These operators are the primary object of analysis. We consider the space $B(S)$ of all bounded, measurable functions from the state space $S$ to $\mathbb{R}$.
 
 **Definition 1.2.1 (Bellman Expectation Operator $T^\pi$)**
 
-For any stationary policy $\pi$, the **Bellman expectation operator** $T^\pi: B(S) \to B(S)$ maps a candidate value function $v$ to its expected value after one step under policy $\pi$. Using the expected reward function $r(s,a)$ and transition kernel $p(ds'|s,a)$ derived from the unified kernel $\kappa$, it is defined as:
+For any stationary policy $\pi$, the **Bellman expectation operator** $T^\pi: B(S) \to B(S)$ maps a candidate value function $v$ to its expected value after one step under policy $\pi$. Using the expected reward function $r(s,a)$ and transition kernel $p(ds' \mid s,a)$ derived from the unified kernel $\kappa$, it is defined as:
 
 $$
 (T^\pi v)(s) := \int_A \pi(da|s) \left( r(s,a) + \gamma \int_S v(s') p(ds'|s,a) \right)
@@ -98,9 +131,9 @@ Analogous operators exist for the space of bounded, measurable action-value func
     The optimal action-value function $q^*$ is the unique fixed point of this operator.
 
 
-**Definition 1.2.2 (Bellman Optimality Operator $T^*$**)
+**Definition 1.2.2 (Bellman Optimality Operator $T^\ast$**)
 
-The **Bellman optimality operator** $T^*: B(S) \to B(S)$ maps a candidate value function $v$ to the best possible value achievable after one step. It is defined by taking the supremum over all actions:
+The **Bellman optimality operator** $T^\ast: B(S) \to B(S)$ maps a candidate value function $v$ to the best possible value achievable after one step. It is defined by taking the supremum over all actions:
 
 $$
 (T^\ast v)(s) := \sup_{a \in A} \left( r(s,a) + \gamma \int_S v(s') p(ds'|s,a) \right)
@@ -118,13 +151,61 @@ This equation states that the value of a state under an optimal policy must equa
 
 ---
 
+#### 1.2.3 Special Case: Finite State-Space Formulation
+
+While the integral form is general, it is instructive to see how the Bellman operators are expressed in the common case of a finite state space $S$ and action space $A$. Here, value functions can be represented as vectors in $\mathbb{R}^{|S|}$, and the operators become matrix-vector operations.
+
+Let's define the components for a fixed policy $\pi$:
+
+* The **expected reward vector**, $r_\pi \in \mathbb R^{|S|}$, is defined by 
+
+$$
+r_\pi = \sum_{s \in S} \biggl( \sum_{a \in A}  \pi (a \mid s) \hspace{0.1cm} r(s, a) \biggr)
+$$
+
+* The **policy transition matrix**, $P_\pi \in \mathbb R^{|S| \times |S|}$, is defined by 
+
+$$
+P_\pi = \sum_{(s, s') \in S \times S} \biggl( \sum_{a \in A} \pi (a \mid s) p (s' \mid s,a) \biggr)
+$$
+
+
+With this notation, the **Bellman expectation operator** ($T^\pi$ in the general case) can be written as a simple linear operation:
+
+$$
+T^\pi v = r_\pi + \gamma P_\pi v
+$$
+
+where $v \in \mathbb R^{|S|}$ is a value vector. This operator performs a one-step lookahead based on the policy $\pi$.
+
+The **Bellman optimality operator** ($T^\ast$ in the general case, sometimes denoted simply as $T$) is defined with a maximization:
+
+$$
+(T^\ast v)(s) = \max_{a \in A} \left( r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) v(s') \right)
+$$
+
+This form makes the subsequent analysis of contraction properties more direct. 
+
+As stated in the **Banach Fixed-Point Theorem**, these operators are $\gamma$-contractions under the maximum norm, $\Vert \cdot \Vert_\infty$:
+
+1.  $\Vert T^\pi u - T^\pi v \Vert_{\infty}\leq \gamma \Vert u - v \Vert_{\infty}$
+2.  $\Vert T^\ast u - T^\ast v \Vert_{\infty} \leq \gamma \Vert u - v \Vert_{\infty}$
+
+This guarantees that iterative application converges to the unique fixed point. For any initial value vector $u \in \mathbb{R}^{|S|}$:
+
+* $\lim_{k\to \infty} (T^\pi)^k u = v_\pi$, where $v_\pi$ is the unique fixed point of $T^\pi$.
+
+* $\lim_{k\to \infty} (T^\ast)^k u = v^\ast$, where $v^\ast$ is the unique fixed point of $T^\ast$.
+
+---
+
 ### 1.3. Key Analytical Properties (Monotonicity, Contraction, Error Bounds)
 
 To prove that the Bellman operators have unique fixed points, we analyze their properties on the **Banach space** $(B(S), \Vert \cdot \Vert_\infty)$, which is the space of bounded measurable functions on $S$ equipped with the supremum norm, $\Vert v \Vert_\infty := \sup_{s \in S} |v(s)|$.
 
 **Property 1.3.1 (Monotonicity)**
 
-Both operators $T^\pi$ and $T^*$ are **monotone**. For any two functions $v_1, v_2 \in B(S)$ such that $v_1(s) \le v_2(s)$ for all $s \in S$, it holds that:
+Both operators $T^\pi$ and $T^\ast$ are **monotone**. For any two functions $v_1, v_2 \in B(S)$ such that $v_1(s) \le v_2(s)$ for all $s \in S$, it holds that:
 
 * $(T^\pi v_1)(s) \le (T^\pi v_2)(s)$ for all $s \in S$.
 
@@ -221,64 +302,79 @@ $$
 \text{supp}(\pi(\cdot|s)) \subseteq \arg\sup_{a \in A} \left( r(s,a) + \gamma \int_S v(s') p(ds'|s,a) \right)
 $$
 
-By its definition, a greedy policy is inherently **memoryless (or stationary)**. 
+By its definition, a greedy policy is inherently **memoryless (or stationary)**. The action-selection mechanism depends only on the current state $s$ and the time-independent value function $v$; it does not rely on the time step or past history.
 
-The action-selection mechanism depends only on the current state $s$ and the time-independent value function $v$; it does not rely on the time step or past history. This property is crucial, as it confirms that the search for an optimal policy can be restricted to this simpler class of strategies.
+The existence of a measurable deterministic policy $\mu: S \to A$ that satisfies this condition is guaranteed by **measurable selection theorems**, as discussed previously. For the finite case, since we are maximizing over a finite set of actions, a maximizing action always exists.
+
+A key property for finite MDPs is that greediness can be characterized by an equality of operators.
+
+**Proposition (Characterizing Greediness in Finite MDPs)**
+
+A memoryless policy $\pi$ is greedy with respect to a value function $v \in \mathbb{R}^{|S|}$ if and only if:
+
+$$T^\pi v = T^\ast v$$
+
+---
+
+**The Fundamental Theorem of Dynamic Programming (Finite MDPs)**
+
+This theorem provides the central connection between optimal policies and the optimal value function for finite MDPs.
+
+**Theorem:** The following hold true in any finite MDP:
+1.  Any policy $\pi$ that is greedy with respect to $v^\ast$ is optimal (i.e., $v_\pi = v^\ast$).
+2.  The optimal value function is the unique fixed point of the Bellman optimality operator, satisfying the **Bellman Optimality Equation**: $v^\ast = T^\ast v^\ast$.
+
+*Proof:*
+
+The proof proceeds in two parts. First, we prove the theorem by only considering the set of memoryless policies, denoted ML. We define $\tilde{v}^\ast = \sup_{\pi \in \text{ML}} v_\pi$. We will show that a policy greedy with respect to $\tilde{v}^\ast$ is optimal within this class, and that $\tilde{v}^\ast = T^\ast \tilde{v}^\ast$. In the second part, we show that this is sufficient because $\tilde{v}^\ast = v^\ast$.
+
+**Part 1: Optimality within Memoryless Policies**
+
+The proof relies on first establishing that $\tilde{v}^\ast \le T^\ast \tilde{v}^\ast$. 
+
+By definition, $v_\pi \le \tilde{v}^\ast$ for all $\pi \in \text{ML}$. Applying the monotone operator $T^\pi$ (as established in Property 1.3.1) to both sides gives $T^\pi v_\pi \le T^\pi \tilde{v}^\ast$. Since $v_\pi$ is the fixed point of $T^\pi$, this means $v_\pi \le T^\pi \tilde{v}^\ast$. Taking the supremum over all memoryless policies $\pi$ on both sides yields:
+$$\tilde{v}^\ast = \sup_{\pi \in \text{ML}} v_\pi \le \sup_{\pi \in \text{ML}} (T^\pi \tilde{v}^\ast) = (T^\ast \tilde{v}^\ast) \quad (1)$$
+
+Now, let $\pi$ be any policy that is greedy with respect to $\tilde{v}^\ast$. By the proposition above, this means $T^\pi \tilde{v}^\ast = T^\ast \tilde{v}^\ast$. Combining this with inequality (1), we get:
+$$T^\pi \tilde{v}^\ast \ge \tilde{v}^\ast \quad (2)$$
+Because $T^\pi$ is monotone, we can apply it repeatedly to both sides of inequality (2):
+$$(T^\pi)^2 \tilde{v}^\ast \ge T^\pi \tilde{v}^\ast \ge \tilde{v}^\ast$$
+Continuing this for $k$ steps, we have $(T^\pi)^k \tilde{v}^\ast \ge \tilde{v}^\ast$. As shown in Section 1.2.3, the sequence of functions generated by iterating the operator, $(T^\pi)^k \tilde{v}^\ast$, converges to the unique fixed point $v_\pi$. Taking the limit as $k \to \infty$, we get:
+$$v_\pi \ge \tilde{v}^\ast$$
+By definition, we also know $v_\pi \le \tilde{v}^\ast$, because $\tilde{v}^\ast$ is the supremum over all memoryless policies. Therefore, we must have $v_\pi = \tilde{v}^\ast$.
+
+Finally, we show that $\tilde{v}^\ast$ satisfies the Bellman equation. Since $\pi$ is greedy with respect to $\tilde{v}^\ast$ and $v_\pi = \tilde{v}^\ast$:
+$$T^\ast \tilde{v}^\ast = T^\pi \tilde{v}^\ast = T^\pi v_\pi = v_\pi = \tilde{v}^\ast$$
+This establishes both parts of the theorem for the restricted class of memoryless policies.
+
+**Part 2: Equivalence of Memoryless and General Policies**
+
+It remains to be shown that $\tilde{v}^\ast = v^\ast$. The set of memoryless policies is a subset of all policies ($\text{ML} \subset \Pi$), so it is clear that $\tilde{v}^\ast \le v^\ast$. We must show $v^\ast \le \tilde{v}^\ast$.
+
+This relies on a known result that for any policy $\pi$ (even non-stationary or history-dependent) and any starting state $s$, there exists a memoryless policy, let's call it $\pi_{ML}$, that induces the same discounted state-visitation distribution. Therefore, their value functions are identical: $v_\pi(s) = v_{\pi_{ML}}(s)$.
+
+For any arbitrary policy $\pi \in \Pi$ and any state $s$:
+$$v_\pi(s) = v_{\pi_{ML}}(s) \le \sup_{\pi' \in \text{ML}} v_{\pi'}(s) = \tilde{v}^\ast(s)$$
+Since this holds for any policy $\pi$, we can take the supremum over all policies on the left side:
+$$v^\ast(s) = \sup_{\pi \in \Pi} v_\pi(s) \le \tilde{v}^\ast(s)$$
+As this holds for all states $s$, we have $v^\ast \le \tilde{v}^\ast$. Combined with $\tilde{v}^\ast \le v^\ast$, this proves $v^\ast = \tilde{v}^\ast$, completing the proof.
+
+---
+
+#### 1.4.2 Implications of the Fundamental Theorem
+
+The Fundamental Theorem is powerful because it reduces the problem of finding an optimal policy—a search over a potentially vast space of functions—to the problem of solving the Bellman Optimality Equation.
+
+* **Efficient Policy Calculation**: If we can find the optimal value function $v^\ast$, we can find an optimal policy simply by "greedifying" it. That is, for each state, we choose the action that maximizes the one-step lookahead:
+    $$
+    \pi^\ast(s) = \arg\max_{a \in A} \left( r(s,a) + \gamma \sum_{s' \in S} p(s'|s,a) v^\ast(s') \right)
+    $$
+    For a finite MDP, this greedy policy can be found in $O(|S|^2 |A|)$ time.
+
+* **Dynamic Programming**: This reframing is the foundation of **dynamic programming** algorithms like Value Iteration and Policy Iteration. These methods provide a way to compute $v^\ast$ in time polynomial in $|S|$, $|A|$, and $1/(1-\gamma)$, which is vastly more efficient than the naive approach of enumerating all policies (the number of which can grow exponentially with $|S|$).
+
+The fact that a stationary policy, which only depends on the current state, can be optimal over all history-dependent policies is a deep consequence of the **Markov property**. This property ensures that the future is conditionally independent of the past given the present state, allowing for this tremendous simplification.
  
-
-The existence of a measurable deterministic policy $\mu: S \to A$ that satisfies this condition is guaranteed by **measurable selection theorems**, a result that depends critically on the state and action spaces being Standard Borel.
-
-The need for a specific theorem here is subtle but fundamental. 
-
-While the value function itself, defined by a supremum, $v(s) = \sup_{a \in A} q(s, a)$, is guaranteed to be measurable if $q$ is, the function that *selects* the maximizing action, $\mu(s) = \arg\sup_{a \in A} q(s, a)$, is **not**. 
-
-The $\arg\max$ operator can produce non-measurable functions when the supremum is taken over an uncountable set (like a continuous action space). 
-
-The measurable selection theorem guarantees the existence of at least one measurable function $\mu(s)$ whose output is always in the $\arg\max$ set. 
-
-Without it, we could define an optimal value function $v^*$ but have no guarantee that a well-defined, measurable policy exists that can achieve it.
-
-**The Fundamental Theorem of Dynamic Programming**
-
-This theorem provides the central connection between optimal policies and the optimal value function. It has two parts:
-
-1.  A policy $\pi$ is optimal **if and only if** it is greedy with respect to its own value function $v_\pi$. This means $T^\pi v_\pi = T^\ast v_\pi$, which implies that $v_\pi$ is a fixed point of $T^\ast$. Since $T^\ast$ has a unique fixed point $v^\ast$, it must be that $v_\pi = v^\ast$.
-
-2.  Any policy $\pi^\ast$ that is greedy with respect to the optimal value function $v^\ast$ is an optimal policy.
-
-*Proof Sketch for Part 1 ("only if" direction)*:
-
-We prove by contradiction that if a policy $\pi$ is optimal ($v_\pi = v^*$), it must be greedy with respect to $v_\pi$. 
-
-Assume $\pi$ is optimal but is *not* greedy at some state $s_0$. 
-
-This means the action(s) chosen by $\pi(\cdot|s_0)$ are strictly suboptimal in the one-step lookahead:
-
-$$
-v_\pi(s_0) = (T^\pi v_\pi)(s_0) < (T^\ast v_\pi)(s_0)
-$$
-
-Let's define a new policy $\pi'$ which is identical to $\pi$ everywhere except at $s_0$. At $s_0$, $\pi'$ takes a greedy action $a' = \arg\sup_a q_\pi(s_0, a)$. 
-
-For any state $s \ne s_0$, $v_{\pi'}(s) = v_\pi(s)$. But for state $s_0$:
-
-$$ 
-v_{\pi'}(s_0) = q_\pi(s_0, a') = \sup_a q_\pi(s_0, a) = (T^\ast v_\pi)(s_0) > v_\pi(s_0)
-$$
-
-Since $v_{\pi'}(s_0) > v_\pi(s_0)$ and $v_{\pi'}(s) \ge v_\pi(s)$ everywhere, the policy $\pi'$ is strictly better than $\pi$. 
-
-This contradicts our initial assumption that $\pi$ was optimal. 
-
-Therefore, an optimal policy must be greedy with respect to its own value function. 
-
-Since $v_\pi = v^\ast$, it must be greedy with respect to $v^\ast$.
-
-In essence, the entire problem of reinforcement learning is reduced to two steps: 
-
-1. Find the unique solution to the Bellman Optimality Equation, $v^\ast$; 
-
-2. Derive an optimal policy by simply acting greedily with respect to $v^\ast$.
 
 ---
 
