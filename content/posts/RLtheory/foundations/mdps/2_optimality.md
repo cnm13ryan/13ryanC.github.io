@@ -74,13 +74,15 @@ $$
 v^\ast (s) = \sup_{a \in A} q^\ast (s, a)
 $$
 
+The set of policies $\Pi$ here consists of all **probability kernels** from the state space to the action space, as formally defined in **Definition 2.2.0** of the formalism document.
+ 
 The existence of a measurable policy that satisfies this condition is non-trivial and represents a cornerstone of the theory. The expression $\arg\max$ is not guaranteed to produce a measurable function from state $s$ to action $a$. We need to prove that a function $\mu: S \to A$ satisfying the greedy condition is itself measurable.
 
 This is guaranteed by **measurable selection theorems**. 
 
-One such result, the **Jankov-von Neumann Theorem**, states that if $S$ is a Standard Borel space, $A$ is a Polish space, and the function to be maximized (here, the $q$-value) is jointly measurable in $(s,a)$, then a measurable selector function $\mu(s)$ exists. 
+One such result, the **Jankov-von Neumann Theorem**, states that if $S$ is a **Standard Borel space (Definition 1.2.4)**, $A$ is a **Polish space (Definition 1.2.3)**, and the function to be maximized (here, the $q$-value) is jointly measurable in $(s,a)$, then a measurable selector function $\mu(s)$ exists.
 
-This is why the Standard Borel assumption from the foundations is critical; without it, we could not guarantee the existence of a greedy policy.
+This is precisely why the Standard Borel assumption from the foundations is critical; without it, as explained in **Section 1.2.5 ("Why Standard Borel?")**, we could not guarantee the existence of a greedy policy.
 
 > **Remark: Intuition for Measurable Selection**
 > Why does the $\arg\max$ operator cause problems, and how do these theorems fix it?
@@ -102,13 +104,49 @@ A foundational result in dynamic programming is that for any discounted MDP defi
 
 ---
 
+### 1.2.0 The Linear Algebra Perspective: Classifying the Operators
+
+Before analyzing the specific properties of the Bellman operators, it is instructive to classify them using the rigorous framework of linear algebra. This formalism provides the precise language to understand their fundamental structure.
+
+**The Vector Space of Functions ($B(S)$)**
+
+The primary arena for our analysis is the space $B(S)$ of all bounded, measurable functions from the state space $S$ to $\mathbb{R}$. As established in the formalism **(see, e.g., Definition 1.5.1 and 1.6.3)**, this is a **vector space** over the field of real numbers ($\mathbb{R}$).
+* **Vectors**: The functions $v \in B(S)$ themselves.
+* **Vector Addition**: $(v_1 + v_2)(s) := v_1(s) + v_2(s)$.
+* **Scalar Multiplication**: $(c \cdot v)(s) := c \cdot v(s)$.
+
+**Linear Transformations (Operators)**
+
+A function $L: V \to W$ between two vector spaces is a **linear transformation** if it preserves vector addition and scalar multiplication. For any vectors $u, v \in V$ and scalar $c \in F$:
+1.  $L(u+v) = L(u) + L(v)$ (Additivity)
+2.  $L(cv) = cL(v)$ (Homogeneity)
+
+* **Application: The Markov Operator is Linear**
+    The underlying **Markov Operator** ($P$) from the formalism **(Definition 1.6.3)**, where $(Pg)(x) := \int g(y) \kappa(x, dy)$, is a true **linear operator**. This follows directly from the linearity of the integral.
+
+**Affine and Non-Linear Operators**
+
+Not all operators are linear. The Bellman operators fall into two other important categories.
+
+* **Affine Transformation**: A transformation $A(v) = L(v) + w_0$, where $L$ is linear and $w_0$ is a fixed vector (a translation), is **affine**.
+    * **Application: The Bellman Expectation Operator ($T^\pi$) is Affine.**
+        The operator $T^\pi v = r_\pi + \gamma P_\pi v$ (in its finite-space form) or its integral equivalent consists of a linear part ($\gamma P_\pi v$) and a fixed translation ($r_\pi$). The presence of the non-zero reward function makes it **affine**, not linear.
+
+* **Non-Linear Operator**: An operator that does not satisfy the additivity and homogeneity axioms is non-linear.
+    * **Application: The Bellman Optimality Operator ($T^*$) is Non-Linear.**
+        The operator $(T^\ast v)(s) := \sup_{a \in A} \{...\}$ contains a supremum (`sup`). This operation is **non-linear**, as $\sup(f+g)$ is not generally equal to $\sup(f) + \sup(g)$.
+
+This classification is crucial: the analysis of the *linear* Markov operator is distinct from the analysis of the *affine* expectation operator and the *non-linear* optimality operator, whose properties must be established using different tools, such as the Contraction Mapping Theorem.
+
+---
+
 ### 1.2. Bellman Operators: $T^\pi, T^\ast$
 
-The recursive structure of the Bellman equations allows us to define operators that map the space of value functions onto itself. These operators are the primary object of analysis. We consider the space $B(S)$ of all bounded, measurable functions from the state space $S$ to $\mathbb{R}$.
+This function space, as discussed in the context of the **Markov Operator (Definition 1.6.3)**, forms a Banach space when equipped with the supremum norm. The Bellman operators act upon this space.
 
 **Definition 1.2.1 (Bellman Expectation Operator $T^\pi$)**
 
-For any stationary policy $\pi$, the **Bellman expectation operator** $T^\pi: B(S) \to B(S)$ maps a candidate value function $v$ to its expected value after one step under policy $\pi$. Using the expected reward function $r(s,a)$ and transition kernel $p(ds' \mid s,a)$ derived from the unified kernel $\kappa$, it is defined as:
+For any stationary policy $\pi$, the **Bellman expectation operator** $T^\pi: B(S) \to B(S)$ maps a candidate value function $v$ to its expected value after one step under policy $\pi$. Using the expected reward function $r(s,a)$ and state transition kernel $p(ds'|s,a)$—derived from the unified kernel $\kappa$ as per **Section 2.2 of the formalism**—it is defined as:
 
 $$
 (T^\pi v)(s) := \int_A \pi(da|s) \left( r(s,a) + \gamma \int_S v(s') p(ds'|s,a) \right)
@@ -252,7 +290,7 @@ By swapping $v_1$ and $v_2$, we obtain the same bound for $|(T^\ast v_1)(s) - (T
 
 **The Banach Fixed-Point Theorem**
 
-This theorem states that every contraction mapping on a complete metric space has a unique fixed point. Since $(B(S), \Vert \cdot \Vert_\infty)$ is a complete metric space (a Banach space) and both $T^\pi$ and $T^\ast$ are $\gamma$-contractions, we conclude:
+This theorem states that every contraction mapping on a complete metric space has a unique fixed point. Since $(B(S), \Vert \cdot \Vert_\infty)$ is a complete metric space (a Banach space), and both $T^\pi$ and $T^\ast$ are $\gamma$-contractions, we conclude:
 
 1.  There exists a **unique** bounded measurable function $v_\pi$ such that $T^\pi v_\pi = v_\pi$.
 
@@ -304,7 +342,7 @@ $$
 
 By its definition, a greedy policy is inherently **memoryless (or stationary)**. The action-selection mechanism depends only on the current state $s$ and the time-independent value function $v$; it does not rely on the time step or past history.
 
-The existence of a measurable deterministic policy $\mu: S \to A$ that satisfies this condition is guaranteed by **measurable selection theorems**, as discussed previously. For the finite case, since we are maximizing over a finite set of actions, a maximizing action always exists.
+The existence of a measurable deterministic policy $\mu: S \to A$ that satisfies this condition is guaranteed by the **measurable selection theorems** discussed in **Section 1.1.1**, which rely on the Standard Borel structure of the state and action spaces. For the finite case, since we are maximizing over a finite set of actions, a maximizing action always exists.
 
 A key property for finite MDPs is that greediness can be characterized by an equality of operators.
 
@@ -390,21 +428,23 @@ The previous sections provide all the components to prove the central existence 
 
 From the **Banach Fixed-Point Theorem**, we know that the Bellman optimality operator $T^\ast$ is a $\gamma$-contraction on the complete metric space $B(S)$. 
 
-Therefore, it has a unique fixed point, which we call the optimal value function, $v^\ast$.
+As defined in the formalism **(e.g., Definitions 1.5.1 and 1.6.3)**, this is the space of bounded, measurable functions on which the system's operators act. The completeness of this space, proven in **Section 1.3**, guarantees that $T^\ast$ has a unique fixed point, which we call the optimal value function, $v^\ast$.
 
 2.  **Existence of a Greedy Policy**: 
 
 We define the optimal action-value function $q^\ast (s, a) = r(s,a) + \gamma \int_S v^\ast (s') p(ds'|s,a)$. 
 
-Because the spaces are Standard Borel and the component functions are measurable, $q^\ast$ is jointly measurable. 
+Because the state and action spaces are **Standard Borel** and the component functions ($r$, $p$, $v^\ast$) are measurable, $q^\ast$ is jointly measurable.
 
-By the **Jankov-von Neumann measurable selection theorem**, there exists a measurable function $\pi^\ast : S \to A$ such that $\pi^\ast (s) \in \arg\sup_{a \in A} q^\ast (s, a)$ for all $s \in S$. 
+By the **Jankov-von Neumann measurable selection theorem**, the requirement for Standard Borel spaces **(Definition 1.2.4)** and Polish spaces **(Definition 1.2.3)** ensures that there exists a measurable function $\pi^\ast : S \to A$ such that $\pi^\ast (s) \in \arg\sup_{a \in A} q^\ast (s, a)$ for all $s \in S$.
+ 
 
 This $\pi^*$ is a deterministic, stationary, greedy policy.
 
 3.  **Optimality of the Greedy Policy**: 
 
-By definition, since $\pi^\ast$ is greedy with respect to $v^\ast$, it satisfies $(T^{\pi^\ast} v^\ast)(s) = (T^\ast v^\ast)(s)$ for all $s$. 
+By definition of a greedy policy, since $\pi^\ast$ is greedy with respect to $v^\ast$, it satisfies $(T^{\pi^\ast} v^\ast)(s) = (T^\ast v^\ast)(s)$ for all $s$.
+ 
 
 Since $v^\ast$ is the fixed point of $T^\ast$, we have $T^\ast v^\ast = v^\ast$. 
 
@@ -412,7 +452,7 @@ Therefore, $T^{\pi^\ast} v^\ast = v^\ast$.
 
 This equation shows that $v^\ast$ is a fixed point of the operator $T^{\pi^\ast}$. 
 
-However, the Bellman expectation operator $T^{\pi^\ast}$ is also a $\gamma$-contraction and has a unique fixed point, which is by definition $v_{\pi^\ast}$. 
+However, the Bellman expectation operator $T^{\pi^\ast}$ is also a $\gamma$-contraction and thus has its own unique fixed point, which is by definition $v_{\pi^\ast}$.
 
 By uniqueness of the fixed point, we must have $v_{\pi^\ast} = v^\ast$. This proves the policy $\pi^\ast$ is optimal.
 
