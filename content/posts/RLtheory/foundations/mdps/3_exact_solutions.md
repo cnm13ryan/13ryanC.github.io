@@ -153,6 +153,16 @@ flowchart TD
     linkStyle default stroke:#ffffff,stroke-width:2px
 ```
 
+**Figure 1 Contraction of the optimal Bellman operator guarantees value‑iteration convergence to the unique optimal value and policy.**
+
+The orange panel defines the *optimal Bellman operator* $T^\ast \bigl[v \bigr] (s) = \sup_{a \in A} \int \bigl[r' + \gamma v(s') \bigr] \kappa(ds',dr'\mid s,a)$, which maps any bounded value function to the best expected return at state $s$.  
+
+The green panel reminds us that $T^\ast$ is a $\gamma$-contraction on the complete metric space $(\mathcal B_{\beta}(S), \lVert \cdot \lVert_\infty)$; hence, by Banach’s fixed‑point theorem it possesses a single fixed point $v^\ast$.  
+
+The blue algorithm panel depicts *value iteration*: starting from an arbitrary $v_0$, the sequence $v_{k+1} = T^\ast v_k$ (violet strip) monotonically approaches $v^\ast$; once converged, the optimal policy is obtained via $\pi^\ast (s)=\arg\max_{a}Q^\ast (s,a)$.  
+
+Red “Key Concepts” boxes summarise these theoretical links, while dashed arrows denote logical dependence and solid arrows procedural flow.  Symbols: $s,s'$–states; $a$–action; $r'$–reward; $\kappa$–transition–reward kernel; $\gamma \in (0,1)$–discount factor; $Q^\ast$–optimal state–action value.  
+
 
 ### 2.1 Algorithm
 
