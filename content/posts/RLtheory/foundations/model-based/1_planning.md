@@ -12,6 +12,11 @@ image: /assets/images/card3.png
 
 # Online Planning: A Formal Treatment
 
+> **Why this matters**    
+> Offline (tabular) planning chokes when the state set $\lvert S \rvert$ explodes.
+> Online planning aims for *just‑in‑time* computation: decide the next action
+> for the *current* state by sampling a simulator, ignoring unreachable states.
+
 This section pivots from the *offline* planning setting to *online* planning. In the offline model, where the MDP is described by explicit transition and reward tables, no algorithm can find a nearly optimal policy with a computational cost less than $\Omega(|S|^2|A|)$. This "curse of dimensionality" renders tabular methods intractable for problems with large state spaces.
 
 The online planning model circumvents this limitation by changing two fundamental assumptions:
@@ -50,6 +55,13 @@ The primary performance metric is the planner's **query cost**: the maximum numb
 ### A Concrete View: The Oracle Model for Finite MDPs
 
 To make these concepts more concrete, we can specialize the definitions for the common case of finite MDPs, where the problem can be framed in terms of a "black-box oracle". In this view, we identify the state and action spaces with subsets of the natural numbers.
+
+> **Running toy example.**  
+> Imagine a $5\times5$ deterministic gridworld.  
+> – States = cells;  
+> – Actions = $\{\text{N,E,S,W}\}$;  
+> – Simulator call: “at (2,3) with E → you land in (2,4) and get reward 0”.  
+> All definitions below apply verbatim, but this picture grounds the symbols.
 
 **Definition (MDP simulator):** A simulator implementing an MDP  $M = (S,\mathcal{A},P,r)$  is a "black- box oracle" that when queried with a state action pair  $(s,a)\in S\times \mathcal{A}$  returns the reward  $r_a(s)$  and a random state  $S^{\prime}\sim P_{a}(s)$.
 
@@ -141,27 +153,116 @@ def q_deterministic(k, s, simulator):
 
 The runtime of this procedure is $O(A^k)$, which is **independent of the size of the state space $|S|$**. This demonstrates that, at least for deterministic environments, online planning can break the curse of dimensionality imposed by the tabular representation.
 
+**Section recap**
+* Recursive look‑ahead uses the simulator rather than tables.
+* Deterministic case cost = $O(A^k)$, free of $\lvert S \rvert$.
+* We still pay exponentially in horizon $k$.
+
 ---
 
 ## 1.3 Lower Bound on Online Planning
 
-While $O(A^k)$ is a significant improvement, we must ask if it's possible to do better. A lower bound shows that this dependency on the action-space size and horizon is fundamental.
+While a planning complexity of $O(A^k)$ is a significant improvement over simpler methods, we must ask if it's possible to do better. A formal lower bound demonstrates that, in the worst case, this dependency on the action-space size ($A$) and the horizon ($k$) is unavoidable.
 
-**Theorem: Online Planning Lower Bound**
+### Theorem: Online Planning Lower Bound
 
-For any $\varepsilon$-optimal online planner with $\varepsilon < 1$ and rewards in $[0,1]$, there exists an MDP on which the planner must make $\Omega(A^k)$ queries at some state, where $A$ is the number of actions and $k$ is the effective horizon:
+For any $\varepsilon$-optimal online planner where $\\varepsilon \< 1$ and rewards are in the range $[0, 1]$, there exists a Markov Decision Process (MDP) on which the planner must make $\\Omega(A^k)$ queries at some state. Here, $A$ is the number of actions and $k$ is the **effective horizon**, defined as:
 
 $$k = \left\lceil \frac{\ln(1 / (\varepsilon(1 - \gamma)))}{\ln(1 / \gamma)}\right\rceil$$
 
-**Proof Sketch:**
-The proof uses a "needle-in-the-haystack" argument. We construct a deterministic MDP whose state space is a full $A$-ary tree of depth $k$. The dynamics follow the tree structure. All rewards are zero except at one of the $A^k$ leaf nodes, where the reward is 1.
 
-* The optimal policy must follow the path to this high-reward leaf. The value of this policy at the root is $\gamma^k / (1 - \gamma)$.
-* Any other policy has a value of 0.
-* For the planner to be $\varepsilon$-optimal, it must distinguish the optimal path from the others. Since $\gamma^k / (1 - \gamma) \geq \varepsilon$ by the definition of $k$, the planner must find the correct path.
-* Finding this unique path is equivalent to finding the one leaf node with a non-zero reward, which requires exploring the tree. In the worst case, this necessitates $\Omega(A^k)$ queries to the simulator to traverse all paths to the leaves.
+### Proof Sketch: The "Needle-in-the-Haystack" Problem
 
-This result establishes that the $A^k$ complexity is near-optimal for online planning in a worst-case scenario.
+The proof relies on constructing a worst-case scenario, often called a "needle-in-the-haystack" problem. The diagram below illustrates a simplified version of this scenario.
+
+```mermaid
+%%{ init: { "theme": "default",
+            "themeVariables": {
+              "background": "#333333",   /* dark canvas                */
+              "lineColor":   "#ffffff",  /* white default line colour  */
+              "mainLineColor":"#ffffff"  /* some renderers use this    */
+            } } }%%
+flowchart TD
+    R((root))
+    R -- a₁ --> N1
+    R -- a₂ --> N2
+    R -- a₃ --> N3
+    N1 -- a₁ --> L11
+    N1 -- a₂ --> L12
+    N1 -- a₃ --> L13
+    N2 -- a₁ --> L21
+    N2 -- a₂ --> L22
+    N2 -- a₃ --> L23
+    N3 -- a₁ --> L31
+    N3 -- a₂ --> L32
+    N3 -- a₃ --> L33
+    
+    %% Styling
+    classDef rootBox fill:#D55E00,stroke:#e65100,stroke-width:2px
+    classDef nodeBox fill:#56B4E9,stroke:#01579b,stroke-width:2px
+    classDef leafBox fill:#009E73,stroke:#1b5e20,stroke-width:2px
+    classDef rewardBox fill:#CC79A7,stroke:#424242,stroke-width:3px
+    
+    class R rootBox
+    class N1,N2,N3 nodeBox
+    class L11,L12,L13,L21,L23,L31,L32,L33 leafBox
+    class L22 rewardBox
+    
+    %% Force-white links in every renderer
+    linkStyle default stroke:#ffffff,stroke-width:2px
+```
+
+1.  **Constructing the MDP:** We design a deterministic MDP whose structure is a full tree.
+
+      * The **`root`** is the starting state.
+      * The number of actions, $A$, is 3 (namely, `a₁`, `a₂`, `a₃`).
+      * The tree has a depth equal to the effective horizon, $k$. In this diagram, **`k=2`**. The total number of unique paths from the root to a leaf is $A^k = 3^2 = 9$.
+
+2.  **Hiding the Reward:** The "needle" is a single high-reward state. We set the reward to be 0 for all transitions, except for the path leading to one specific leaf node. In the diagram, the path `root → a₂ → N2 → a₂ → L22` leads to a reward of 1 at the final transition. The node `L22` is highlighted to represent this hidden reward. All other 8 paths yield a total reward of 0. This creates a "haystack" of $A^k$ possible paths where the planner must find the single valuable "needle".
+
+3.  **The Planner's Dilemma:**
+
+      * The **optimal policy** is to take the action sequence leading to `L22`. The value of this policy at the root is $\\gamma^k$.
+      * Any other policy has a value of 0.
+      * The definition of $k$ ensures that finding this path is necessary for the planner to be $\\varepsilon$-optimal.
+
+4.  **Query Complexity:** Since the planner has no prior knowledge of which path leads to the reward, it cannot distinguish the optimal path from any other without querying the model. To guarantee finding the "needle," the planner might have to simulate every possible path to its conclusion. In the worst case, this requires checking all $A^k$ leaf nodes, thus demanding $\\Omega(A^k)$ queries to the simulator.
+
+This argument establishes that the $A^k$ complexity is not an algorithmic flaw but a fundamental property of online planning in the worst case.
+
+
+### Formal Argument
+
+We can formalize the "needle-in-the-haystack" by considering a set of distinct MDPs.
+
+Let the set of all possible optimal paths be indexed by $\theta \in \lbrace 1, 2, \dots, A^k \rbrace$. We define a corresponding class of MDPs, $\lbrace \mathcal M_\theta \rbrace_{\theta=1}^{A^k}$. 
+
+In each $\mathcal M_\theta$, the reward function $R_\theta(s, a)$ is $1$ only for the final state-action pair along path $\theta$, and $0$ everywhere else.
+
+An online planning algorithm is given an MDP, $\mathcal M$, drawn uniformly at random from this set.
+
+The algorithm does not know $\theta$. The history of $N$ queries (state-action pairs) and their outcomes (next state, reward) is $H_N$. The crucial insight is that unless the algorithm queries the specific rewarding transition of a particular $\mathcal M_\theta$, it gains no information to distinguish it from any other $\mathcal M_{\theta'}$ whose rewarding transition has also not been queried.
+
+Let $Q_N$ be the set of $N$ state-action pairs the algorithm has queried. The posterior probability of any path $\theta$ being the true rewarded path, given the history, is derived from Bayes' theorem:
+
+$$ 
+P(\theta \mid  H_N) \propto P(H_N \mid \theta) P(\theta)
+$$
+
+The prior $P(\theta)$ is uniform, $1/A^k$. If the unique rewarding transition of path $\theta$ is not in $Q_N$, the history $H_N$ (which contains only zero rewards) is consistent with $\theta$. 
+
+If the algorithm has made $N < (A^k)/2$ queries, there are at least $A^k - N > A^k/2$ such "un-disproven" paths. The algorithm cannot distinguish the true path from this large set of alternatives.
+
+A more rigorous application of information-theoretic tools (specifically, Fano's inequality) confirms this. 
+
+To identify the true path $\theta$ with a probability of error less than some constant, the number of queries $N$ must satisfy:
+
+$$ 
+N \ge \frac{\log_2(A^k/2)}{I(q, r)} = \Omega(A^k)
+$$
+
+where $I(q, r)$ is the mutual information from a single query. This demonstrates that to be $\varepsilon$-optimal, the planner must effectively solve a search problem that, in the worst case, requires exploring a number of paths proportional to the total number of possibilities, $A^k$.
+
 
 ---
 
@@ -229,6 +330,16 @@ The total runtime of this function is now $O((mA)^{k + 1})$. What is important i
 
 This pseudocode sweeps under the rug on who creates the lists $C(s,a)$ and when? A simple and effective approach is to use "lazy evaluation" (or memoization): Create $C(s,a)$ at the first time it is needed (and do not create it otherwise).
 
+**Glossary of symbols (local)**
+
+* $S$ – state space
+* $\mathcal{A}$ – action space
+* $P_a(s)$ – transition kernel
+* $T_q^\*$ – Bellman optimality operator for action‑values
+* $\hat{T}$ – sample‑based approximation of $T$
+* $m$ – number of samples per $(s,a)$
+* $H$ – look‑ahead depth
+
 ### Good Action-Value Approximations Suffice
 
 As a first step towards understanding the strength and weaknesses of this approach, let us define $\hat{T}:\mathbb{R}^{S\times \mathcal{A}}\rightarrow \mathbb{R}^{S\times \mathcal{A}}$ by
@@ -267,6 +378,13 @@ Let $\pi$ be a memoryless policy and choose a function $q:\mathcal{S}\times \mat
 $$
 v^{\pi}\geq v^\ast - \frac{2 \Vert q - q^\ast \Vert_{\infty}}{1 - \gamma}\mathbf{1}.
 $$
+
+*Proof Sketch*
+
+Standard contraction‑mapping argument.  
+1. Write Bellman error for greedy $\pi$ vs. $q^\ast$.
+2. Use the performance‑difference lemma.  
+3. Bound with the infinity norm.  
 
 **Suboptimality of almost $\epsilon$-optimizing policies**
 
@@ -324,6 +442,13 @@ To obtain a planner that induces a $\delta$-optimal policy, we can set $H$, $\ze
 
 Overall, we see that the runtime did increase compared to the deterministic case, but we managed to get a runtime that is independent of the cardinality of the state space. The exponential dependence on the effective horizon is, as we have seen, unavoidable in the worst case.
 
+*Section recap*  
+
+* Sampling replaces integrals $\rightarrow$ cost independent of $\lvert S \rvert$.  
+* Need $m = \tilde O \bigl((1-\gamma)^{-2}\bigr)$ samples for $\delta$-optimality.
+* Exponential in horizon still unavoidable (matches lower bound).
+ 
+
 ---
 
 ## 1.5 Notes on Simulator Access Models
@@ -335,6 +460,40 @@ The interaction between a planner and a simulator can be categorized by the acce
 * **Online Access**: The simulator maintains an internal state. The planner can either reset this state to the initial one or provide an action to transition the internal state forward. This is the most restrictive and realistic model, as it mirrors an agent's actual interaction with an environment.
 
 The algorithms discussed here can be adapted to these different models, with online access being the most general and challenging setting.
+
+```mermaid
+%%{ init: { "theme": "default",
+            "themeVariables": {
+              "background": "#333333",   /* dark canvas                */
+              "lineColor":   "#ffffff",  /* white default line colour  */
+              "mainLineColor":"#ffffff"  /* some renderers use this    */
+            } } }%%
+flowchart LR
+    subgraph PlannerGroup["Planner"]
+        P["Planner<br/>(algorithm)"]
+    end
+    subgraph SimulatorGroup["Simulator"]
+        S0["reset ⇦<br/>initial state"]
+        S1["state buffer"]
+    end
+    P -- query (s,a) --> S1
+    S1 -- sample (s',r) --> P
+    P -- reset? --> S0
+    
+    %% Styling
+    classDef plannerBox fill:#56B4E9,stroke:#01579b,stroke-width:2px
+    classDef simulatorBox fill:#E69F00,stroke:#4a148c,stroke-width:2px
+    classDef nodeBox fill:#009E73,stroke:#1b5e20,stroke-width:2px
+    classDef resetBox fill:#D55E00,stroke:#e65100,stroke-width:2px
+    
+    class PlannerGroup plannerBox
+    class SimulatorGroup simulatorBox
+    class P,S1 nodeBox
+    class S0 resetBox
+    
+    %% Force-white links in every renderer
+    linkStyle default stroke:#ffffff,stroke-width:2px
+```
 
 ---
 
@@ -373,3 +532,14 @@ which, combined with our first lemma on the policy error bound gives that the po
 ### From local to online access
 
 The algorithm analyzed here requires local access simulators. This is better than requiring global access, but worse than requiring online access. It remains an open question whether a similar result can be achieved using only online access.
+
+### Subsection recap cheat‑sheet
+
+*Online Planning in one tweet:* **Sample your way down a sparse look‑ahead tree; horizon kills you, state‑count doesn’t.**
+
+| Topic | Core lesson |
+|-------|-------------|
+Deterministic look‑ahead | $O(A^{k})$ runtime, no $\lvert S \rvert $. |
+Lower‑bound | Exponential in $k$ is information‑theoretically tight. |
+Stochastic MDPs | Hoeffding + lazy sampling → same state‑space‑free guarantee. |
+Simulator models | Online access is most realistic & hardest. |
