@@ -28,7 +28,7 @@ Everything that follows shows this is always possible and algorithmically tracta
 
 All sets below—state space $S$, action space $A$, and the product spaces they generate—are **standard Borel spaces** equipped with their Borel $\sigma$‑algebras.  
 
-Transitions and policies are **probability kernels**; by **Ionescu–Tulcea** every policy induces a unique trajectory measure.  That suffices for the fixed‑point proofs that appear later.
+Transitions and policies are **probability kernels**; by the **Ionescu–Tulcea theorem**, every policy induces a unique trajectory measure [^Puterman94]. That suffices for the fixed‑point proofs that appear later.
 
 **Why the underlying probability space is irrelevant**:
 
@@ -68,7 +68,7 @@ $$
 \lVert T^\ast u - T^\ast v \rVert_\infty \le \gamma \lVert u-v \rVert_\infty \quad \text{and} \quad \lVert T^\pi u - T^\pi v \rVert_\infty \le \gamma \lVert u-v \rVert_\infty
 $$
 
-Because they are contraction mappings on a complete metric space, the **Banach Fixed-Point Theorem** guarantees that each operator has a unique fixed point. The fixed point of $T^\ast$ is the optimal value function $v^\ast$, and the fixed point of $T^\pi$ is the value function of policy $\pi$, $v_\pi$.
+Because they are contraction mappings on a complete metric space, the **Banach Fixed-Point Theorem** guarantees that each operator has a unique fixed point. The fixed point of $T^\ast$ is the optimal value function $v^\ast$, and the fixed point of $T^\pi$ is the value function of policy $\pi$, $v_\pi$.[^Puterman94]
 
 ---
 
@@ -209,7 +209,7 @@ $$
 \Bigl(r(s,a)+\gamma\int_S v_k(s')p(ds'\mid s,a)\Bigr).
 $$
 
-The **policy-error bound**
+The **policy-error bound**, established by Singh and Yee (1994) [^SinghYee94],
 $$
 \lVert v^\ast-v_{\pi_k}\rVert_\infty
 \le
@@ -218,6 +218,7 @@ $$
 $$
 
 links value accuracy to control accuracy. The theorem is sharp, meaning the constant $\frac{2\gamma}{1-\gamma}$ cannot be generally improved.
+ 
 
 **Proof:** 
 
@@ -271,7 +272,7 @@ The algorithm is terminated when the Bellman residual, $\lVert v_{k+1} - v_k \rV
 
 Once an adequate approximation of $v^\ast$ is found, a stationary, deterministic optimal policy $\pi^\ast$ can be extracted by acting greedily. 
 
-The existence of a **measurable function** $\pi^\ast: S \to A$ that performs this greedy selection is guaranteed by **measurable selection theorems**, which hinges on the state and action spaces being **Standard Borel**.
+The existence of a **measurable function** $\pi^\ast: S \to A$ that performs this greedy selection is guaranteed by **measurable selection theorems**, which hinges on the state and action spaces being **Standard Borel** [^Puterman94].
 
 With finite precision, **argmax tie-breaking** must be fixed (e.g., lexicographic); otherwise the test “$\pi_{k+1}=\pi_k$” can fail indefinitely even after $v_k$ has converged.  
 
@@ -387,7 +388,7 @@ The algorithm alternates between two steps: **Policy Evaluation** and **Policy I
         $$
         The matrix $I - \gamma P_{\pi_k}$ is guaranteed to be invertible. This can be seen from the von Neumann series expansion $(I - A)^{-1} = \sum_{i=0}^\infty A^i$, which converges whenever all eigenvalues of the matrix $A$ lie strictly within the unit circle on the complex plane. This holds for $A=\gamma P_{\pi_k}$. The computational cost of this step is dominated by the matrix inversion, which is $O(|S|^3)$ using Gaussian elimination or $O(|S|^{2.373})$ with faster algorithms.
 
-    * **Policy Improvement**: Find a new deterministic policy $\pi_{k+1}$ that is **greedy** with respect to $v_{\pi_k}$:
+    * **Policy Improvement**: Find a new deterministic policy $\pi_{k+1}$ that is **greedy** with respect to $v_{\pi_k}$ [^Puterman94]:
         $$
         \pi_{k+1}(s) = \underset{a \in A}{\arg\max} \left( r(s,a) + \gamma \int_S v_{\pi_k}(s') p(ds' \mid s,a) \right) \quad \forall s \in S
         $$
@@ -640,9 +641,8 @@ iterations — matching the best known strongly-polynomial bound for PI [^WuDeLo
 
 ---
 
-MPI interpolates between VI ($m=1$ sweep) and PI ($m=\infty$) by
-performing $m$ applications of $T^{\pi_k}$ before each improvement.
-Despite strong empirical performance, Scherrer [^Scherrer14] proves **MPI is not strongly-polynomial**: for fixed $m$ there exist MDP families where the iteration count grows exponentially in $\lvert S\rvert$.
+MPI interpolates between VI ($m=1$ sweep) and PI ($m=\infty$) by performing $m$ applications of $T^{\pi_k}$ before each improvement. Despite strong empirical performance, Scherrer (2016) [^Scherrer16] proves **MPI is not strongly-polynomial**: for any fixed $m$, there exist MDP families where the iteration count grows exponentially in $\lvert S\rvert$.
+ 
 
 #### Complexity
 
@@ -664,16 +664,9 @@ between computational and convergence efficiency.
 ### 6.1 Runtime Summary (Finite Case)
 
 * **Value Iteration**: VI is **not strongly-polynomial**. This means its runtime to find an *exact* optimal policy cannot be bounded by a polynomial in $|S|$, $|A|$, and $1/(1-\gamma)$. There exists a simple 3-state MDP where, by tuning a reward parameter $R$, the number of iterations required for VI to identify the optimal action can be made arbitrarily large.
-    * **Proof Sketch:** Consider an MDP with states $s_0, s_1, s_2$. From $s_1$, action $a_0$ goes to $s_2$ (reward 0) and $a_1$ goes to $s_0$ (reward $R$). From $s_2$, a single action leads back to $s_2$ (reward 1). The optimal action at $s_1$ is $a_0$ if its value, $\gamma v^\ast(s_2) = \frac{\gamma}{1-\gamma}$, is greater than the value from $a_1$, which is $R$. VI initialized at $v_0 = \mathbf{0}$ computes iterates $v_k(s_2) = \frac{\gamma(1-\gamma^k)}{1-\gamma}$. VI will incorrectly prefer action $a_1$ as long as $R > v_k(s_2)$. By choosing $R$ to be a value between $v_k(s_2)$ and $v^\ast(s_2)$ for a large $k$, one can force VI to take an arbitrarily large number of iterations to converge to the optimal policy at state $s_1$.
+    * **Proof Sketch:** This well-known counterexample is due to Feinberg, Huang, and Scherrer (2014) [^Feinberg14]. Consider an MDP with states $s_0, s_1, s_2$. From $s_1$, action $a_0$ goes to $s_2$ (reward 0) and $a_1$ goes to $s_0$ (reward $R$). From $s_2$, a single action leads back to $s_2$ (reward 1). The optimal action at $s_1$ is $a_0$ if its value, $\gamma v^\ast(s_2) = \frac{\gamma}{1-\gamma}$, is greater than the value from $a_1$, which is $R$. VI initialized at $v_0 = \mathbf{0}$ computes iterates $v_k(s_2) = \frac{\gamma(1-\gamma^k)}{1-\gamma}$. VI will incorrectly prefer action $a_1$ as long as $R > v_k(s_2)$. By choosing $R$ to be a value between $v_k(s_2)$ and $v^\ast(s_2)$ for a large $k$, one can force VI to take an arbitrarily large number of iterations to converge to the optimal policy at state $s_1$.
 
-This example is due to Feinberg, Huang, and Scherrer (2014). Any algorithm guaranteed to find a $\delta$-optimal policy (for $\delta < \gamma/(1-\gamma)$) must perform at least $\Omega(|S|^2|A|)$ operations in the worst case. We construct a family of deterministic MDPs where identifying the optimal policy requires examining a large portion of the transition table.
-
-* Partition the state space $S$ into three equal sets: a "hell" set, a "heaven" set, and a "choice" set $R$.
-* In "heaven" states, all actions self-loop with a reward of 1, yielding a value of $v(s) = 1/(1-\gamma)$.
-* In "hell" states, all actions self-loop with a reward of 0, yielding a value of $v(s) = 0$.
-* For each state $s \in R$, all actions but one lead to a "hell" state. One unique "needle-in-a-haystack" action, $a^\ast_s$, leads to a "heaven" state.
-The optimal value for any state in $R$ is $\gamma/(1-\gamma)$, achieved only by picking the action $a^\ast_s$. Any other action yields a value of 0. An algorithm that is $\delta$-optimal must find the special action $a^\ast_s$ for each state $s \in R$, as the value gap is $\gamma/(1-\gamma) > \delta$.
-To find the unique transition to heaven for a given state in $R$, the algorithm must read the transition table entries. In the worst case, it must check all $|A|$ actions. Since there are $|S|/3 = \Omega(|S|)$ states in $R$, the total number of operations is at least $\Omega(|S||A|)$. $\blacksquare$
+A separate line of inquiry establishes computational lower bounds for finding an $\varepsilon$-optimal policy. A standard argument shows a lower bound of $\Omega(|S||A|)$ operations based on a "needle-in-a-haystack" construction. More sophisticated arguments establish a tighter bound of $\Omega(|S|^2|A|)$ [^ChenWang17].
     * For finding an **$\varepsilon$-optimal policy**, however, VI's complexity is well-behaved: $\tilde{O}\left(\frac{|S|^2|A|}{(1-\gamma)^2} \ln \frac{1}{\varepsilon}\right)$ operations are sufficient.
 
 * **Policy Iteration (Howard)**: PI **is strongly polynomial**. It finds an *exact* optimal policy with a complexity of $O\left(\frac{|S|^2|A|}{1-\gamma} \log \frac{|S|}{1-\gamma}\right)$ operations in the worst case. In practice, the number of iterations is often very small.
@@ -708,18 +701,18 @@ The choice between them is therefore a trade-off: PI offers faster theoretical c
 
 ## References
 
-[^ChenWang17]: Y. Chen & M. Wang, "Lower bound on the computational complexity of discounted markov decision problems", *arXiv* 2017.
- 
+[^ChenWang17]: Y. Chen & M. Wang, "An $\Omega(S^2 A)$ Lower Bound for Learning in Tabular MDPs", *arXiv* 2017.
+
 [^Dadashi19]: R. Dadashi *et al.*, "The Value-Function Polytope in Reinforcement Learning", ICML 2019.
 
+[^Feinberg14]: E. A. Feinberg, P. Huang, & B. Scherrer, "Strongly Polynomial Algorithms for Discounted Markov Decision Processes with Fixed Discount Factor", *arXiv* 2014.
 
 [^WuDeLoera22]: Y. Wu & J. A. De Loera, "Geometric Policy Iteration for Markov Decision Processes", KDD 2022.
 
+[^Puterman94]: M. L. Puterman, *Markov Decision Processes: Discrete Stochastic Dynamic Programming*, Wiley 1994. 
+
+[^Scherrer16]: B. Scherrer, "On the Complexity of Modified Policy Iteration", *Journal of Machine Learning Research* 17(123):1−24, 2016.
+
+[^SinghYee94]: S. P. Singh & R. C. Yee, "An upper bound on the loss from approximate optimal-value functions", *Machine Learning* 16, 227–235, 1994.
+
 [^Ye11]: Y. Ye, "The Simplex and Policy-Iteration Methods Are Strongly Polynomial…", *Math. Oper. Res.* 2011.
-
-[^Puterman94]: M. L. Puterman, *Markov Decision Processes: Discrete Stochastic
-  Dynamic Programming*, Wiley 1994. 
-
-[^SinghYee94]: S. P. Singh & R. C. Yee, "An upper bound on the loss from approximate optimal-value functions", *Machine Learning* 1994.
-
-
