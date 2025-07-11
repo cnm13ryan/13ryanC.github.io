@@ -14,9 +14,77 @@ image: /assets/images/card3.png
 
 This section builds upon the measure-theoretic definition of an MDP to establish the core principles of optimality. We will introduce the Bellman operators as the central tool for analyzing value functions, prove their contraction properties which guarantee the existence and uniqueness of solutions, and conclude with the fundamental theorem that connects optimal value functions to optimal policies.
 
+Keep in mind three pillars:
+
+1. **Operators** ($T^\pi$, $T^\ast$) map value functions to value functions.
+2. **$\gamma$‑contraction** → unique fixed points ($v_\pi$, $v^\ast$).
+3. **Greedy policy** with respect to $v^\ast$ is optimal.
+
+```mermaid
+%%{ init: { "theme": "default",
+            "themeVariables": {
+              "background": "#333333",   /* dark canvas                */
+              "lineColor":   "#ffffff",  /* white default line colour  */
+              "mainLineColor":"#ffffff"  /* some renderers use this    */
+            } } }%%
+flowchart TD
+    subgraph MDPGroup["MDP"]
+        S["States S"] -->|choose| A["Actions A"]
+        A -->|prob.| P["Kernel p(·|s,a)"]
+        P --> S
+        A --> R["Reward r(s,a)"]
+    end
+    pi["Policy π"] -->|controls| A
+    pi --> Vpi["vπ"]
+    Vpi -->|fixed point| Tpi["T^π"]
+    Tpi -.contraction.- Vpi
+    Vstar["v*"] -->|greedy| pistar["π*"]
+    Vstar -.fixed pt.- Tstar["T*"]
+    Tstar -.contraction.- Vstar
+    
+    %% Styling
+    classDef algorithmBox fill:#56B4E9,stroke:#01579b,stroke-width:2px
+    classDef operatorBox fill:#E69F00,stroke:#4a148c,stroke-width:2px
+    classDef propertyBox fill:#009E73,stroke:#1b5e20,stroke-width:2px
+    classDef legendBox fill:#D55E00,stroke:#e65100,stroke-width:2px
+    classDef sequenceBox fill:#CC79A7,stroke:#424242,stroke-width:2px
+    classDef nodeBox fill:#009E73,stroke:#1b5e20,stroke-width:2px
+    classDef rootBox fill:#D55E00,stroke:#e65100,stroke-width:2px
+    classDef rewardBox fill:#CC79A7,stroke:#424242,stroke-width:3px
+    classDef resetBox fill:#D55E00,stroke:#e65100,stroke-width:2px
+    
+    class MDPGroup operatorBox
+    class S,A,P,R nodeBox
+    class pi,Vpi propertyBox
+    class Tpi operatorBox
+    class Vstar,pistar rootBox
+    class Tstar operatorBox
+    
+    %% Force-white links in every renderer
+    linkStyle default stroke:#ffffff,stroke-width:2px
+```
+
+**Figure 1 — Relationship map for a Markov‑Decision Process and its value‑function solution methods.**
+The left‑hand module (blue frame) is the *generative* core of the MDP: from a state $s \in S$ the agent **chooses** an action $a \in A$; the environment responds with an immediate reward $r(s,a)$ and a next‑state distribution given by the kernel $p( \cdot\mid s,a)$.
+
+The right‑hand branch shows *evaluation* and *control*: a policy $\pi$ selects actions and induces a state‑value function $v_\pi$, the unique fixed point of its Bellman operator $T^\pi$.  The dashed link labelled “contraction” marks the property that iterative application of $T^\pi$ converges to $v_\pi$.  The optimal value $v^\ast$ is the fixed point of the optimal Bellman operator $T^\ast$; acting **greedy** with respect to $v^\ast$ yields the optimal policy $\pi^\ast$.
+
+Colour‑coding distinguishes roles—green boxes for entities (states, actions, rewards), orange boxes for operators, and red boxes for optimal quantities—while solid arrows denote causal or functional dependence and dashed arrows summarise mathematical properties.  
+
+
 ---
 
 ### 1.1. Optimality Notions and Objective Functions
+
+An MDP is a game played forever. Your score is the discounted sum of rewards:
+
+$$
+R = \sum_{t=0}^{\infty} \gamma^{t} r_t.
+$$
+
+The **value function** $v_\pi (s)$ is the expected score if you start in $s$ and always follow $\pi$.
+The **optimal value** $v^\ast (s)$ is the best score any policy can secure from $s$.
+When exact optimality is over‑kill, we settle for being within $\varepsilon$.
 
 The objective in a discounted, infinite-horizon MDP is to find a policy that maximizes the expected discounted return from any starting state. This concept is formalized through optimal value functions.
 
@@ -26,7 +94,9 @@ The primary goal in a discounted, infinite-horizon MDP is to find a policy that 
 
 We use $\mathbb{E}_s^\pi$ to denote the expectation when starting in state $s$ and following policy $\pi$. The total discounted return, $R$, is the sum of discounted rewards over an infinite horizon:
 
-$$R = \sum_{t = 0}^{\infty}\gamma^{t}r_{t}$$
+$$
+R = \sum_{t = 0}^{\infty}\gamma^{t}r_{t}
+$$
 
 where $r_t$ is the reward received at timestep $t$.
 
@@ -44,7 +114,7 @@ By definition, $v_\pi(s) \le v^\ast (s)$ for all states $s$ and any policy $\pi$
 
 In practice, finding a perfectly optimal policy may not be necessary or feasible. Instead, we often seek an **$\epsilon$-optimal policy**.
 
-**Definition: $\epsilon$-Optimal Policy**
+**Definition 1.1 ($\epsilon$-Optimal Policy)**
 
 Let $\epsilon > 0$. A policy $\pi$ is said to be **$\epsilon$-optimal** if its value function is within $\epsilon$ of the optimal value function for all states. Using vector notation where $\mathbf{1}$ is a vector of ones, this is expressed as:
 
@@ -106,6 +176,8 @@ A foundational result in dynamic programming is that for any discounted MDP defi
 
 ### 1.2.0 The Linear Algebra Perspective: Classifying the Operators
 
+> **Why this detour?**: Classifying each Bellman‑flavoured operator as **linear**, **affine**, or **non‑linear** tells us which fixed‑point theorem or spectral tool we may invoke. Jump ahead if linear‑algebra lore is second nature. 
+
 > **Linear‑algebra backdrop.** All basic notions—vector spaces, bases, linear maps, kernel, image, and the rank–nullity theorem—are summarised once‑and‑for‑all in the *Formalism* document (§1.2.6 “Finite‑Dimensional Vector‑Space Primer”). Here we simply *use* those facts to analyse the Bellman and Markov operators. 
 
 * **Application: The Markov Operator is Linear.**
@@ -128,6 +200,8 @@ This classification is crucial: the analysis of the *linear* Markov operator is 
 ---
 
 ### 1.2. Bellman Operators: $T^\pi, T^\ast$
+
+> **Intuition first**: $T^\pi$ says “evaluate one step of $\pi$ and add the discounted continuation”, while $T^\ast$ says “evaluate the *best* first action then add the discounted continuation”. Iterating either map shrinks errors by $\\gamma$, hence both converge.  
 
 This function space, as discussed in the context of the **Markov Operator (Definition 1.6.3)**, forms a Banach space when equipped with the supremum norm. The Bellman operators act upon this space.
 
@@ -258,6 +332,11 @@ This guarantees that iterative application converges to the unique fixed point. 
 
 ### 1.3. Key Analytical Properties (Monotonicity, Contraction, Error Bounds)
 
+> **Roadmap**:
+> 1. Monotone ⇒ preserves order of value estimates.
+> 2. $\gamma$‑contraction ⇒ unique fixed point.
+> 3. Banach fixed‑point ⇒ Value Iteration converges geometrically.
+
 To prove that the Bellman operators have unique fixed points, we analyze their properties on the **Banach space** $(B(S), \Vert \cdot \Vert_\infty)$, which is the space of bounded measurable functions on $S$ equipped with the supremum norm, $\Vert v \Vert_\infty := \sup_{s \in S} |v(s)|$.
 
 **Property 1.3.1 (Monotonicity)**
@@ -372,6 +451,8 @@ estimates (see forthcoming §2.4).
 
 ### 1.4. Greedy Policies and the Fundamental Theorem of Dynamic Programming
 
+> **Big takeaway**: Once $v^\ast$ is in hand, just act greedily with respect to it—the resulting $\pi^\ast$ is optimal. Thus computing $v^\ast$ is both necessary *and* sufficient. 
+
 With the existence and uniqueness of $v^\ast$ established, we now connect it back to finding an optimal policy $\pi^\ast$.
 
 **Definition 1.4.1 (Greedy Policy)**
@@ -433,11 +514,23 @@ It remains to be shown that $\tilde{v}^\ast = v^\ast$. The set of memoryless pol
 
 This relies on a known result that for any policy $\pi$ (even non-stationary or history-dependent) and any starting state $s$, there exists a memoryless policy, let's call it $\pi_{ML}$, that induces the same discounted state-visitation distribution. Therefore, their value functions are identical: $v_\pi(s) = v_{\pi_{ML}}(s)$.
 
-For any arbitrary policy $\pi \in \Pi$ and any state $s$:
-$$v_\pi(s) = v_{\pi_{ML}}(s) \le \sup_{\pi' \in \text{ML}} v_{\pi'}(s) = \tilde{v}^\ast(s)$$
+This uses the fact that for any possibly history‑dependent policy $\pi$ and any state $s$, we can **simulate** its discounted visitation distribution with some memory‑less policy $\pi_{ML}$; consequently, the two share the same value.
+
+Hence. For any arbitrary policy $\pi \in \Pi$ and any state $s$:
+
+$$
+v_\pi(s) = v_{\pi_{ML}}(s) \le \sup_{\pi' \in \text{ML}} v_{\pi'}(s) = \tilde{v}^\ast(s)
+$$
+
 Since this holds for any policy $\pi$, we can take the supremum over all policies on the left side:
-$$v^\ast(s) = \sup_{\pi \in \Pi} v_\pi(s) \le \tilde{v}^\ast(s)$$
-As this holds for all states $s$, we have $v^\ast \le \tilde{v}^\ast$. Combined with $\tilde{v}^\ast \le v^\ast$, this proves $v^\ast = \tilde{v}^\ast$, completing the proof.
+
+$$
+v^\ast(s) = \sup_{\pi \in \Pi} v_\pi(s) \le \tilde{v}^\ast(s)
+$$
+
+As this holds for all states $s$, we have $v^\ast \le \tilde{v}^\ast$. 
+
+Combined with $\tilde{v}^\ast \le v^\ast$, this proves $v^\ast = \tilde{v}^\ast$, completing the proof.
 
 ---
 
@@ -459,6 +552,11 @@ The fact that a stationary policy, which only depends on the current state, can 
 ---
 
 ### 1.5. Existence of an Optimal Stationary Policy
+
+> **Recap**: Standard Borel + bounded rewards + $\gamma<1$ ⇒
+> 1. unique $v^\ast$ by Banach.
+> 2. measurable selection ⇒ greedy measurable $\\pi^\ast$. 
+> 3. fixed‑point argument ⇒ $v_{\pi^\ast} = v^\ast$.
 
 The previous sections provide all the components to prove the central existence theorem of dynamic programming.
 
