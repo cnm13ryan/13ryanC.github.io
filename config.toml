@@ -57,6 +57,12 @@ theme       = ["hugo-PaperMod", "hugo-cite"]
 [pagination]
   pagerSize = 20 
 
+# ---- Hugo core ----
+enableGitInfo = true          # ask Hugo to query Git history
+# Pin the date‑field precedence so Git wins first:
+[frontmatter]
+  lastmod = [":git", "lastmod", "date"]
+
 ############################
 # 1. Site-wide PaperMod flags
 ############################
@@ -65,8 +71,9 @@ theme       = ["hugo-PaperMod", "hugo-cite"]
   mermaid             = true
   ShowCodeCopyButtons = true     # clipboard icon on every ``` fence
   ShowPageNums       = true      # so the nav bar is visible
-  description        = "Exploring the frontiers of AI research and applications"
+  description        = "Exploring the foundations and frontiers of AI research simultaneously."
   defaultTheme       = "auto"
+  ShowLastMod        = true
   ShowReadingTime    = true
   ShowShareButtons   = true
   showtoc            = true
