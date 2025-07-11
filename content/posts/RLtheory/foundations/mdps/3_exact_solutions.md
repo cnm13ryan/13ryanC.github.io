@@ -16,21 +16,36 @@ This document details the cornerstone algorithms for finding the optimal value f
 
 ---
 
-## 1. The Mathematical Foundation
+## 1. Mathematical Foundation
+
+Before diving into $\sigma$‑algebras, here’s the **problem we want to solve** in one sentence:
+
+Given any (possibly continuous) MDP, compute a value function that no alternative policy can beat on expected $\gamma$‑discounted return.
+
+Everything that follows shows this is always possible and algorithmically tractable.
 
 ### 1.1 Measure-Theoretic Backdrop
 
-All sets below—state space $S$, action space $A$, and the product spaces they generate—are **standard Borel spaces** equipped with their Borel σ‑algebras. Transitions and policies are **probability kernels**; the Ionescu–Tulcea theorem then guarantees a unique path‑space measure for every policy–kernel pair. This setting is general enough to cover finite, countable, and continuous MDPs while retaining the regularity needed for rigorous fixed‑point arguments.
+All sets below—state space $S$, action space $A$, and the product spaces they generate—are **standard Borel spaces** equipped with their Borel $\sigma$‑algebras.  
 
-This guarantee is critical because it ensures value functions are well-defined despite the fact that the underlying probability space $(\Omega ,\mathcal{F},\mathbb{P})$ is not uniquely defined. For any measurable function $f$ over trajectories, and for any two probability spaces $(\Omega ,\mathcal{F},\mathbb{P})$ and $(\Omega^{\prime},\mathcal{F}^{\prime},\mathbb{P}^{\prime})$ that satisfy the theorem's requirements, the expectations will be identical: $\mathbb{E}[f(\tau)] = \mathbb{E}^{\prime}[f(\tau)]$. It therefore suffices to work with the canonical probability space induced by the state-action space of the MDP.
+Transitions and policies are **probability kernels**; by **Ionescu–Tulcea** every policy induces a unique trajectory measure.  That suffices for the fixed‑point proofs that appear later.
 
+**Why the underlying probability space is irrelevant**:
+
+For any measurable $f$ over trajectories and any two probability spaces $(\Omega,\mathcal F,\mathbb P)$ and $(\Omega',\mathcal F',\mathbb P')$ satisfying the theorem,  
+
+$$
+\mathbb E[f(\tau)]=\mathbb E'[f(\tau)].
+$$
+
+Hence we may work with the canonical probability space $(\Omega,\mathcal F,\mathbb P)$ induced by the state-action space $S\times A$ of the MDP.
 
 ### 1.2 The Value-Function Banach Space
 
 Let $\mathcal{B}_b(S)$ be the space of bounded, measurable functions from states to the reals:
 
 $$ 
-\mathcal B_b(S):= \lbrace v:S\to\mathbb R  v\text{ measurable}, \lvert v \rvert_\infty := \sup_{s\in S} \lvert v(s) \rvert <\infty \bigr \rbrace
+\mathcal B_b(S):= \lbrace v:S\to\mathbb R   v \text{ measurable}, \lVert v \rVert_\infty := \sup_{s\in S} \lvert v(s) \rvert <\infty \bigr \rbrace
 $$
 
 Equipped with the sup–norm $\lVert \cdot \rVert_\infty$, $\mathcal B_b(S)$ is a **Banach space** (a complete normed vector space). This completeness is a prerequisite for using the Banach fixed-point theorem, which is the engine of our convergence proofs.
@@ -60,6 +75,84 @@ Because they are contraction mappings on a complete metric space, the **Banach F
 ## 2. Value Iteration (VI)
 
 Value Iteration (VI) computes the optimal state-value function $v^\ast$ by directly implementing the successive application of the Bellman optimality operator, $T^\ast$.
+
+> **Intuition snapshot**: repeatedly *back‑up* future value until numbers stop changing.
+
+```mermaid
+%%{ init: { "theme": "default",
+            "themeVariables": {
+              "background": "#333333",   /* dark canvas                */
+              "lineColor":   "#ffffff",  /* white default line colour  */
+              "mainLineColor":"#ffffff"  /* some renderers use this    */
+            } } }%%
+flowchart TD
+    subgraph Legend["Key Concepts"]
+        T_star["T* = Optimal Bellman Operator"]
+        gamma["γ-contraction: ||Tu - Tv|| ≤ γ||u - v||"]
+        banach["Banach Fixed-Point Theorem guarantees unique solutions"]
+        
+        T_star -.-> gamma
+        gamma -.-> banach
+    end
+    
+    subgraph Operators["Bellman Operators"]
+        subgraph OptOp["Optimal Bellman Operator T*"]
+            opt_formula["(T*v)(s) = sup_{a∈A} ∫[r' + γv(s')] κ(ds',dr'|s,a)"]
+            opt_desc["Finds best action at each state"]
+        end
+        
+        opt_formula --> opt_desc
+    end
+    
+    subgraph VI["Value Iteration Algorithm"]
+        vi_start["Initialize: v₀ (arbitrary)"]
+        vi_iter["Iterate: vₖ₊₁ = T*vₖ"]
+        vi_conv["Converge: v* (optimal value)"]
+        vi_policy["Extract: π*(s) = argmax_a Q*(s,a)"]
+        
+        vi_start --> vi_iter
+        vi_iter --> vi_conv
+        vi_conv --> vi_policy
+        
+        subgraph vi_sequence["Convergence Sequence"]
+            v0["v₀"]
+            v1["v₁ = T*v₀"]
+            v2["v₂ = T*v₁"]
+            vdots["⋯"]
+            vstar["v* = lim vₖ"]
+            
+            v0 --> v1 --> v2 --> vdots --> vstar
+        end
+    end
+    
+    subgraph Properties["Contraction Properties"]
+        complete["Complete Metric Space 𝒷ᵦ(S)"]
+        contract["γ-Contraction Mapping"]
+        unique["Unique Fixed Point"]
+        
+        complete --> contract
+        contract --> unique
+    end
+    
+    %% Connections between algorithms and operators
+    OptOp -.-> VI
+    Properties -.-> VI
+    
+    %% Styling
+    classDef algorithmBox fill:#56B4E9,stroke:#01579b,stroke-width:2px
+    classDef operatorBox fill:#E69F00,stroke:#4a148c,stroke-width:2px
+    classDef propertyBox fill:#009E73,stroke:#1b5e20,stroke-width:2px
+    classDef legendBox fill:#D55E00,stroke:#e65100,stroke-width:2px
+    classDef sequenceBox fill:#CC79A7,stroke:#424242,stroke-width:1px
+    class VI algorithmBox
+    class OptOp operatorBox
+    class Properties propertyBox
+    class Legend legendBox
+    class vi_sequence sequenceBox
+    %% ── Force-white links in every renderer ──
+    linkStyle default stroke:#ffffff,stroke-width:2px
+```
+
 
 ### 2.1 Algorithm
 
@@ -149,7 +242,20 @@ Taking the sup-norm of both sides yields $\lVert \delta \rVert_\infty = \lVert v
  
 Thus it suffices to stop when the Bellman residual is below $\dfrac{(1-\gamma)\varepsilon}{2\gamma}$ to guarantee an $\varepsilon$-optimal policy.
 
-### Stopping Condition and Final Policy
+### Why do we stop? (Stopping Condition and Final Policy)
+
+```mermaid
+%%{init: {"theme": "dark", "themeVariables": {"background": "#333333", "primaryColor": "#ffffff", "primaryTextColor": "#ffffff", "primaryBorderColor": "#ffffff", "lineColor": "#ffffff", "secondaryColor": "#444444", "tertiaryColor": "#555555"}}}%%
+
+flowchart LR
+    start(["Start VI"])
+    calc["Compute ||vₖ₊₁-vₖ||∞"]
+    check{Below threshold?}
+    cont(["k←k+1"])
+    done(["Extract greedy π*"])
+    start --> calc --> check -- No --> cont --> calc
+    check -- Yes --> done
+```
 
 The algorithm is terminated when the Bellman residual, $\lVert v_{k+1} - v_k \rVert_\infty$, falls below a pre-specified threshold.
 
@@ -169,13 +275,96 @@ More formally, to achieve a relative error bound $v^\pi \ge v^\ast - \delta_{\te
 
 ---
 
-## 3. Policy Iteration (PI)
+## 3. Policy Iteration (PI) - leapfrogging policies
 
 Policy Iteration (PI) is an alternative algorithm that generates a sequence of policies $\{\pi_k\}$, each strictly better than the last, until it converges to the optimal policy $\pi^\ast$. In contrast to Value Iteration, whose runtime depends on the desired precision level $\delta$, Policy Iteration can be shown to find an *exact* optimal policy with a number of operations that is polynomial in the size of the MDP and the effective horizon, a property known as being **strongly polynomial**.
 
-The algorithm alternates between two steps: **Policy Evaluation** and **Policy Improvement**.
+```mermaid
+%%{ init: { "theme": "default",
+            "themeVariables": {
+              "background": "#333333",   /* dark canvas                */
+              "lineColor":   "#ffffff",  /* white default line colour  */
+              "mainLineColor":"#ffffff"  /* some renderers use this    */
+            } } }%%
+flowchart TD
+    subgraph Legend["Key Concepts"]
+        T_pi["T^π = Policy-Specific Operator"]
+        gamma["γ-contraction: ||Tu - Tv|| ≤ γ||u - v||"]
+        banach["Banach Fixed-Point Theorem guarantees unique solutions"]
+        
+        T_pi -.-> gamma
+        gamma -.-> banach
+    end
+    
+    subgraph Operators["Bellman Operators"]
+        subgraph PolOp["Policy-Specific Operator T^π"]
+            pol_formula["(T^π v)(s) = ∫π(da|s) ∫[r' + γv(s')] κ(ds',dr'|s,a)"]
+            pol_desc["Evaluates given policy π"]
+        end
+        
+        pol_formula --> pol_desc
+    end
+    
+    subgraph PI["Policy Iteration Algorithm"]
+        pi_start["Initialize: π₀ (arbitrary policy)"]
+        pi_loop["Iterate until convergence"]
+        pi_optimal["Optimal: π*"]
+        
+        pi_start --> pi_loop
+        pi_loop --> pi_optimal
+        
+        subgraph pi_cycle["Policy Iteration Cycle"]
+            pi_k["Policy πₖ"]
+            eval["Evaluate: solve vₖ = T^πₖ vₖ"]
+            improve["Improve: πₖ₊₁(s) = argmax_a Q^πₖ(s,a)"]
+            
+            pi_k --> eval
+            eval --> improve
+            improve --> pi_k
+        end
+        
+        subgraph pi_sequence["Policy Sequence"]
+            pi0["π₀"]
+            pi1["π₁"]
+            pi2["π₂"]
+            pidots["⋯"]
+            pistar["π*"]
+            
+            pi0 --> pi1 --> pi2 --> pidots --> pistar
+        end
+    end
+    
+    subgraph Properties["Contraction Properties"]
+        complete["Complete Metric Space 𝒷ᵦ(S)"]
+        contract["γ-Contraction Mapping"]
+        unique["Unique Fixed Point"]
+        
+        complete --> contract
+        contract --> unique
+    end
+    
+    %% Connections between algorithms and operators
+    PolOp -.-> PI
+    Properties -.-> PI
+    
+    %% Styling
+    classDef algorithmBox fill:#56B4E9,stroke:#01579b,stroke-width:2px
+    classDef operatorBox fill:#E69F00,stroke:#4a148c,stroke-width:2px
+    classDef propertyBox fill:#009E73,stroke:#1b5e20,stroke-width:2px
+    classDef legendBox fill:#D55E00,stroke:#e65100,stroke-width:2px
+    classDef sequenceBox fill:#CC79A7,stroke:#424242,stroke-width:1px
+    class PI algorithmBox
+    class PolOp operatorBox
+    class Properties propertyBox
+    class Legend legendBox
+    class pi_cycle,pi_sequence sequenceBox
+    %% ── Force-white links in every renderer ──
+    linkStyle default stroke:#ffffff,stroke-width:2px
+```
 
 ### 3.1 Algorithm
+
+The algorithm alternates between two steps: **Policy Evaluation** and **Policy Improvement**.
 
 1.  **Initialization**: Start with an arbitrary stationary, deterministic policy $\pi_0: S \to A$.
 
@@ -202,7 +391,7 @@ The convergence of PI is guaranteed because the sequence of value functions $\lb
 
 Geometrically, this monotonic improvement has a clear interpretation. In contrast to Value Iteration, Policy Iteration proceeds by moving from vertex to vertex along the boundary of the value-function polytope. Each **Policy Evaluation** step computes the value of a deterministic policy, which corresponds to a vertex on the polytope, and each **Policy Improvement** step jumps to a new, better-performing vertex.
  
-**Lemma (Geometric Progress Lemma):** Let $\pi$ be a policy and $\pi'$ be the policy obtained by acting greedily with respect to $v^\pi$. Then, $v^\pi \le v^{\pi'}$.
+**Lemma 1 (Geometric Progress Lemma):** Let $\pi$ be a policy and $\pi'$ be the policy obtained by acting greedily with respect to $v^\pi$. Then, $v^\pi \le v^{\pi'}$.
 
 **Proof:** By definition of $\pi'$ being greedy, $T^\ast v^\pi = T^{\pi'} v^\pi$. We also know from the definition of the Bellman operator that $v^\pi = T^\pi v^\pi \le T^\ast v^\pi$. Chaining these gives $v^\pi \le T^{\pi'}v^\pi$.
 
@@ -224,7 +413,7 @@ $$\Vert v_{\pi_k} - v^\ast \Vert_\infty \leq \gamma^k \Vert v_{\pi_0} - v^\ast \
 
 While geometric convergence is guaranteed, a stronger result shows that PI makes strict progress in a finite number of steps by eliminating suboptimal state-action pairs. This relies on the **Value Difference Identity**.
 
-**Lemma (Value Difference Identity):** For any two policies $\pi$ and $\pi'$, the difference in their value functions can be written as:
+**Lemma 2 (Value Difference Identity):** For any two policies $\pi$ and $\pi'$, the difference in their value functions can be written as:
 $$v^{\pi'} - v^{\pi} = (I - \gamma P_{\pi'})^{-1} \left( T^{\pi'}v^{\pi} - v^{\pi} \right)$$
 The term $T^{\pi'}v^{\pi} - v^{\pi}$ is the **advantage** of policy $\pi'$ over $\pi$. This identity shows that the value difference is a discounted sum of future advantages. From this, one can prove the following lemma.
 
@@ -245,13 +434,13 @@ This can only happen if the action has changed, i.e., $\pi_k(s_0) \neq \pi_0(s_0
 
 This leads to the main runtime result for Policy Iteration.
 
-**Theorem (Runtime Bound for Policy Iteration):** For a finite MDP, Policy Iteration finds an optimal policy in a number of iterations that is polynomial in $|S|$, $|A|$, and $1/(1-\gamma)$. The total complexity is at most $\tilde{O}\left(\frac{|S|^2|A|}{1 - \gamma} \log\frac{|S|}{1-\gamma}\right)$ operations.
+**Theorem 1 (Runtime Bound for Policy Iteration):** For a finite MDP, Policy Iteration finds an optimal policy in a number of iterations that is polynomial in $|S|$, $|A|$, and $1/(1-\gamma)$. The total complexity is at most $\tilde{O}\left(\frac{|S|^2|A|}{1 - \gamma} \log\frac{|S|}{1-\gamma}\right)$ operations.
 
 As an immediate corollary of the strict progress lemma, since there are at most $|S|(|A|-1)$ suboptimal state-action pairs to eliminate, the algorithm terminates in a number of iterations that is polynomial in $|S|$ and $|A|$.
 
 ---
 
-## 4. Geometric Structure and Algorithmic Dynamics
+## 4. Geometry of value functions (why algorithms behave as they do)
 
 An alternative way of seeing the fundamental theorem of dynamic programming is as a result concerning the geometry of the space of value functions. For a given MDP, let $\mathcal{V}$ be the set of all attainable value functions and $\mathcal{V}^{\text{DET}}$ be the subset corresponding to deterministic, memoryless policies:
 
@@ -265,7 +454,60 @@ $$
 
 The behavior of these algorithms is best understood by analyzing the geometric structure of the space of value functions, $\mathcal{V} = \lbrace v^{\pi} \mid \pi \in \text{Policies} \rbrace$. The work of Dadashi et al. (2019) provides a rigorous characterization of this space for finite MDPs.
 
-### 4.1 The Geometry of the Value-Function Space
+### 4.1 The value‑function polytope (visual)
+
+```mermaid
+%%{ init: { "theme": "default",
+            "themeVariables": {
+              "background": "#333333",   /* dark canvas                */
+              "lineColor":   "#ffffff",  /* white default line colour  */
+              "mainLineColor":"#ffffff"  /* some renderers use this    */
+            } } }%%
+flowchart TD
+    subgraph Polytope["Value-function polytope 𝒱"]
+        v1["det. policy 1"]
+        v2["det. policy 2"]
+        v3["det. policy 3"]
+        vStar["v*"]
+        v1---v2---v3---v1
+        vStar -.-> v3
+    end
+    noteVI["VI iterates may wander outside 𝒱"]
+    notePI["PI hops along vertices"]
+    noteVI -.-> vStar
+    notePI -.-> vStar
+    
+    %% Styling
+    classDef polytopeBox fill:#E69F00,stroke:#4a148c,stroke-width:2px
+    classDef noteBox fill:#56B4E9,stroke:#01579b,stroke-width:2px
+    classDef vertexBox fill:#009E73,stroke:#1b5e20,stroke-width:2px
+    classDef optimalBox fill:#D55E00,stroke:#e65100,stroke-width:2px
+    
+    class Polytope polytopeBox
+    class noteVI,notePI noteBox
+    class v1,v2,v3 vertexBox
+    class vStar optimalBox
+    
+    %% Force-white links in every renderer
+    linkStyle default stroke:#ffffff,stroke-width:2px
+```
+Note: "det. policy 1", "det. policy 2", etc. refer to **deterministic policies**. 
+
+In the context of this value-function polytope diagram:
+
+- **Deterministic policies** are policies that always choose a specific action for each state (no randomness)
+- Each deterministic policy has a corresponding **value function** that represents the expected returns when following that policy
+- The **polytope 𝒱** is the convex hull formed by all possible value functions of deterministic policies
+- The **vertices** of this polytope correspond to the value functions of individual deterministic policies
+
+So "det. policy 1", "det. policy 2", "det. policy 3" represent three different deterministic policies, and their positions in the diagram show where their respective value functions sit as vertices of the polytope.
+
+The key insight the diagram illustrates is:
+- **Policy Iteration (PI)** moves along the edges/vertices of this polytope (staying within the convex hull of deterministic policy value functions)
+- **Value Iteration (VI)** can iterate through points that lie outside this polytope, potentially exploring value functions that don't correspond to any single deterministic policy
+- **$v^\ast$** (the optimal value function) is the target both algorithms converge to.
+
+---
 
 Using terminology from multicriteria optimization, the optimal value function, $v^{\ast}$, is the **ideal point** of $\mathcal{V}$:
 
