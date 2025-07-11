@@ -212,6 +212,15 @@ flowchart TD
     linkStyle default stroke:#ffffff,stroke-width:2px
 ```
 
+**Figure 1. Needle‑in‑the‑Haystack worst‑case MDP used to prove the $\Omega (A^k)$ online‑planning lower bound $(A = 3, k = 2)$.**
+
+A deterministic depth‑2 search tree starts at root state $R$ (orange). 
+
+Each action $a_1 - a_3$ leads to internal states $N_1 - N_3$ (blue), which in turn branch to nine terminal states $L_{11} - L_{33}$ (green). 
+
+Exactly one leaf—**$L_{22}$** (magenta outline)—delivers reward = 1; every other transition returns reward = 0. With no prior clue about where the reward lies, an $\varepsilon$‑optimal planner must, in the worst case, evaluate all $A^k = 9$ action sequences to locate the unique rewarding path, establishing the $\Omega (A^k)$  query lower bound. Uniform white arrows depict deterministic transitions; colours differentiate root, internal, leaf, and rewarding states for rapid visual decoding.
+
+
 1.  **Constructing the MDP:** We design a deterministic MDP whose structure is a full tree.
 
       * The **`root`** is the starting state.
@@ -494,6 +503,10 @@ flowchart LR
     %% Force-white links in every renderer
     linkStyle default stroke:#ffffff,stroke-width:2px
 ```
+
+**Figure 2 Interaction loop between planner and simulator.**
+
+Starting from a *reset* to the predefined initial state (red node), the **Planner** algorithm (blue group) repeatedly (1) sends a state–action query $(s, a)$ to the simulator’s *state buffer* (green), (2) receives a sampled next‑state/reward tuple $(s', r)$ in reply, and then (3) either issues a further query or another reset. Boxes are colour‑keyed by function—planner, simulator (orange group), data nodes, and reset—but roles are also indicated by labels so the figure remains clear if reproduced in grey‑scale. Solid white arrows trace the direction of data and control flow through the cycle.
 
 ---
 
