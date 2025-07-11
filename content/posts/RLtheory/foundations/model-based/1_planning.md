@@ -12,7 +12,7 @@ image: /assets/images/card3.png
 
 # Online Planning: A Formal Treatment
 
-This section pivots from the *offline* planning setting to *online* planning. In the offline model, where the MDP is described by explicit transition and reward tables, we've seen that no algorithm can find a nearly optimal policy with a computational cost less than $\Omega(|S|^2|A|)$. This "curse of dimensionality" renders tabular methods intractable for problems with large state spaces.
+This section pivots from the *offline* planning setting to *online* planning. In the offline model, where the MDP is described by explicit transition and reward tables, no algorithm can find a nearly optimal policy with a computational cost less than $\Omega(|S|^2|A|)$. This "curse of dimensionality" renders tabular methods intractable for problems with large state spaces.
 
 The online planning model circumvents this limitation by changing two fundamental assumptions:
 
@@ -93,7 +93,7 @@ The following vignette summarizes the online planning problem from this perspect
 
 A natural approach to online planning is to adapt the iterative algorithms used for offline solutions. To select an action in state $s$, we need to estimate the optimal action-values $q^\ast(s, a)$. This suggests using the **Bellman optimality operator for action-value functions**, $T_q^*$.
 
-Recall that $v^\ast$ is the fixed point of $T^\ast$ and $q^\ast$ is the fixed point of $T_q^\ast$. The operator $T_q^\ast$ is defined as:
+The optimal value function $v^\ast$ is the fixed point of the Bellman optimality operator for state-value functions, $T^\ast$, and similarly, the optimal action-value function $q^\ast$ is the fixed point of the Bellman optimality operator for action-value functions, $T_q^\ast$. The operator $T_q^\ast$ is defined as:
 
 $$(T_q^* q)(s, a) := r(s,a) + \gamma \int_S p(ds'|s,a) \sup_{a' \in A} q(s', a')$$
 
@@ -167,15 +167,15 @@ This result establishes that the $A^k$ complexity is near-optimal for online pla
 
 ## 1.4 Online Planning in Stochastic MDPs: The Sampling Approach
 
-In the previous lecture online planning was introduced. The main idea is to amortize the cost of planning by asking a planner to produce an action to be taken at a particular state so that the policy induced by repeatedly calling the planner at the states just visited and then using the action returned by the planner is near-optimal. We have seen that with this, the cost of planning can be made independent of the size of the state space - at least for deterministic MDPs. For this, one can use just a recursive implementation of value iteration, which, for convenience, we wrote using action-value functions and the corresponding Bellman optimality operator, $T$, defined by:
+The core idea of online planning is to amortize the planning cost by having a planner produce a single action for the current state. When called repeatedly, this process induces a near-optimal policy. A key benefit of this approach is that the planning cost can be independent of the state space size, particularly for deterministic MDPs. This is achieved using a recursive implementation of value iteration based on action-value functions and the corresponding Bellman optimality operator for action-values, denoted here as $T$:
 
 $$
 Tq(s,a) = r_a(s) + \gamma \langle P_a(s),Mq\rangle .
 $$
 
-*(Note: The notation for the Bellman optimality operator for action-value functions now simplifies from $T_q^\ast$ (used in Section 5.2) to $T$ for the remainder of this discussion, aligning with the new passage's convention. In the previous lecture we used $\tilde{T}$ to denote this operator, but to reduce clutter from now on, we will drop the tilde).*
+Note: The notation for the Bellman optimality operator for action-value functions now simplifies from $T_q^\ast$ (used in Section 1.2) to $T$ for the remainder of this discussion.
 
-We have also seen that no procedure can do significantly better in terms of its runtime (or query cost) than this simple recursive procedure. In this lecture we show that these ideas also extend to the stochastic case.
+Lower bounds show that no procedure can significantly improve upon the runtime of this recursive method in the worst case. These foundational ideas can also be extended to stochastic MDPs.
 
 ### Sampling May Save the Day?
 
@@ -245,7 +245,8 @@ $$
 
 Let us now turn to the question of whether the policy $\hat{\pi}$ induced by this planners is a good one. We start with a lemma that parallels our earlier result that bounded the suboptimality of a policy that is greedy w.r.t. a function over the states as a function of how well the function approximates the optimal value function. To state the lemma, we need the analog of optimal value functions but with action values.
 
-**Suboptimality of $\epsilon$-optimizing policies**
+To analyze the performance of this approach, a key lemma is needed to bound the suboptimality of a policy that is greedy with respect to an action-value function $q$. This requires defining the optimal action-value function, $q^\ast$.
+ 
 
 Define
 $$
@@ -349,10 +350,12 @@ Hoeffding's inequality is a special case of what is known as measure concentrati
 
 ### A model-centered view and random operators
 
-A key idea of this lecture is that $\hat{T}$ is a good (random) approximation to $T$, hence, it can be used in place of $T$. One can also tell this story by saying that the data underlying $\hat{T}$ gives a random approximation to the MDP. The transition probabilities of this random approximating MDP would be defined using
+A key idea of this approach is that $\hat{T}$ is a good (random) approximation to $T$, hence, it can be used in place of $T$. One can also tell this story by saying that the data underlying $\hat{T}$ gives a random approximation to the MDP. The transition probabilities of this random approximating MDP would be defined using
+
 $$
 \hat{P} (s,a,s^{\prime}) = \frac{1}{m}\sum_{s^{\prime \prime}\in C(s,a)}\mathbb{I} \lbrace s^{\prime \prime} = s^{\prime} \rbrace
 $$
+
 A bigger point is that for a model to be a "good" approximation to the "true MDP", it suffices that the Bellman optimality operator that it induces is a "close" approximation to the Bellman optimality operator of the true MDP.
 
 ### Imperfect simulation model?
@@ -369,4 +372,4 @@ which, combined with our first lemma on the policy error bound gives that the po
 
 ### From local to online access
 
-The algorithm that is analyzed in this lecture requires local access simulators. This is better than requiring global access, but worse than requiring online access. It remains an open question of whether with online access, one can also get a similar result than shown in the present lecture.
+The algorithm analyzed here requires local access simulators. This is better than requiring global access, but worse than requiring online access. It remains an open question whether a similar result can be achieved using only online access.
