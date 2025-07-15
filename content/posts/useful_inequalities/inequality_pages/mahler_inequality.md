@@ -5,6 +5,7 @@ summary: "Mahler's Inequality"
 lastmod: "2025-07-15"
 category: "Notes"
 series: ["Inequalities"]
+legacy: ["legacy"]
 author: "Bryan Chan"
 hero: /assets/images/hero3.png
 image: /assets/images/card3.png
