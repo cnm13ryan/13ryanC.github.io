@@ -1,7 +1,7 @@
 ---
 date: "2025-07-10"
-title: "(4.1) Planning with a Known Model (Online Planning, MCTS)" 
-summary: "Planning with a Known Model (Online Planning, MCTS)"
+title: "(4.1) Sample‑Based Online Planning: From Deterministic Trees to Stochastic MDPs"
+summary: "Sample‑Based Online Planning: From Deterministic Trees to Stochastic MDPs"
 lastmod: "2025-07-10"
 category: "Notes"
 series: ["RL Theory"]
