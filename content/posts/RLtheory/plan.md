@@ -57,11 +57,11 @@ image: /assets/images/card3.png
 ### **Part II: Core Algorithmic Paradigms**
 
 **Chapter 3: Model-Free Learning: Prediction and Control**
-* **3.1. On-Policy Value Prediction (MC, TD($\lambda$), LSTD)**
-    * 3.1.1. Monte-Carlo (MC) Prediction: First-visit, Every-visit, and Incremental Updates
-    * 3.1.2. Temporal-Difference (TD) Learning: TD(0), Bias-Variance Trade-offs
-    * 3.1.3. Multi-Step TD and the $\lambda$-Return: TD($\lambda$) and Eligibility Traces (GAE)
-    * 3.1.4. Least-Squares Temporal Difference (LSTD) and Batch Methods
+* **3.1. On-Policy Value Prediction (MC, TD($\lambda$))**
+    * 3.1.1. Motivation for learning from experience
+    * 3.1.2. Monte-Carlo (MC) Prediction: First-visit, Every-visit, and Incremental Updates
+    * 3.1.3. Temporal-Difference (TD) Learning: TD(0), Bias-Variance Trade-offs
+    * 3.1.4. Multi-Step TD and the $\lambda$-Return: TD($\lambda$) and Eligibility Traces (GAE)
 * **3.2. On-Policy Control: Sarsa, Expected Sarsa, and GLIE**
     * 3.2.1. Sarsa and Expected Sarsa
     * 3.2.2. Sarsa($\lambda$) and True-Online Sarsa($\lambda$)
@@ -91,23 +91,30 @@ image: /assets/images/card3.png
     * 3.7.3. Intrinsic Motivation: Curiosity (ICM), Random Network Distillation (RND)
 
 **Chapter 4: Model-Based Learning: Planning, Imagination, and Control**
-* **4.1. Planning with a Known Model (Online Planning, MCTS)**
-    * 4.1.1. The Online Planning Problem and Simulator Access
-    * 4.1.2. Sparse Sampling and Upper/Lower Runtime Bounds
-    * 4.1.3. Monte-Carlo Tree Search (MCTS)
-* **4.2. Learning World Models (Parametric, Ensembles, Latent-State Models)**
-    * 4.2.1. Model-Bias Bounds and Ensemble Methods
-    * 4.2.2. Latent State-Space Models (RSSM, VRNN)
-* **4.3. Planning in Learned Models (Dreamer, MuZero)**
-    * 4.3.1. Trajectory Optimisation and Model-Predictive Control (MPC)
-    * 4.3.2. Planning in Latent Space (Dreamer Family)
-    * 4.3.3. Integrating Planning and Learning (MuZero)
-* **4.4. Model-Based Exploration and Uncertainty Quantification**
-    * 4.4.1. Optimism Under Model Uncertainty
-    * 4.4.2. Thompson Sampling with Learned Models
-* **4.5. Hybrid Model-Based/Model-Free Architectures**
-    * 4.5.1. Dyna: Integrating Planning, Acting, and Learning
-    * 4.5.2. Imagination-Augmented Agents
+* **4.1. Sample‑Based Online Planning: From Deterministic Trees to Stochastic MDPs**
+    * 4.1.1. Formalizing the Online Planning Problem
+    * 4.1.2. Online Planning with Action‑Value Iteration
+    * 4.1.3. Lower Bound on Online Planning 
+    * 4.1.4. Online Planning in Stochastic MDPs: The Sampling Approach
+    * 4.1.5. Notes on Simulator Access Models
+    * 4.1.6. Further Notes and Connections
+* **4.2. Planning with a Known Model (Online Planning, MCTS)**
+    * 4.2.1. The Online Planning Problem and Simulator Access
+    * 4.2.2. Sparse Sampling and Upper/Lower Runtime Bounds
+    * 4.2.3. Monte-Carlo Tree Search (MCTS)
+* **4.3. Learning World Models (Parametric, Ensembles, Latent-State Models)**
+    * 4.3.1. Model-Bias Bounds and Ensemble Methods
+    * 4.3.2. Latent State-Space Models (RSSM, VRNN)
+* **4.4. Planning in Learned Models (Dreamer, MuZero)**
+    * 4.4.1. Trajectory Optimisation and Model-Predictive Control (MPC)
+    * 4.4.2. Planning in Latent Space (Dreamer Family)
+    * 4.4.3. Integrating Planning and Learning (MuZero)
+* **4.5. Model-Based Exploration and Uncertainty Quantification**
+    * 4.5.1. Optimism Under Model Uncertainty
+    * 4.5.2. Thompson Sampling with Learned Models
+* **4.6. Hybrid Model-Based/Model-Free Architectures**
+    * 4.6.1. Dyna: Integrating Planning, Acting, and Learning
+    * 4.6.2. Imagination-Augmented Agents
 
 **Chapter 5: Offline (Batch) Reinforcement Learning**
 * **5.1. Problem Formulation: The Challenge of Distribution Shift**
