@@ -1,15 +1,13 @@
 ---
 date: "2025-07-19"
-title: "Plan for MARL"
-summary: "Plan for MARL"
+title: "Plan for Multi-Agent Reinforcement Learning"
+summary: "Plan for Multi-Agent Reinforcement Learning"
 category: Plan
 series: ["RL Topics", "MARL"]
 author: "Author: Bryan Chan"
 hero: /assets/images/hero3.png
 image: /assets/images/card3.png
 ---
-
-# Multi-Agent Reinforcement Learning: Structured Question Framework
 
 ## 1. Fundamental Concepts and Problem Definition
 
