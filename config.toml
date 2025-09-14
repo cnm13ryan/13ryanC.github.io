@@ -76,7 +76,7 @@ enableGitInfo = true          # ask Hugo to query Git history
   ShowLastMod        = true
   ShowReadingTime    = true
   ShowShareButtons   = true
-  showtoc            = false
+  showtoc            = true
   UseHugoToc         = false
   tocopen            = false
 
