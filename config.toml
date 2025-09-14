@@ -76,9 +76,9 @@ enableGitInfo = true          # ask Hugo to query Git history
   ShowLastMod        = true
   ShowReadingTime    = true
   ShowShareButtons   = true
-  showtoc            = true
+  showtoc            = false
   UseHugoToc         = false
-  tocopen            = true 
+  tocopen            = false
 
   homeInfoParams = { Title = "Welcome", Content = "Exploring the frontiers of AI research and applications" }
 
